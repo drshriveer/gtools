@@ -20,6 +20,15 @@ func (e {{.EnumTypeName}}) Values() []{{.EnumTypeName}} {
     }
 }
 
+// StringValues returns a list of all potential values of this enum as strings.
+func (e {{.EnumTypeName}}) StringValues() []string {
+    return []string{
+    {{- range $val := .Values}}
+        "{{$val.Name}}",
+    {{- end }}
+    }
+}
+
 // String returns a string representation of this enum.
 // Note: in the case of duplicate values only the first alphabetical definition will be choosen.
 func (e {{.EnumTypeName}}) String() string {
@@ -33,7 +42,7 @@ func (e {{.EnumTypeName}}) String() string {
     }
 }
 
-// PareString will return a value as defined in string form.
+// ParseString will return a value as defined in string form.
 func (e {{.EnumTypeName}}) ParseString(text string) ({{.EnumTypeName}}, error) {
     switch text {
     {{- range $val := .Values}}

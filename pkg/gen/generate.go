@@ -96,7 +96,8 @@ func (g *Generate) warnDuplicates() {
 				println(
 					fmt.Sprintf(
 						"[WARN] - Definitions `%v` share the same value `%d`. "+
-							"`%s` will be arbitarily chosen as the primary value.",
+							"`%s` will be arbitarily chosen as the primary value when stringifying enums. "+
+							"If this is undesireable, please mark a value as primary using <FIXME>",
 						duplicates, lastVal, duplicates[0],
 					),
 				)

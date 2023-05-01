@@ -33,6 +33,28 @@ func (e MyEnum) Values() []MyEnum {
     }
 }
 
+// StringValues returns a list of all potential values of this enum as strings.
+func (e MyEnum) StringValues() []string {
+    return []string{
+        "IntentionallyNegative",
+        "EnumOneComplicationZero",
+        "EnumThreeComplicationOne",
+        "EnumTwoComplicationOne",
+        "EnumTwoComplicationZero",
+        "UNSET",
+        "EnumOneComplicationOne",
+        "EnumThreeComplicationThree",
+        "EnumTwoComplicationThree",
+        "EnumTwoComplicationTwo",
+        "ValueOne",
+        "EnumOneComplicationTwo",
+        "ValueTwo",
+        "EnumThreeComplicationTwo",
+        "EnumThreeComplicationZero",
+        "ValueSeven",
+    }
+}
+
 // String returns a string representation of this enum.
 // Note: in the case of duplicate values only the first alphabetical definition will be choosen.
 func (e MyEnum) String() string {
@@ -52,7 +74,7 @@ func (e MyEnum) String() string {
     }
 }
 
-// PareString will return a value as defined in string form.
+// ParseString will return a value as defined in string form.
 func (e MyEnum) ParseString(text string) (MyEnum, error) {
     switch text {
     case "IntentionallyNegative":
@@ -92,12 +114,12 @@ func (e MyEnum) ParseString(text string) (MyEnum, error) {
     }
 }
 
-// MarshalJSON implements the json.Marshaler interface for MyEnum
+// MarshalJSON implements the json.Marshaler interface for MyEnum.
 func (e MyEnum) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
-// UnmarshalJSON implements the json.Unmarshaler interface for MyEnum
+// UnmarshalJSON implements the json.Unmarshaler interface for MyEnum.
 func (e *MyEnum) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
