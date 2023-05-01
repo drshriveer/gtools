@@ -1,6 +1,6 @@
 package internal
 
-//go:generate genum -type=MyEnum2
+//go:generate genum -types=MyEnum,MyEnum2
 
 // MyEnum is pretty awesome
 type MyEnum int

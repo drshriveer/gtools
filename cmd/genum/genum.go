@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	typeName    = flag.String("type", "", "[Required] name of type to generate enum code for")
+	typeNames   = flag.String("types", "", "[Required] comma-separated names of types to generate enum code for")
 	inFileArg   = flag.String("in", "", "path to input file (defaults to go:generate context)")
 	outFileName = flag.String("out", "", "name of output file (defaults to go:generate context filename.enum.go)")
 	genJSON     = flag.Bool("json", true, "generate json marshal methods (default true)")
@@ -38,19 +38,19 @@ func main() {
 	} else if len(gofile) == 0 {
 		outFile = path.Join(path.Dir(inFile), *outFileName)
 	}
-	if len(*typeName) == 0 {
+	if len(*typeNames) == 0 {
 		println("type is required")
 		os.Exit(2)
 	}
-	println(fmt.Sprintf("genum: %s::%s => %s", inFile, *typeName, outFile))
+	println(fmt.Sprintf("genum: %s::%s => %s", inFile, *typeNames, outFile))
 
 	g := gen.Generate{
-		InFile:       inFile,
-		OutFile:      outFile,
-		EnumTypeName: *typeName,
-		GenJSON:      *genJSON,
-		GenYAML:      *genYAML,
-		GenText:      *genText,
+		InFile:        inFile,
+		OutFile:       outFile,
+		EnumTypeNames: strings.Split(*typeNames, ","),
+		GenJSON:       *genJSON,
+		GenYAML:       *genYAML,
+		GenText:       *genText,
 	}
 
 	if err := g.Parse(); err != nil {

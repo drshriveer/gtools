@@ -2,29 +2,33 @@
 package {{.PkgName}}
 
 import (
+    {{- if .GenJSON}}
     "encoding/json"
+    {{- end}}
     "fmt"
 )
+{{- range $i, $enumTypeName := .EnumTypeNames}}
+{{- $values := (index $.Values $i)}}
 
 // IsValid has a terrible implementation, but returns true if the value is, well, valid.
-func (e {{.EnumTypeName}}) IsValid() bool {
+func (e {{$enumTypeName}}) IsValid() bool {
     _, err := e.ParseString(e.String())
     return err == nil
 }
 
 // Values returns a list of all potential values of this enum.
-func (e {{.EnumTypeName}}) Values() []{{.EnumTypeName}} {
-    return []{{.EnumTypeName}}{
-    {{- range $val := .Values}}
+func (e {{$enumTypeName}}) Values() []{{$enumTypeName}} {
+    return []{{$enumTypeName}}{
+    {{- range $val := $values}}
         {{$val.Name}},
     {{- end }}
     }
 }
 
 // StringValues returns a list of all potential values of this enum as strings.
-func (e {{.EnumTypeName}}) StringValues() []string {
+func (e {{$enumTypeName}}) StringValues() []string {
     return []string{
-    {{- range $val := .Values}}
+    {{- range $val := $values}}
         "{{$val.Name}}",
     {{- end }}
     }
@@ -32,91 +36,92 @@ func (e {{.EnumTypeName}}) StringValues() []string {
 
 // String returns a string representation of this enum.
 // Note: in the case of duplicate values only the first alphabetical definition will be choosen.
-func (e {{.EnumTypeName}}) String() string {
+func (e {{$enumTypeName}}) String() string {
     switch e {
-    {{- range $val := .Values.ValueDeduplicatedSet}}
+    {{- range $val := $values.ValueDeduplicatedSet}}
     case {{$val.Name}}:
         return "{{$val.Name}}"
     {{- end }}
     default:
-        return fmt.Sprintf("Undefined{{.EnumTypeName}}:%d", e)
+        return fmt.Sprintf("Undefined{{$enumTypeName}}:%d", e)
     }
 }
 
 // ParseString will return a value as defined in string form.
-func (e {{.EnumTypeName}}) ParseString(text string) ({{.EnumTypeName}}, error) {
+func (e {{$enumTypeName}}) ParseString(text string) ({{$enumTypeName}}, error) {
     switch text {
-    {{- range $val := .Values}}
+    {{- range $val := $values}}
     case "{{$val.Name}}":
         return {{$val.Name}}, nil
     {{- end }}
     default:
-        return 0, fmt.Errorf("`%s` is not a valid enum of type {{.EnumTypeName}}", text)
+        return 0, fmt.Errorf("`%s` is not a valid enum of type {{$enumTypeName}}", text)
     }
 }
-{{- if .GenJSON }}
+{{- if $.GenJSON }}
 
-// MarshalJSON implements the json.Marshaler interface for {{.EnumTypeName}}.
-func (e {{.EnumTypeName}}) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements the json.Marshaler interface for {{$enumTypeName}}.
+func (e {{$enumTypeName}}) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
-// UnmarshalJSON implements the json.Unmarshaler interface for {{.EnumTypeName}}.
-func (e *{{.EnumTypeName}}) UnmarshalJSON(data []byte) error {
+// UnmarshalJSON implements the json.Unmarshaler interface for {{$enumTypeName}}.
+func (e *{{$enumTypeName}}) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
         var err error
-        *e, err = {{.EnumTypeName}}(0).ParseString(s)
+        *e, err = {{$enumTypeName}}(0).ParseString(s)
         return err
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-        *e = {{.EnumTypeName}}(i)
+        *e = {{$enumTypeName}}(i)
         if e.IsValid() {
             return nil
         }
     }
 
-    return fmt.Errorf("unable to unmarshal {{.EnumTypeName}} from `%v`", data)
+    return fmt.Errorf("unable to unmarshal {{$enumTypeName}} from `%v`", data)
 }
 {{- end}}
-{{- if .GenText }}
+{{- if $.GenText }}
 
-// MarshalText implements the encoding.TextMarshaler interface for {{.EnumTypeName}}.
-func (e {{.EnumTypeName}}) MarshalText() ([]byte, error) {
+// MarshalText implements the encoding.TextMarshaler interface for {{$enumTypeName}}.
+func (e {{$enumTypeName}}) MarshalText() ([]byte, error) {
 	return []byte(e.String()), nil
 }
 
-// UnmarshalText implements the encoding.TextUnmarshaler interface for {{.EnumTypeName}}.
-func (e *{{.EnumTypeName}}) UnmarshalText(text []byte) error {
+// UnmarshalText implements the encoding.TextUnmarshaler interface for {{$enumTypeName}}.
+func (e *{{$enumTypeName}}) UnmarshalText(text []byte) error {
     var err error
-	*e, err = {{.EnumTypeName}}(0).ParseString(string(text))
+	*e, err = {{$enumTypeName}}(0).ParseString(string(text))
 	return err
 }
 {{- end}}
-{{- if .GenYAML }}
+{{- if $.GenYAML }}
 
-// MarshalYAML implements a YAML Marshaler for {{.EnumTypeName}}.
-func (e {{.EnumTypeName}}) MarshalYAML() (any, error) {
+// MarshalYAML implements a YAML Marshaler for {{$enumTypeName}}.
+func (e {{$enumTypeName}}) MarshalYAML() (any, error) {
 	return e.String(), nil
 }
 
-// UnmarshalYAML implements a YAML Unmarshaler for {{.EnumTypeName}}.
-func (e *{{.EnumTypeName}}) UnmarshalYAML(unmarshal func(any) error) error {
+// UnmarshalYAML implements a YAML Unmarshaler for {{$enumTypeName}}.
+func (e *{{$enumTypeName}}) UnmarshalYAML(unmarshal func(any) error) error {
 	var s string
 	if err := unmarshal(&s); err == nil {
         var err error
-        *e, err = {{.EnumTypeName}}(0).ParseString(s)
+        *e, err = {{$enumTypeName}}(0).ParseString(s)
         return err
 	}
 	var i int
 	if err := unmarshal(&i); err == nil {
-        *e = {{.EnumTypeName}}(i)
+        *e = {{$enumTypeName}}(i)
         if e.IsValid() {
             return nil
         }
     }
 
-    return fmt.Errorf("unable to unmarshal {{.EnumTypeName}} from yaml")
+    return fmt.Errorf("unable to unmarshal {{$enumTypeName}} from yaml")
 }
+{{- end}}
 {{- end}}
