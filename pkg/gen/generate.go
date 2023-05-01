@@ -92,7 +92,7 @@ func (g *Generate) warnDuplicates() {
 	var duplicates []string
 	for _, v := range g.Values {
 		if lastVal != v.Value {
-			if len(duplicates) > 0 {
+			if len(duplicates) > 1 {
 				println(
 					fmt.Sprintf(
 						"[WARN] - Definitions `%v` share the same value `%d`. "+

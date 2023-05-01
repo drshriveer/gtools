@@ -1,13 +1,17 @@
 package tester
 
 import (
+    "encoding/json"
     "fmt"
 )
 
-func (e MyEnum) IsValid(in MyEnum) bool {
-    return true
+// IsValid has a terrible implementation, but returns true if the value is, well, valid.
+func (e MyEnum) IsValid() bool {
+    _, err := e.ParseString(e.String())
+    return err == nil
 }
 
+// Values returns a list of all potential values of this enum.
 func (e MyEnum) Values() []MyEnum {
     return []MyEnum{
         IntentionallyNegative,
@@ -29,6 +33,8 @@ func (e MyEnum) Values() []MyEnum {
     }
 }
 
+// String returns a string representation of this enum.
+// Note: in the case of duplicate values only the first alphabetical definition will be choosen.
 func (e MyEnum) String() string {
     switch e {
     case IntentionallyNegative:
@@ -46,41 +52,102 @@ func (e MyEnum) String() string {
     }
 }
 
-func (e MyEnum) ParseString(text string) (MyEnum, bool) {
+// PareString will return a value as defined in string form.
+func (e MyEnum) ParseString(text string) (MyEnum, error) {
     switch text {
     case "IntentionallyNegative":
-        return IntentionallyNegative, true
+        return IntentionallyNegative, nil
     case "EnumOneComplicationZero":
-        return EnumOneComplicationZero, true
+        return EnumOneComplicationZero, nil
     case "EnumThreeComplicationOne":
-        return EnumThreeComplicationOne, true
+        return EnumThreeComplicationOne, nil
     case "EnumTwoComplicationOne":
-        return EnumTwoComplicationOne, true
+        return EnumTwoComplicationOne, nil
     case "EnumTwoComplicationZero":
-        return EnumTwoComplicationZero, true
+        return EnumTwoComplicationZero, nil
     case "UNSET":
-        return UNSET, true
+        return UNSET, nil
     case "EnumOneComplicationOne":
-        return EnumOneComplicationOne, true
+        return EnumOneComplicationOne, nil
     case "EnumThreeComplicationThree":
-        return EnumThreeComplicationThree, true
+        return EnumThreeComplicationThree, nil
     case "EnumTwoComplicationThree":
-        return EnumTwoComplicationThree, true
+        return EnumTwoComplicationThree, nil
     case "EnumTwoComplicationTwo":
-        return EnumTwoComplicationTwo, true
+        return EnumTwoComplicationTwo, nil
     case "ValueOne":
-        return ValueOne, true
+        return ValueOne, nil
     case "EnumOneComplicationTwo":
-        return EnumOneComplicationTwo, true
+        return EnumOneComplicationTwo, nil
     case "ValueTwo":
-        return ValueTwo, true
+        return ValueTwo, nil
     case "EnumThreeComplicationTwo":
-        return EnumThreeComplicationTwo, true
+        return EnumThreeComplicationTwo, nil
     case "EnumThreeComplicationZero":
-        return EnumThreeComplicationZero, true
+        return EnumThreeComplicationZero, nil
     case "ValueSeven":
-        return ValueSeven, true
+        return ValueSeven, nil
     default:
-        return 0, false
+        return 0, fmt.Errorf("`%s` is not a valid enum of type MyEnum", text)
     }
+}
+
+// MarshalJSON implements the json.Marshaler interface for MyEnum
+func (e MyEnum) MarshalJSON() ([]byte, error) {
+	return json.Marshal(e.String())
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface for MyEnum
+func (e *MyEnum) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+        var err error
+        *e, err = MyEnum(0).ParseString(s)
+        return err
+	}
+	var i int
+	if err := json.Unmarshal(data, &i); err == nil {
+        *e = MyEnum(i)
+        if e.IsValid() {
+            return nil
+        }
+    }
+
+    return fmt.Errorf("unable to unmarshal MyEnum from `%v`", data)
+}
+
+// MarshalText implements the encoding.TextMarshaler interface for MyEnum.
+func (e MyEnum) MarshalText() ([]byte, error) {
+	return []byte(e.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface for MyEnum.
+func (e *MyEnum) UnmarshalText(text []byte) error {
+    var err error
+	*e, err = MyEnum(0).ParseString(string(text))
+	return err
+}
+
+// MarshalYAML implements a YAML Marshaler for MyEnum.
+func (e MyEnum) MarshalYAML() (any, error) {
+	return e.String(), nil
+}
+
+// UnmarshalYAML implements a YAML Unmarshaler for MyEnum.
+func (e *MyEnum) UnmarshalYAML(unmarshal func(any) error) error {
+	var s string
+	if err := unmarshal(&s); err == nil {
+        var err error
+        *e, err = MyEnum(0).ParseString(s)
+        return err
+	}
+	var i int
+	if err := unmarshal(&i); err == nil {
+        *e = MyEnum(i)
+        if e.IsValid() {
+            return nil
+        }
+    }
+
+    return fmt.Errorf("unable to unmarshal MyEnum from yaml")
 }

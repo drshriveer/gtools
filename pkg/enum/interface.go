@@ -4,7 +4,7 @@ package enum
 type Enum[T ~int | ~uint] interface {
 
 	// IsValid returns true if the num is valid.
-	IsValid(T) bool
+	IsValid() bool
 
 	// Values returns all valid values of an enum.
 	Values() []T
