@@ -15,8 +15,14 @@ lint: tools.lint
 check.format:
 	@gofmt -l -d ./pkg/...
 
+generate: tools.genum
+	@go generate ./...
+
 tools.build:
 	@go mod download
 
 tools.lint:
 	@echo "currently disabled, should download golangci-lint"
+
+tools.genum:
+	go install github.com/drshriveer/gcommon/cmd/genum

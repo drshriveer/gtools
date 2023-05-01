@@ -1,3 +1,3 @@
-module github.com/drshriveer/gsenum
+module github.com/drshriveer/gcommon
 
 go 1.19

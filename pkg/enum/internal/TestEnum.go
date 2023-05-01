@@ -1,10 +1,11 @@
-package tester
+package internal
+
+//go:generate genum -type=MyEnum2
 
 // MyEnum is pretty awesome
 type MyEnum int
 
 // MyEnum2 is dopy
-// Deprecated:
 type MyEnum2 uint64
 
 const (

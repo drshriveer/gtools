@@ -2,7 +2,7 @@ package gen
 
 import (
 	"fmt"
-	"github.com/drshriveer/gsenum/pkg/tmpl"
+	"github.com/drshriveer/gcommon/pkg/enum/tmpl"
 	"go/ast"
 	"go/constant"
 	"go/importer"
