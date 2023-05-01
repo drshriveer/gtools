@@ -4,7 +4,7 @@ package tester
 type MyEnum int
 
 // MyEnum2 is dopy
-type MyEnum2 int
+type MyEnum2 uint64
 
 const (
 	// UNSET is the default value and is completely unset.
@@ -22,6 +22,7 @@ const (
 	UnrelatedValue           = "my string!"
 	EnumTwoValueZero MyEnum2 = iota
 	EnumTwoValueOne
+	IntentionallyNegative MyEnum = -1
 )
 
 // These should just be treated as alternative definitions.

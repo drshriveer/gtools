@@ -1,7 +1,7 @@
 package enum
 
 // Enum is the base interface that all generated enums will implement.
-type Enum[T ~int] interface {
+type Enum[T ~int | ~uint] interface {
 
 	// IsValid returns true if the num is valid.
 	IsValid(T) bool

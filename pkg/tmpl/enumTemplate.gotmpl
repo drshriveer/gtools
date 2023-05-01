@@ -1,0 +1,42 @@
+package {{.PkgName}}
+
+import (
+    "fmt"
+)
+
+func (e {{.EnumTypeName}}) IsValid(in {{.EnumTypeName}}) bool {
+    return true
+}
+
+func (e {{.EnumTypeName}}) Values() []{{.EnumTypeName}} {
+    return []{{.EnumTypeName}}{
+    {{- range $val := .Values}}
+        {{$val.Name}},
+    {{- end }}
+    }
+}
+
+func (e {{.EnumTypeName}}) String() string {
+    switch e {
+    {{- range $val := .Values.ValueDeduplicatedSet}}
+    case {{$val.Name}}:
+        return "{{$val.Name}}"
+    {{- end }}
+    default:
+        return fmt.Sprintf("Undefined{{.EnumTypeName}}:%d", e)
+    }
+}
+
+func (e {{.EnumTypeName}}) ParseString(text string) ({{.EnumTypeName}}, bool) {
+    switch text {
+    {{- range $val := .Values}}
+    case "{{$val.Name}}":
+        return {{$val.Name}}, true
+    {{- end }}
+    default:
+        return 0, false
+    }
+}
+{{- if .GenJSON }}
+
+{{- end}}
