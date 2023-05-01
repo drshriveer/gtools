@@ -4,6 +4,7 @@ package tester
 type MyEnum int
 
 // MyEnum2 is dopy
+// Deprecated:
 type MyEnum2 uint64
 
 const (
@@ -27,6 +28,7 @@ const (
 
 // These should just be treated as alternative definitions.
 const (
+	// Deprecated: old value, don't use
 	EnumOneComplicationZero MyEnum = iota
 	EnumOneComplicationOne  MyEnum = iota
 	EnumOneComplicationTwo  MyEnum = iota
@@ -34,12 +36,14 @@ const (
 
 // These should just be treated as alternative definitions.
 const (
+	// Deprecated: old names for the same thing.
 	EnumTwoComplicationZero, EnumTwoComplicationOne MyEnum = iota, iota
 	EnumTwoComplicationTwo, EnumTwoComplicationThree
 )
 
 // These should just be treated as alternative definitions.
 const (
+	// Deprecated: old names for the same thing.
 	EnumThreeComplicationZero, EnumThreeComplicationOne MyEnum = 7, iota
 	EnumThreeComplicationTwo, EnumThreeComplicationThree
 )

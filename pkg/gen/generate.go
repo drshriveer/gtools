@@ -11,6 +11,7 @@ import (
 	"go/types"
 	"os"
 	"sort"
+	"strings"
 )
 
 type Generate struct {
@@ -57,11 +58,13 @@ func (g *Generate) Parse() error {
 		if v.Type().String() != g.EnumTypeName {
 			continue
 		}
+
 		value, isUint := constant.Uint64Val(v.Val())
 		toAdd := Value{
-			Name:   name,
-			Value:  value,
-			Signed: !isUint,
+			Name:         name,
+			Value:        value,
+			Signed:       !isUint,
+			IsDeprecated: isDeprecated(fAST, name),
 		}
 		g.Values = append(g.Values, toAdd)
 	}
@@ -97,7 +100,7 @@ func (g *Generate) warnDuplicates() {
 					fmt.Sprintf(
 						"[WARN] - Definitions `%v` share the same value `%d`. "+
 							"`%s` will be arbitarily chosen as the primary value when stringifying enums. "+
-							"If this is undesireable, please mark a value as primary using <FIXME>",
+							"If this is undesireable, please mark values other than the primary Deprecated.",
 						duplicates, lastVal, duplicates[0],
 					),
 				)
@@ -106,8 +109,28 @@ func (g *Generate) warnDuplicates() {
 			duplicates = nil
 			lastVal = v.Value
 		}
-		if lastVal == v.Value {
+		if lastVal == v.Value && !v.IsDeprecated {
 			duplicates = append(duplicates, v.Name)
 		}
 	}
+}
+
+func isDeprecated(fAST *ast.File, name string) bool {
+	obj := fAST.Scope.Lookup(name)
+	spec, ok := obj.Decl.(*ast.ValueSpec)
+	if !ok {
+		return false
+	}
+	if spec.Doc == nil {
+		return false
+	}
+
+	for _, comment := range spec.Doc.List {
+		trimmed := strings.TrimPrefix(comment.Text, "//")
+		trimmed = strings.TrimSpace(trimmed)
+		if strings.HasPrefix(trimmed, "Deprecated:") {
+			return true
+		}
+	}
+	return false
 }

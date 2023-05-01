@@ -61,8 +61,8 @@ func (e MyEnum) String() string {
     switch e {
     case IntentionallyNegative:
         return "IntentionallyNegative"
-    case EnumOneComplicationZero:
-        return "EnumOneComplicationZero"
+    case UNSET:
+        return "UNSET"
     case EnumOneComplicationOne:
         return "EnumOneComplicationOne"
     case EnumOneComplicationTwo:
