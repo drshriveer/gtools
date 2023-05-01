@@ -13,7 +13,7 @@ func (e MyEnum) IsValid() bool {
 }
 
 // Values returns a list of all potential values of this enum.
-func (e MyEnum) Values() []MyEnum {
+func (MyEnum) Values() []MyEnum {
     return []MyEnum{
         IntentionallyNegative,
         EnumOneComplicationZero,
@@ -35,7 +35,7 @@ func (e MyEnum) Values() []MyEnum {
 }
 
 // StringValues returns a list of all potential values of this enum as strings.
-func (e MyEnum) StringValues() []string {
+func (MyEnum) StringValues() []string {
     return []string{
         "IntentionallyNegative",
         "EnumOneComplicationZero",
@@ -182,7 +182,7 @@ func (e MyEnum2) IsValid() bool {
 }
 
 // Values returns a list of all potential values of this enum.
-func (e MyEnum2) Values() []MyEnum2 {
+func (MyEnum2) Values() []MyEnum2 {
     return []MyEnum2{
         EnumTwoValueZero,
         EnumTwoValueOne,
@@ -190,7 +190,7 @@ func (e MyEnum2) Values() []MyEnum2 {
 }
 
 // StringValues returns a list of all potential values of this enum as strings.
-func (e MyEnum2) StringValues() []string {
+func (MyEnum2) StringValues() []string {
     return []string{
         "EnumTwoValueZero",
         "EnumTwoValueOne",

@@ -17,7 +17,7 @@ func (e {{$enumTypeName}}) IsValid() bool {
 }
 
 // Values returns a list of all potential values of this enum.
-func (e {{$enumTypeName}}) Values() []{{$enumTypeName}} {
+func ({{$enumTypeName}}) Values() []{{$enumTypeName}} {
     return []{{$enumTypeName}}{
     {{- range $val := $values}}
         {{$val.Name}},
@@ -26,7 +26,7 @@ func (e {{$enumTypeName}}) Values() []{{$enumTypeName}} {
 }
 
 // StringValues returns a list of all potential values of this enum as strings.
-func (e {{$enumTypeName}}) StringValues() []string {
+func ({{$enumTypeName}}) StringValues() []string {
     return []string{
     {{- range $val := $values}}
         "{{$val.Name}}",
