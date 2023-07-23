@@ -2,7 +2,6 @@ package gen
 
 import (
 	"fmt"
-	"github.com/drshriveer/gcommon/pkg/enum/tmpl"
 	"go/ast"
 	"go/constant"
 	"go/importer"
@@ -12,6 +11,9 @@ import (
 	"os"
 	"sort"
 	"strings"
+
+	"github.com/drshriveer/gcommon/pkg/enum/tmpl"
+	"github.com/drshriveer/gcommon/pkg/set"
 )
 
 type Generate struct {
@@ -24,6 +26,8 @@ type Generate struct {
 
 	// derived:
 	Values  []Values
+	Traits  []TraitDescs
+	Imports []string
 	PkgName string
 }
 
@@ -41,10 +45,13 @@ func (g *Generate) Parse() error {
 
 	g.PkgName = pkg.Name()
 	g.Values = make([]Values, len(g.EnumTypeNames))
+	g.Traits = make([]TraitDescs, len(g.EnumTypeNames))
 	pkgScope := pkg.Scope()
 
 	for i, enumType := range g.EnumTypeNames {
 		values := make(Values, 0)
+		traits := make(map[string]TraitInstances)
+		var lastValue Value
 		for _, name := range pkgScope.Names() {
 			// we only care about constants:
 			v, ok := pkgScope.Lookup(name).(*types.Const)
@@ -52,24 +59,56 @@ func (g *Generate) Parse() error {
 				continue
 			}
 			// we only care about the target enum Type.
-			if v.Type().String() != enumType {
-				continue
+			if v.Type().String() == enumType {
+				value, isUint := constant.Uint64Val(v.Val())
+				toAdd := Value{
+					Name:         name,
+					Value:        value,
+					Signed:       !isUint,
+					IsDeprecated: isDeprecated(fAST, name),
+					Line:         fSet.Position(v.Pos()).Line,
+				}
+				values = append(values, toAdd)
+				lastValue = toAdd
+			} else if traitName, ok := lastValue.HasTrait(name, fSet.Position(v.Pos()).Line); ok {
+				temp, ok := traits[traitName]
+				if !ok {
+					temp = make(TraitInstances, 0, 1)
+				}
+				temp = append(temp, TraitInstance{
+					OwningValue:  lastValue,
+					VariableName: name,
+					Type:         v.Type(),
+				},
+				)
+				traits[traitName] = temp
 			}
-
-			value, isUint := constant.Uint64Val(v.Val())
-			toAdd := Value{
-				Name:         name,
-				Value:        value,
-				Signed:       !isUint,
-				IsDeprecated: isDeprecated(fAST, name),
-			}
-			values = append(values, toAdd)
 		}
 		sort.Sort(values)
 		warnDuplicates(values, enumType) // detect and warn duplicates
 		g.Values[i] = values
-
+		g.Traits[i] = traitsFromMap(traits)
 	}
+
+	return g.calcImports()
+}
+
+func (g *Generate) calcImports() error {
+	imports := make(set.Set[string])
+	for _, traitGroup := range g.Traits {
+		for _, traitDesc := range traitGroup {
+			if len(traitDesc.PackageImport) > 0 {
+				imports.Add(traitDesc.PackageImport)
+			}
+		}
+	}
+
+	// TODO: We can to package validation here i think...
+	// look for conflicting import simple package names....
+	// need to think it through
+
+	g.Imports = imports.Slice()
+	sort.Strings(g.Imports)
 	return nil
 }
 

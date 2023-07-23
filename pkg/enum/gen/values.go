@@ -1,5 +1,9 @@
 package gen
 
+import (
+	"strings"
+)
+
 type Values []Value
 
 func (s Values) Len() int {
@@ -11,18 +15,7 @@ func (s Values) Swap(i, j int) {
 }
 
 func (s Values) Less(i, j int) bool {
-	if s[i].Signed || s[j].Signed {
-		v1, v2 := int64(s[i].Value), int64(s[j].Value)
-		if v1 == v2 {
-			return s[i].Name < s[j].Name
-		}
-		return v1 < v2
-	}
-	v1, v2 := s[i].Value, s[j].Value
-	if v1 == v2 {
-		return s[i].Name < s[j].Name
-	}
-	return v1 < v2
+	return s[i].Less(s[j])
 }
 
 func (s Values) ValueDeduplicatedSet() Values {
@@ -51,4 +44,29 @@ type Value struct {
 	Value        uint64
 	Signed       bool
 	IsDeprecated bool
+	Line         int
+}
+
+// TODO: not sure if we should enforce same-line crazies or not.
+func (v Value) HasTrait(name string, lineNo int) (string, bool) {
+	if lineNo != v.Line || v.Name == "" {
+		return "", false
+	}
+	trimmed := strings.TrimPrefix(name, v.Name+"_")
+	return trimmed, len(trimmed) < len(name)
+}
+
+func (v Value) Less(vIn Value) bool {
+	if v.Signed || vIn.Signed {
+		v1, v2 := int64(v.Value), int64(vIn.Value)
+		if v1 == v2 {
+			return v.Name < vIn.Name
+		}
+		return v1 < v2
+	}
+	v1, v2 := v.Value, vIn.Value
+	if v1 == v2 {
+		return v.Name < vIn.Name
+	}
+	return v1 < v2
 }

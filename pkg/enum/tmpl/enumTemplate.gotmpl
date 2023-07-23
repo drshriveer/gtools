@@ -5,11 +5,29 @@ import (
     {{- if .GenJSON}}
     "encoding/json"
     {{- end}}
+	{{- range $import := $.Imports}}
+	"{{$import}}"
+    {{- end}}
     "fmt"
 )
 {{- range $i, $enumTypeName := .EnumTypeNames}}
-{{- $values := (index $.Values $i)}}
+{{- range $trait := (index $.Traits $i)}}
 
+// {{$trait.Name}} returns the enum's associated trait of the same name, and a bool
+// indicating whether the trait exists.
+func (e {{$enumTypeName}}) {{$trait.Name}}() ({{$trait.Type}}, bool) {
+    switch e {
+	{{- range $instance := $trait.Traits}}
+    case {{$instance.OwningValue.Name}}:
+        return {{$instance.VariableName}}, true
+    {{- end }}
+    }
+
+	var result {{$trait.Type}}
+	return result, false
+}
+{{ end }}
+{{- $values := (index $.Values $i)}}
 // IsValid has a terrible implementation, but returns true if the value is, well, valid.
 func (e {{$enumTypeName}}) IsValid() bool {
     _, err := e.ParseString(e.String())

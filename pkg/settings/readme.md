@@ -12,3 +12,5 @@
    5) List settings
    6) List settings in use 
    7) Update as per schema 
+6) What if _settings_ were attached to a context instead? 
+7) 
