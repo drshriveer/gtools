@@ -4,16 +4,16 @@ import (
 	"strings"
 )
 
+// Values implements sort.Interface. Values must be consistently sorted to
+// keep diffs to a minimum.
 type Values []Value
 
 func (s Values) Len() int {
 	return len(s)
 }
-
 func (s Values) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
-
 func (s Values) Less(i, j int) bool {
 	return s[i].Less(s[j])
 }

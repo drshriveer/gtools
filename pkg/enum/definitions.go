@@ -31,4 +31,9 @@ type TypedEnum[T EnumLike] interface {
 	// ParseString converts text into a type if valid.
 	// returns true if the enum is valid, and false otherwise.
 	ParseString(text string) (T, error)
+
+	// TODO consider adding:
+	ParseNumber(int) (T, error)
 }
+
+// type AnyEnum TypedEnum[any]

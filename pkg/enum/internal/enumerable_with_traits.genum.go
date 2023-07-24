@@ -152,3 +152,6 @@ func (e *EnumerableWithTraits) UnmarshalYAML(unmarshal func(any) error) error {
 
     return fmt.Errorf("unable to unmarshal EnumerableWithTraits from yaml")
 }
+
+// IsEnum implements an empty function required to implement Enum.
+func (*EnumerableWithTraits) IsEnum() {}
