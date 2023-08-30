@@ -2,156 +2,180 @@
 package internal
 
 import (
-    "encoding/json"
-	"time"
-    "fmt"
+	"encoding/json"
+	"fmt"
 )
 
-// Timeout returns the enum's associated trait of the same name, and a bool
+// IsMammal returns the enum's associated trait of the same name, and a bool
 // indicating whether the trait exists.
-func (e EnumerableWithTraits) Timeout() (time.Duration, bool) {
-    switch e {
-    case E1:
-        return E1_Timeout, true
-    case E2:
-        return E2_Timeout, true
-    case E3:
-        return E3_Timeout, true
-    }
+func (e Creatures) IsMammal() (bool, bool) {
+	switch e {
+	case Cat:
+		return Cat_IsMammal, true
+	case Dog:
+		return Dog_IsMammal, true
+	case Ant:
+		return Ant_IsMammal, true
+	case Spider:
+		return Spider_IsMammal, true
+	case Human:
+		return Human_IsMammal, true
+	}
 
-	var result time.Duration
+	var result bool
 	return result, false
 }
 
-
-// Trait returns the enum's associated trait of the same name, and a bool
+// NumLegs returns the enum's associated trait of the same name, and a bool
 // indicating whether the trait exists.
-func (e EnumerableWithTraits) Trait() (string, bool) {
-    switch e {
-    case E1:
-        return E1_Trait, true
-    case E2:
-        return E2_Trait, true
-    case E3:
-        return E3_Trait, true
-    }
+func (e Creatures) NumLegs() (int, bool) {
+	switch e {
+	case Cat:
+		return Cat_NumLegs, true
+	case Dog:
+		return Dog_NumLegs, true
+	case Ant:
+		return Ant_NumLegs, true
+	case Spider:
+		return Spider_NumLegs, true
+	case Human:
+		return Human_NumLegs, true
+	}
 
-	var result string
+	var result int
 	return result, false
 }
 
 // IsValid has a terrible implementation, but returns true if the value is, well, valid.
-func (e EnumerableWithTraits) IsValid() bool {
-    _, err := e.ParseString(e.String())
-    return err == nil
+func (e Creatures) IsValid() bool {
+	_, err := e.ParseString(e.String())
+	return err == nil
 }
 
 // Values returns a list of all potential values of this enum.
-func (EnumerableWithTraits) Values() []EnumerableWithTraits {
-    return []EnumerableWithTraits{
-        E1,
-        E2,
-        E3,
-    }
+func (Creatures) Values() []Creatures {
+	return []Creatures{
+		NotCreature,
+		Cat,
+		Dog,
+		Ant,
+		Spider,
+		Human,
+	}
 }
 
 // StringValues returns a list of all potential values of this enum as strings.
-func (EnumerableWithTraits) StringValues() []string {
-    return []string{
-        "E1",
-        "E2",
-        "E3",
-    }
+func (Creatures) StringValues() []string {
+	return []string{
+		"NotCreature",
+		"Cat",
+		"Dog",
+		"Ant",
+		"Spider",
+		"Human",
+	}
 }
 
 // String returns a string representation of this enum.
 // Note: in the case of duplicate values only the first alphabetical definition will be choosen.
-func (e EnumerableWithTraits) String() string {
-    switch e {
-    case E1:
-        return "E1"
-    case E2:
-        return "E2"
-    case E3:
-        return "E3"
-    default:
-        return fmt.Sprintf("UndefinedEnumerableWithTraits:%d", e)
-    }
+func (e Creatures) String() string {
+	switch e {
+	case NotCreature:
+		return "NotCreature"
+	case Cat:
+		return "Cat"
+	case Dog:
+		return "Dog"
+	case Ant:
+		return "Ant"
+	case Spider:
+		return "Spider"
+	case Human:
+		return "Human"
+	default:
+		return fmt.Sprintf("UndefinedCreatures:%d", e)
+	}
 }
 
 // ParseString will return a value as defined in string form.
-func (e EnumerableWithTraits) ParseString(text string) (EnumerableWithTraits, error) {
-    switch text {
-    case "E1":
-        return E1, nil
-    case "E2":
-        return E2, nil
-    case "E3":
-        return E3, nil
-    default:
-        return 0, fmt.Errorf("`%s` is not a valid enum of type EnumerableWithTraits", text)
-    }
+func (e Creatures) ParseString(text string) (Creatures, error) {
+	switch text {
+	case "NotCreature":
+		return NotCreature, nil
+	case "Cat":
+		return Cat, nil
+	case "Dog":
+		return Dog, nil
+	case "Ant":
+		return Ant, nil
+	case "Spider":
+		return Spider, nil
+	case "Human":
+		return Human, nil
+	default:
+		return 0, fmt.Errorf("`%s` is not a valid enum of type Creatures", text)
+	}
 }
 
-// MarshalJSON implements the json.Marshaler interface for EnumerableWithTraits.
-func (e EnumerableWithTraits) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements the json.Marshaler interface for Creatures.
+func (e Creatures) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
 }
 
-// UnmarshalJSON implements the json.Unmarshaler interface for EnumerableWithTraits.
-func (e *EnumerableWithTraits) UnmarshalJSON(data []byte) error {
+// UnmarshalJSON implements the json.Unmarshaler interface for Creatures.
+func (e *Creatures) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-        var err error
-        *e, err = EnumerableWithTraits(0).ParseString(s)
-        return err
+		var err error
+		*e, err = Creatures(0).ParseString(s)
+		return err
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-        *e = EnumerableWithTraits(i)
-        if e.IsValid() {
-            return nil
-        }
-    }
+		*e = Creatures(i)
+		if e.IsValid() {
+			return nil
+		}
+	}
 
-    return fmt.Errorf("unable to unmarshal EnumerableWithTraits from `%v`", data)
+	return fmt.Errorf("unable to unmarshal Creatures from `%v`", data)
 }
 
-// MarshalText implements the encoding.TextMarshaler interface for EnumerableWithTraits.
-func (e EnumerableWithTraits) MarshalText() ([]byte, error) {
+// MarshalText implements the encoding.TextMarshaler interface for Creatures.
+func (e Creatures) MarshalText() ([]byte, error) {
 	return []byte(e.String()), nil
 }
 
-// UnmarshalText implements the encoding.TextUnmarshaler interface for EnumerableWithTraits.
-func (e *EnumerableWithTraits) UnmarshalText(text []byte) error {
-    var err error
-	*e, err = EnumerableWithTraits(0).ParseString(string(text))
+// UnmarshalText implements the encoding.TextUnmarshaler interface for Creatures.
+func (e *Creatures) UnmarshalText(text []byte) error {
+	var err error
+	*e, err = Creatures(0).ParseString(string(text))
 	return err
 }
 
-// MarshalYAML implements a YAML Marshaler for EnumerableWithTraits.
-func (e EnumerableWithTraits) MarshalYAML() (any, error) {
+// MarshalYAML implements a YAML Marshaler for Creatures.
+func (e Creatures) MarshalYAML() (any, error) {
 	return e.String(), nil
 }
 
-// UnmarshalYAML implements a YAML Unmarshaler for EnumerableWithTraits.
-func (e *EnumerableWithTraits) UnmarshalYAML(unmarshal func(any) error) error {
+// UnmarshalYAML implements a YAML Unmarshaler for Creatures.
+func (e *Creatures) UnmarshalYAML(unmarshal func(any) error) error {
 	var s string
 	if err := unmarshal(&s); err == nil {
-        var err error
-        *e, err = EnumerableWithTraits(0).ParseString(s)
-        return err
+		var err error
+		*e, err = Creatures(0).ParseString(s)
+		return err
 	}
 	var i int
 	if err := unmarshal(&i); err == nil {
-        *e = EnumerableWithTraits(i)
-        if e.IsValid() {
-            return nil
-        }
-    }
+		*e = Creatures(i)
+		if e.IsValid() {
+			return nil
+		}
+	}
 
-    return fmt.Errorf("unable to unmarshal EnumerableWithTraits from yaml")
+	return fmt.Errorf("unable to unmarshal Creatures from yaml")
 }
 
 // IsEnum implements an empty function required to implement Enum.
-func (*EnumerableWithTraits) IsEnum() {}
+func (Creatures) IsEnum() {}

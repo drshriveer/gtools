@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/drshriveer/gcommon/pkg/enum/gen"
-	"github.com/drshriveer/gcommon/pkg/error"
 )
 
 var (
@@ -19,11 +18,6 @@ var (
 	genYAML     = flag.Bool("yaml", true, "generate yaml marshal methods (default true)")
 	genText     = flag.Bool("text", true, "generate text marshal methods (default true)")
 )
-
-type CMDError struct {
-	error.GError
-	exitCode int
-}
 
 func main() {
 	flag.Parse()

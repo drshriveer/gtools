@@ -1,5 +1,14 @@
 package enum
 
+import (
+	"github.com/drshriveer/gcommon/pkg/errors"
+)
+
+var ErrFailedParsing errors.Factory = &errors.GError{
+	Name:    "ErrFailedParsing",
+	Message: "failed to read or parse configuration",
+}
+
 // EnumLike is a generic type for something that looks like an enum.
 type EnumLike interface {
 	~int | ~uint
@@ -35,5 +44,3 @@ type TypedEnum[T EnumLike] interface {
 	// TODO consider adding:
 	ParseNumber(int) (T, error)
 }
-
-// type AnyEnum TypedEnum[any]

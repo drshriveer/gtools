@@ -1,0 +1,80 @@
+scalars:
+  numbers:
+    float: 3.14159
+    int: 271
+  strings: a.value.here
+  bools: true
+slices:
+  numbers:
+    float:
+      - 3.14159
+      - 2.71
+    int:
+      - 3173
+      - 271
+      - 365
+      - 1
+  strings:
+    - a.value.here
+    - b.value.here
+    - c.value.here
+  bools:
+    - true
+    - true
+    - false
+    - false
+maps:
+  numbers:
+    1: thing1
+    2: thing2
+  strings:
+    s1: true
+    s2: false
+    s3: false
+  bools:
+    true: 1
+    false: 0
+
+dimensions:
+  valid:
+    v1:
+      D1a:
+        D2a: v1:D1a.D2a
+        default: v1:D1a.default
+      D1b: v1:D1b
+      default: v1:default
+    v2:
+      D2b: v2:D2b
+      default: v2:default
+    v3:
+      - item.1
+      - item.2
+      - default: item.default
+        D1a: item.D1a
+        D1b: item.D1b
+
+struct:
+  standard:
+    D1a:
+      pi: 3.14159
+      e: 2.71828
+      duration: 3m
+      useReal: true
+      name: a name
+    default:
+      pi: 3
+      e: 2
+      duration: 2m
+      useReal: false
+      name: default name
+  nestedDimension:
+      pi: 3.14159
+      e: 2.71828
+      duration: 2s1ms
+      useReal:
+        D2b: false
+        default: true
+      name:
+        D1a: "D1a name"
+        D1b: "D1b name"
+        default: "default"

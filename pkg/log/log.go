@@ -3,6 +3,8 @@ package log
 import (
 	"context"
 	"sync/atomic"
+
+	"go.uber.org/zap"
 )
 
 // XXX: consider moving this to a different package.
@@ -40,7 +42,9 @@ func Log(ctx context.Context) zap.Logger {
 
 func EnableDebug(ctx context.Context) context.Context {
 	lh, _ := getOrDefault(ctx)
-	core := lh.Load().
+	core := lh.Load()
+
+	return ctx
 }
 
 func SetLevel(ctx context.Context) context.Context {
