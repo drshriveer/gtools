@@ -13,6 +13,8 @@ _tools-generate:
     @go install github.com/drshriveer/gcommon/pkg/enum/genum
 ```
 
+#### Docs
+
 // TODO: do we have to install this package ? 
 // can it be referenced another way?
 
@@ -21,6 +23,7 @@ _tools-generate:
 - **Enum Interface**
 - [Traits](#traits) - A way
 - **Parsing**
+- String generators
 
 
 ### Usage

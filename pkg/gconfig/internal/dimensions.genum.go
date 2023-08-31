@@ -4,25 +4,36 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
+	"strconv"
+
+	"gopkg.in/yaml.v3"
 )
 
-// IsValid has a terrible implementation, but returns true if the value is, well, valid.
+var _DimensionOneValues = []DimensionOne{
+	D1a,
+	D1b,
+	D1c,
+	D1d,
+}
+
+// IsValid returns true if the enum value is, in fact, valid.
 func (e DimensionOne) IsValid() bool {
-	_, err := e.ParseString(e.String())
-	return err == nil
+	for _, v := range _DimensionOneValues {
+		if v == e {
+			return true
+		}
+	}
+	return false
 }
 
 // Values returns a list of all potential values of this enum.
 func (DimensionOne) Values() []DimensionOne {
-	return []DimensionOne{
-		D1a,
-		D1b,
-		D1c,
-		D1d,
-	}
+	return slices.Clone(_DimensionOneValues)
 }
 
 // StringValues returns a list of all potential values of this enum as strings.
+// Note: This does not return duplicates.
 func (DimensionOne) StringValues() []string {
 	return []string{
 		"D1a",
@@ -107,45 +118,49 @@ func (e DimensionOne) MarshalYAML() (any, error) {
 }
 
 // UnmarshalYAML implements a YAML Unmarshaler for DimensionOne.
-func (e *DimensionOne) UnmarshalYAML(unmarshal func(any) error) error {
-	var s string
-	if err := unmarshal(&s); err == nil {
-		var err error
-		*e, err = DimensionOne(0).ParseString(s)
-		return err
-	}
-	var i int
-	if err := unmarshal(&i); err == nil {
+func (e *DimensionOne) UnmarshalYAML(value *yaml.Node) error {
+	i, err := strconv.ParseInt(value.Value, 10, 64)
+	if err == nil {
 		*e = DimensionOne(i)
-		if e.IsValid() {
-			return nil
-		}
+	} else {
+		*e, err = DimensionOne(0).ParseString(value.Value)
 	}
-
-	return fmt.Errorf("unable to unmarshal DimensionOne from yaml")
+	if err != nil {
+		return err
+	} else if e.IsValid() {
+		return nil
+	}
+	return fmt.Errorf("unable to unmarshal DimensionOne from yaml `%s`", value.Value)
 }
 
 // IsEnum implements an empty function required to implement Enum.
 func (DimensionOne) IsEnum() {}
 
-// IsValid has a terrible implementation, but returns true if the value is, well, valid.
+var _DimensionTwoValues = []DimensionTwo{
+	D2a,
+	D2b,
+	D2c,
+	D2d,
+	D2e,
+}
+
+// IsValid returns true if the enum value is, in fact, valid.
 func (e DimensionTwo) IsValid() bool {
-	_, err := e.ParseString(e.String())
-	return err == nil
+	for _, v := range _DimensionTwoValues {
+		if v == e {
+			return true
+		}
+	}
+	return false
 }
 
 // Values returns a list of all potential values of this enum.
 func (DimensionTwo) Values() []DimensionTwo {
-	return []DimensionTwo{
-		D2a,
-		D2b,
-		D2c,
-		D2d,
-		D2e,
-	}
+	return slices.Clone(_DimensionTwoValues)
 }
 
 // StringValues returns a list of all potential values of this enum as strings.
+// Note: This does not return duplicates.
 func (DimensionTwo) StringValues() []string {
 	return []string{
 		"D2a",
@@ -235,43 +250,47 @@ func (e DimensionTwo) MarshalYAML() (any, error) {
 }
 
 // UnmarshalYAML implements a YAML Unmarshaler for DimensionTwo.
-func (e *DimensionTwo) UnmarshalYAML(unmarshal func(any) error) error {
-	var s string
-	if err := unmarshal(&s); err == nil {
-		var err error
-		*e, err = DimensionTwo(0).ParseString(s)
-		return err
-	}
-	var i int
-	if err := unmarshal(&i); err == nil {
+func (e *DimensionTwo) UnmarshalYAML(value *yaml.Node) error {
+	i, err := strconv.ParseInt(value.Value, 10, 64)
+	if err == nil {
 		*e = DimensionTwo(i)
-		if e.IsValid() {
-			return nil
-		}
+	} else {
+		*e, err = DimensionTwo(0).ParseString(value.Value)
 	}
-
-	return fmt.Errorf("unable to unmarshal DimensionTwo from yaml")
+	if err != nil {
+		return err
+	} else if e.IsValid() {
+		return nil
+	}
+	return fmt.Errorf("unable to unmarshal DimensionTwo from yaml `%s`", value.Value)
 }
 
 // IsEnum implements an empty function required to implement Enum.
 func (DimensionTwo) IsEnum() {}
 
-// IsValid has a terrible implementation, but returns true if the value is, well, valid.
+var _DimensionThreeValues = []DimensionThree{
+	D3a,
+	D3b,
+	D3c,
+}
+
+// IsValid returns true if the enum value is, in fact, valid.
 func (e DimensionThree) IsValid() bool {
-	_, err := e.ParseString(e.String())
-	return err == nil
+	for _, v := range _DimensionThreeValues {
+		if v == e {
+			return true
+		}
+	}
+	return false
 }
 
 // Values returns a list of all potential values of this enum.
 func (DimensionThree) Values() []DimensionThree {
-	return []DimensionThree{
-		D3a,
-		D3b,
-		D3c,
-	}
+	return slices.Clone(_DimensionThreeValues)
 }
 
 // StringValues returns a list of all potential values of this enum as strings.
+// Note: This does not return duplicates.
 func (DimensionThree) StringValues() []string {
 	return []string{
 		"D3a",
@@ -351,22 +370,19 @@ func (e DimensionThree) MarshalYAML() (any, error) {
 }
 
 // UnmarshalYAML implements a YAML Unmarshaler for DimensionThree.
-func (e *DimensionThree) UnmarshalYAML(unmarshal func(any) error) error {
-	var s string
-	if err := unmarshal(&s); err == nil {
-		var err error
-		*e, err = DimensionThree(0).ParseString(s)
-		return err
-	}
-	var i int
-	if err := unmarshal(&i); err == nil {
+func (e *DimensionThree) UnmarshalYAML(value *yaml.Node) error {
+	i, err := strconv.ParseInt(value.Value, 10, 64)
+	if err == nil {
 		*e = DimensionThree(i)
-		if e.IsValid() {
-			return nil
-		}
+	} else {
+		*e, err = DimensionThree(0).ParseString(value.Value)
 	}
-
-	return fmt.Errorf("unable to unmarshal DimensionThree from yaml")
+	if err != nil {
+		return err
+	} else if e.IsValid() {
+		return nil
+	}
+	return fmt.Errorf("unable to unmarshal DimensionThree from yaml `%s`", value.Value)
 }
 
 // IsEnum implements an empty function required to implement Enum.

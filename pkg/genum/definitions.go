@@ -2,6 +2,7 @@ package genum
 
 import (
 	"github.com/drshriveer/gcommon/pkg/gerrors"
+	"github.com/drshriveer/gcommon/pkg/math"
 )
 
 var ErrFailedParsing gerrors.Factory = &gerrors.GError{
@@ -10,9 +11,7 @@ var ErrFailedParsing gerrors.Factory = &gerrors.GError{
 }
 
 // EnumLike is a generic type for something that looks like an enum.
-type EnumLike interface {
-	~int | ~uint
-}
+type EnumLike math.Integer
 
 // Enum is the base interface all generated enums implement.
 type Enum interface {
@@ -40,7 +39,4 @@ type TypedEnum[T EnumLike] interface {
 	// ParseString converts text into a type if valid.
 	// returns true if the enum is valid, and false otherwise.
 	ParseString(text string) (T, error)
-
-	// TODO consider adding:
-	ParseNumber(int) (T, error)
 }

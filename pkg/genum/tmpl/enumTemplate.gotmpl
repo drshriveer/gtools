@@ -2,15 +2,27 @@
 package {{.PkgName}}
 
 import (
+	"slices"
     {{- if .GenJSON}}
     "encoding/json"
     {{- end}}
+	{{- if .GenYAML}}
+	"gopkg.in/yaml.v3"
+	"strconv"
+	{{- end}}
 	{{- range $import := $.Imports}}
 	"{{$import}}"
     {{- end}}
     "fmt"
 )
 {{- range $i, $enumTypeName := .EnumTypeNames}}
+{{- $values := (index $.Values $i)}}
+
+var _{{$enumTypeName}}Values = []{{$enumTypeName}}{
+    {{- range $val := $values.ValueDeduplicatedSet}}
+        {{$val.Name}},
+    {{- end }}
+    }
 {{- range $trait := (index $.Traits $i)}}
 
 // {{$trait.Name}} returns the enum's associated trait of the same name, and a bool
@@ -27,26 +39,33 @@ func (e {{$enumTypeName}}) {{$trait.Name}}() ({{$trait.Type}}, bool) {
 	return result, false
 }
 {{ end }}
-{{- $values := (index $.Values $i)}}
-// IsValid has a terrible implementation, but returns true if the value is, well, valid.
+
+// IsValid returns true if the enum value is, in fact, valid.
 func (e {{$enumTypeName}}) IsValid() bool {
-    _, err := e.ParseString(e.String())
-    return err == nil
+	{{- /*turns out it's probably faster to do a binary search if there are more than 15 values.*/}}
+	{{- if gt (len $values) 15}}
+    _, ok := slices.BinarySearch(_{{$enumTypeName}}Values, e)
+	return ok
+	{{- else}}
+    for _, v := range _{{$enumTypeName}}Values {
+        if v == e {
+            return true
+        }
+    }
+	return false
+	{{- end}}
 }
 
 // Values returns a list of all potential values of this enum.
 func ({{$enumTypeName}}) Values() []{{$enumTypeName}} {
-    return []{{$enumTypeName}}{
-    {{- range $val := $values}}
-        {{$val.Name}},
-    {{- end }}
-    }
+	return slices.Clone(_{{$enumTypeName}}Values)
 }
 
 // StringValues returns a list of all potential values of this enum as strings.
+// Note: This does not return duplicates.
 func ({{$enumTypeName}}) StringValues() []string {
     return []string{
-    {{- range $val := $values}}
+    {{- range $val := $values.ValueDeduplicatedSet}}
         "{{$val.Name}}",
     {{- end }}
     }
@@ -124,22 +143,19 @@ func (e {{$enumTypeName}}) MarshalYAML() (any, error) {
 }
 
 // UnmarshalYAML implements a YAML Unmarshaler for {{$enumTypeName}}.
-func (e *{{$enumTypeName}}) UnmarshalYAML(unmarshal func(any) error) error {
-	var s string
-	if err := unmarshal(&s); err == nil {
-        var err error
-        *e, err = {{$enumTypeName}}(0).ParseString(s)
-        return err
+func (e *{{$enumTypeName}}) UnmarshalYAML(value *yaml.Node) error {
+	i, err := strconv.ParseInt(value.Value, 10, 64)
+	if err == nil {
+		*e = {{$enumTypeName}}(i)
+	} else {
+	    *e, err = {{$enumTypeName}}(0).ParseString(value.Value)
 	}
-	var i int
-	if err := unmarshal(&i); err == nil {
-        *e = {{$enumTypeName}}(i)
-        if e.IsValid() {
-            return nil
-        }
+	if err != nil {
+        return err
+	} else if e.IsValid() {
+        return nil
     }
-
-    return fmt.Errorf("unable to unmarshal {{$enumTypeName}} from yaml")
+    return fmt.Errorf("unable to unmarshal {{$enumTypeName}} from yaml `%s`", value.Value)
 }
 
 // IsEnum implements an empty function required to implement Enum.

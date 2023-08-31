@@ -13,6 +13,7 @@ import (
 
 	"github.com/drshriveer/gcommon/pkg/genum"
 	"github.com/drshriveer/gcommon/pkg/gerrors"
+	"github.com/drshriveer/gcommon/pkg/rutils"
 	"github.com/drshriveer/gcommon/pkg/set"
 )
 
@@ -65,7 +66,7 @@ func (d *Dimension) initFlag() error {
 		if err := ptrVal.UnmarshalText([]byte(s)); err != nil {
 			return err
 		}
-		d.parsed, ok = unptr(ptrVal).(genum.Enum)
+		d.parsed, ok = rutils.Unptr(ptrVal).(genum.Enum)
 		if !ok {
 			return ErrFailedParsing.WithStack()
 		}
@@ -233,14 +234,4 @@ func keySet(in map[string]any) (set.Set[string], bool) {
 		}
 	}
 	return result, hasDefault
-}
-
-func unptr(in any) any {
-	v := reflect.ValueOf(in)
-	switch v.Kind() {
-	case reflect.Pointer:
-		return v.Elem().Interface()
-	default:
-		return v.Interface()
-	}
 }

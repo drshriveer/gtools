@@ -79,8 +79,7 @@ func (g *Generate) Parse() error {
 					OwningValue:  lastValue,
 					VariableName: name,
 					Type:         v.Type(),
-				},
-				)
+				})
 				traits[traitName] = temp
 			}
 		}

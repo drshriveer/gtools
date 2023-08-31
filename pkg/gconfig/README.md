@@ -15,7 +15,7 @@ go get -u github.com/drshriveer/gscommon/pkg/gconfig
 
 ### Docs:
 
-// FIXME!
+https://pkg.go.dev/github.com/drshriveer/gcommon/pkg/gconfig
 
 ### Features
 - __Generics:__ This library uses generics to fetch configuration values from a yaml file. This works with primitives, slices, maps<sup>†</sup>, and structs (supporting yaml). The same key can be resolved into multiple types. _<sup>†</sup> - note: maps with dimensional keys do not currently work_

@@ -4,8 +4,18 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
+	"strconv"
 	"time"
+
+	"gopkg.in/yaml.v3"
 )
+
+var _EnumerableWithTraitsValues = []EnumerableWithTraits{
+	E1,
+	E2,
+	E3,
+}
 
 // Timeout returns the enum's associated trait of the same name, and a bool
 // indicating whether the trait exists.
@@ -39,22 +49,23 @@ func (e EnumerableWithTraits) Trait() (string, bool) {
 	return result, false
 }
 
-// IsValid has a terrible implementation, but returns true if the value is, well, valid.
+// IsValid returns true if the enum value is, in fact, valid.
 func (e EnumerableWithTraits) IsValid() bool {
-	_, err := e.ParseString(e.String())
-	return err == nil
+	for _, v := range _EnumerableWithTraitsValues {
+		if v == e {
+			return true
+		}
+	}
+	return false
 }
 
 // Values returns a list of all potential values of this enum.
 func (EnumerableWithTraits) Values() []EnumerableWithTraits {
-	return []EnumerableWithTraits{
-		E1,
-		E2,
-		E3,
-	}
+	return slices.Clone(_EnumerableWithTraitsValues)
 }
 
 // StringValues returns a list of all potential values of this enum as strings.
+// Note: This does not return duplicates.
 func (EnumerableWithTraits) StringValues() []string {
 	return []string{
 		"E1",
@@ -134,26 +145,32 @@ func (e EnumerableWithTraits) MarshalYAML() (any, error) {
 }
 
 // UnmarshalYAML implements a YAML Unmarshaler for EnumerableWithTraits.
-func (e *EnumerableWithTraits) UnmarshalYAML(unmarshal func(any) error) error {
-	var s string
-	if err := unmarshal(&s); err == nil {
-		var err error
-		*e, err = EnumerableWithTraits(0).ParseString(s)
-		return err
-	}
-	var i int
-	if err := unmarshal(&i); err == nil {
+func (e *EnumerableWithTraits) UnmarshalYAML(value *yaml.Node) error {
+	i, err := strconv.ParseInt(value.Value, 10, 64)
+	if err == nil {
 		*e = EnumerableWithTraits(i)
-		if e.IsValid() {
-			return nil
-		}
+	} else {
+		*e, err = EnumerableWithTraits(0).ParseString(value.Value)
 	}
-
-	return fmt.Errorf("unable to unmarshal EnumerableWithTraits from yaml")
+	if err != nil {
+		return err
+	} else if e.IsValid() {
+		return nil
+	}
+	return fmt.Errorf("unable to unmarshal EnumerableWithTraits from yaml `%s`", value.Value)
 }
 
 // IsEnum implements an empty function required to implement Enum.
 func (EnumerableWithTraits) IsEnum() {}
+
+var _CreaturesValues = []Creatures{
+	NotCreature,
+	Cat,
+	Dog,
+	Ant,
+	Spider,
+	Human,
+}
 
 // IsMammal returns the enum's associated trait of the same name, and a bool
 // indicating whether the trait exists.
@@ -195,25 +212,23 @@ func (e Creatures) NumLegs() (int, bool) {
 	return result, false
 }
 
-// IsValid has a terrible implementation, but returns true if the value is, well, valid.
+// IsValid returns true if the enum value is, in fact, valid.
 func (e Creatures) IsValid() bool {
-	_, err := e.ParseString(e.String())
-	return err == nil
+	for _, v := range _CreaturesValues {
+		if v == e {
+			return true
+		}
+	}
+	return false
 }
 
 // Values returns a list of all potential values of this enum.
 func (Creatures) Values() []Creatures {
-	return []Creatures{
-		NotCreature,
-		Cat,
-		Dog,
-		Ant,
-		Spider,
-		Human,
-	}
+	return slices.Clone(_CreaturesValues)
 }
 
 // StringValues returns a list of all potential values of this enum as strings.
+// Note: This does not return duplicates.
 func (Creatures) StringValues() []string {
 	return []string{
 		"NotCreature",
@@ -308,22 +323,19 @@ func (e Creatures) MarshalYAML() (any, error) {
 }
 
 // UnmarshalYAML implements a YAML Unmarshaler for Creatures.
-func (e *Creatures) UnmarshalYAML(unmarshal func(any) error) error {
-	var s string
-	if err := unmarshal(&s); err == nil {
-		var err error
-		*e, err = Creatures(0).ParseString(s)
-		return err
-	}
-	var i int
-	if err := unmarshal(&i); err == nil {
+func (e *Creatures) UnmarshalYAML(value *yaml.Node) error {
+	i, err := strconv.ParseInt(value.Value, 10, 64)
+	if err == nil {
 		*e = Creatures(i)
-		if e.IsValid() {
-			return nil
-		}
+	} else {
+		*e, err = Creatures(0).ParseString(value.Value)
 	}
-
-	return fmt.Errorf("unable to unmarshal Creatures from yaml")
+	if err != nil {
+		return err
+	} else if e.IsValid() {
+		return nil
+	}
+	return fmt.Errorf("unable to unmarshal Creatures from yaml `%s`", value.Value)
 }
 
 // IsEnum implements an empty function required to implement Enum.
