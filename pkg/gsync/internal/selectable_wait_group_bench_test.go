@@ -1,10 +1,11 @@
-package gsync_test
+package internal_test
 
 import (
 	"sync"
 	"testing"
 
 	"github.com/drshriveer/gcommon/pkg/gsync"
+	"github.com/drshriveer/gcommon/pkg/gsync/internal"
 )
 
 // BenchmarkSyncWaitGroup_Add
@@ -51,13 +52,13 @@ func BenchmarkSyncWaitGroup_Add(b *testing.B) {
 
 func BenchmarkSelectableWaitGroup1_Add(b *testing.B) {
 	b.Run("single", func(b *testing.B) {
-		wg := gsync.NewSelectableWaitGroup()
+		wg := internal.NewSelectableWaitGroup1()
 		for i := 0; i < b.N; i++ {
 			wg.Add(1)
 		}
 	})
 	b.Run("parallel", func(b *testing.B) {
-		wg := gsync.NewSelectableWaitGroup()
+		wg := internal.NewSelectableWaitGroup1()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
 				wg.Add(1)
@@ -68,14 +69,14 @@ func BenchmarkSelectableWaitGroup1_Add(b *testing.B) {
 
 func BenchmarkSelectableWaitGroup2_Add(b *testing.B) {
 	b.Run("single", func(b *testing.B) {
-		wg := gsync.NewSelectableWaitGroup2()
+		wg := internal.NewSelectableWaitGroup2()
 		for i := 0; i < b.N; i++ {
 			wg.Add(1)
 		}
 	})
 
 	b.Run("parallel", func(b *testing.B) {
-		wg := gsync.NewSelectableWaitGroup2()
+		wg := internal.NewSelectableWaitGroup2()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
 				wg.Add(1)
@@ -86,14 +87,14 @@ func BenchmarkSelectableWaitGroup2_Add(b *testing.B) {
 
 func BenchmarkSelectableWaitGroup3_Add(b *testing.B) {
 	b.Run("single", func(b *testing.B) {
-		wg := gsync.NewSelectableWaitGroup3()
+		wg := internal.NewSelectableWaitGroup3()
 		for i := 0; i < b.N; i++ {
 			wg.Add(1)
 		}
 	})
 
 	b.Run("parallel", func(b *testing.B) {
-		wg := gsync.NewSelectableWaitGroup3()
+		wg := internal.NewSelectableWaitGroup3()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
 				wg.Add(1)
@@ -104,14 +105,14 @@ func BenchmarkSelectableWaitGroup3_Add(b *testing.B) {
 
 func BenchmarkSelectableWaitGroup4_Add(b *testing.B) {
 	b.Run("single", func(b *testing.B) {
-		wg := gsync.NewSelectableWaitGroup4()
+		wg := gsync.NewSelectableWaitGroup()
 		for i := 0; i < b.N; i++ {
 			wg.Add(1)
 		}
 	})
 
 	b.Run("parallel", func(b *testing.B) {
-		wg := gsync.NewSelectableWaitGroup4()
+		wg := gsync.NewSelectableWaitGroup()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
 				wg.Add(1)

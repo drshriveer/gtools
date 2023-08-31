@@ -1,9 +1,11 @@
-package gsync
+package internal
 
 import (
 	"context"
 	"sync/atomic"
 	"time"
+
+	"github.com/drshriveer/gcommon/pkg/gsync"
 )
 
 // TODO: benchmark with various impl & against sync.WG
@@ -94,7 +96,7 @@ func (wg *SelectableWaitGroup3) WaitTimeout(timeout time.Duration) error {
 	defer timer.Stop()
 	select {
 	case <-timer.C:
-		return ErrWGTimeout.Raw()
+		return gsync.ErrWGTimeout.Raw()
 	case <-wg.Wait():
 		return nil
 	}

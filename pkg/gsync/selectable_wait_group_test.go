@@ -14,7 +14,7 @@ import (
 )
 
 func TestSelectableWaitGroup_Wait(t *testing.T) {
-	wg := gsync.NewSelectableWaitGroup4()
+	wg := gsync.NewSelectableWaitGroup()
 	wg.Add(1)
 	err := wg.WaitTimeout(100 * time.Millisecond)
 	assert.Equal(t, gsync.ErrWGTimeout, errors.Unwrap(err))
@@ -25,7 +25,7 @@ func TestSelectableWaitGroup_Wait(t *testing.T) {
 	assert.Equal(t, context.DeadlineExceeded, errors.Unwrap(err))
 
 	ready := make(chan struct{})
-	wg2 := gsync.NewSelectableWaitGroup4()
+	wg2 := gsync.NewSelectableWaitGroup()
 	wg2.Inc()
 	go func() {
 		select {
@@ -41,7 +41,7 @@ func TestSelectableWaitGroup_Wait(t *testing.T) {
 	wg.Dec()
 	require.NoError(t, wg2.WaitTimeout(time.Second))
 
-	wg = gsync.NewSelectableWaitGroup4()
+	wg = gsync.NewSelectableWaitGroup()
 	assert.NoError(t, wg.WaitTimeout(100*time.Millisecond))
 	wg.Add(3)
 	assert.Error(t, wg.WaitTimeout(100*time.Millisecond))
@@ -53,7 +53,7 @@ func TestSelectableWaitGroup_Wait(t *testing.T) {
 	assert.NoError(t, wg.WaitTimeout(100*time.Millisecond))
 }
 
-func testWaitGroup(t *testing.T, wg1 *gsync.SelectableWaitGroup4, wg2 *gsync.SelectableWaitGroup4) {
+func testWaitGroup(t *testing.T, wg1 *gsync.SelectableWaitGroup, wg2 *gsync.SelectableWaitGroup) {
 	n := 16
 	wg1.Add(n)
 	wg2.Add(n)
@@ -80,8 +80,8 @@ func testWaitGroup(t *testing.T, wg1 *gsync.SelectableWaitGroup4, wg2 *gsync.Sel
 }
 
 func TestWaitGroup(t *testing.T) {
-	wg1 := gsync.NewSelectableWaitGroup4()
-	wg2 := gsync.NewSelectableWaitGroup4()
+	wg1 := gsync.NewSelectableWaitGroup()
+	wg2 := gsync.NewSelectableWaitGroup()
 
 	// Run the same test a few times to ensure barrier is in a proper state.
 	for i := 0; i != 8; i++ {
@@ -92,7 +92,7 @@ func TestWaitGroup(t *testing.T) {
 func TestWaitGroupRace(t *testing.T) {
 	// Run this test for about 1ms.
 	for i := 0; i < 1000; i++ {
-		wg := gsync.NewSelectableWaitGroup4()
+		wg := gsync.NewSelectableWaitGroup()
 		n := new(int32)
 		// spawn goroutine 1
 		wg.Add(1)

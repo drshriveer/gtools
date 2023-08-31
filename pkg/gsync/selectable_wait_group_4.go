@@ -4,16 +4,30 @@ import (
 	"context"
 	"sync/atomic"
 	"time"
+
+	"github.com/drshriveer/gcommon/pkg/errors"
 )
 
-// TODO: benchmark with various impl & against sync.WG
-type SelectableWaitGroup4 struct {
+// ErrWGTimeout indicates a wait group timeout.
+var ErrWGTimeout errors.Factory = &errors.GError{
+	Name:    "ErrWGTimeout",
+	Message: "timed out waiting for SelectableWaitGroup",
+}
+
+var closedChan chan struct{}
+
+func init() {
+	closedChan = make(chan struct{})
+	close(closedChan)
+}
+
+type SelectableWaitGroup struct {
 	count atomic.Int64
 	wChan atomic.Pointer[chan struct{}]
 }
 
-func NewSelectableWaitGroup4() *SelectableWaitGroup4 {
-	wg := &SelectableWaitGroup4{
+func NewSelectableWaitGroup() *SelectableWaitGroup {
+	wg := &SelectableWaitGroup{
 		count: atomic.Int64{},
 		wChan: atomic.Pointer[chan struct{}]{},
 	}
@@ -22,16 +36,16 @@ func NewSelectableWaitGroup4() *SelectableWaitGroup4 {
 }
 
 // Inc adds 1 to the wait group.
-func (wg *SelectableWaitGroup4) Inc() int {
+func (wg *SelectableWaitGroup) Inc() int {
 	return wg.Add(1)
 }
 
 // Dec adds -1 to the wait group.
-func (wg *SelectableWaitGroup4) Dec() int {
+func (wg *SelectableWaitGroup) Dec() int {
 	return wg.Add(-1)
 }
 
-func (wg *SelectableWaitGroup4) Add(delta int) int {
+func (wg *SelectableWaitGroup) Add(delta int) int {
 	newV := wg.count.Add(int64(delta))
 	if newV == 0 {
 		oldChan := wg.wChan.Swap(&closedChan)
@@ -48,11 +62,11 @@ func (wg *SelectableWaitGroup4) Add(delta int) int {
 	return int(newV)
 }
 
-func (wg *SelectableWaitGroup4) Count() int {
+func (wg *SelectableWaitGroup) Count() int {
 	return int(wg.count.Load())
 }
 
-func (wg *SelectableWaitGroup4) Wait() <-chan struct{} {
+func (wg *SelectableWaitGroup) Wait() <-chan struct{} {
 	// there is a race between updating the counter and updating the channel
 	// .. so to make sure we have a consistent state check that we don't have a > zero count
 	// but a closed channel. Do this repeatedly until the result makes sense.
@@ -67,7 +81,7 @@ func (wg *SelectableWaitGroup4) Wait() <-chan struct{} {
 
 // WaitCTX waits for the group to complete or for a context to be done.
 // If the context ends first, this method will return the context error.
-func (wg *SelectableWaitGroup4) WaitCTX(ctx context.Context) error {
+func (wg *SelectableWaitGroup) WaitCTX(ctx context.Context) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -78,7 +92,7 @@ func (wg *SelectableWaitGroup4) WaitCTX(ctx context.Context) error {
 
 // WaitTimeout will wait for the group to be complete a specified time and will return
 // ErrWGTimeout if the timeout passes.
-func (wg *SelectableWaitGroup4) WaitTimeout(timeout time.Duration) error {
+func (wg *SelectableWaitGroup) WaitTimeout(timeout time.Duration) error {
 	timer := time.NewTimer(timeout)
 	defer timer.Stop()
 	select {
