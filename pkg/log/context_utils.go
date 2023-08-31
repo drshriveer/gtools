@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync/atomic"
 
+	"go.uber.org/zap/zapcore"
+
 	"go.uber.org/zap"
 )
 
@@ -21,38 +23,51 @@ func InitLogger(ctx context.Context, fields ...zap.Field) context.Context {
 	if !ok {
 		ctx = context.WithValue(ctx, logHolderKey, lh)
 	}
-	newLogger := lh.Load().WithFields(fields...)
+	newLogger := lh.Load().With(fields...)
 	lh.Store(newLogger)
 	return ctx
 }
 
 func ChildLogger(ctx context.Context, fields ...zap.Field) context.Context {
 	lh, _ := getOrDefault(ctx)
-	newLogger := lh.Load().WithFields(fields...)
+	newLogger := lh.Load().With(fields...)
 	lh = &logHolder{}
 	lh.Store(newLogger)
 	ctx = context.WithValue(ctx, logHolderKey, lh)
 	return ctx
 }
 
-func Log(ctx context.Context) zap.Logger {
+func Log(ctx context.Context) *zap.Logger {
 	lh, _ := getOrDefault(ctx)
 	return lh.Load()
 }
 
 func EnableDebug(ctx context.Context) context.Context {
-	lh, _ := getOrDefault(ctx)
-	core := lh.Load()
+	return SetLevel(ctx, zapcore.DebugLevel)
+}
 
+func SetLevel(ctx context.Context, level zapcore.Level) context.Context {
+	lh, ok := getOrDefault(ctx)
+	logger := lh.Load()
+	coreWrapper := &customLevelCoreWrapper{
+		Core:     logger.Core(),
+		minLevel: level,
+	}
+	lh.Store(zap.New(coreWrapper))
+	if !ok {
+		ctx = context.WithValue(ctx, logHolderKey, logger)
+	}
 	return ctx
 }
 
-func SetLevel(ctx context.Context) context.Context {
-
-}
-
-func WithFields(ctx context.Context, fields ...zap.field) context.Context {
-
+func WithFields(ctx context.Context, fields ...zap.Field) context.Context {
+	lh, ok := getOrDefault(ctx)
+	logger := lh.Load()
+	lh.Store(logger.With(fields...))
+	if !ok {
+		ctx = context.WithValue(ctx, logHolderKey, logger)
+	}
+	return ctx
 }
 
 func getOrDefault(ctx context.Context) (*logHolder, bool) {

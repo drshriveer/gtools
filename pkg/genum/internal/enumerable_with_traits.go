@@ -4,7 +4,7 @@ import (
 	stupidTime "time"
 )
 
-//go:generate genum -types=EnumerableWithTraits
+//go:generate genum -types=EnumerableWithTraits,Creatures
 type EnumerableWithTraits int
 
 const (
@@ -13,7 +13,6 @@ const (
 	E3, E3_Trait, E3_Timeout = EnumerableWithTraits(iota), "trait 3", 5 * stupidTime.Minute
 )
 
-//go:generate genum -types=Creatures
 type Creatures int
 
 const (

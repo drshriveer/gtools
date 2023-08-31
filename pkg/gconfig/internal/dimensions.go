@@ -1,6 +1,6 @@
 package internal
 
-//go:generate genum -types=DimensionOne,DimensionTwo
+//go:generate genum -types=DimensionOne,DimensionTwo,DimensionThree
 type DimensionOne int
 
 const (
@@ -18,4 +18,12 @@ const (
 	D2c
 	D2d
 	D2e
+)
+
+type DimensionThree int
+
+const (
+	D3a DimensionThree = iota
+	D3b
+	D3c
 )

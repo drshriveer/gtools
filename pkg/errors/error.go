@@ -105,7 +105,6 @@ type GError struct {
 	// The things that have to be equal:
 	Name    string
 	Message string
-	// Code  codes.Code
 
 	// The things that don't have to be equal:
 	Source     string
@@ -156,16 +155,20 @@ func (e *GError) Raw() GError {
 func (e *GError) Merge(gError GError) GError {
 	clone := e.clone(noStack)
 	if len(gError.Name) > 0 {
-		e.Name = gError.Name
+		clone.Name = gError.Name
 	}
 	if len(gError.Message) > 0 {
-		e.Message = gError.Message
+		clone.Message = gError.Message
 	}
 	if len(gError.Source) > 0 {
-		e.Source = gError.Source
+		clone.Source = gError.Source
 	}
 	if len(gError.ExtMessage) > 0 {
-		e.ExtMessage = gError.ExtMessage
+		if e.ExtMessage != "" {
+			clone.ExtMessage = fmt.Sprintf("%s %s", e.ExtMessage, gError.ExtMessage)
+		} else {
+			clone.ExtMessage = gError.ExtMessage
+		}
 	}
 	if len(gError.MTag) > 0 {
 		e.MTag = gError.MTag
@@ -198,9 +201,6 @@ func (e *GError) clone(st stackType) GError {
 	clone.ExtMessage = ""
 	clone.MTag = ""
 
-	if clone.Source != "nil" {
-
-	}
 	if st == noStack || (st == sourceOnly && clone.Source != "") {
 		clone.Stack = nil
 	} else {
@@ -220,8 +220,11 @@ func (e *GError) Convert(err error) GError {
 	case *GError:
 		return *v
 	}
-	// FIXME!!! this call needs to skip a stack trace;
-	return e.Include("originalError: %+v", err)
+
+	clone := e.clone(defaultStack)
+	clone.ExtMessage = fmt.Sprintf("originalError: %+v", err)
+
+	return clone
 }
 
 func (e *GError) Unwrap() error {

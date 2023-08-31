@@ -1,6 +1,6 @@
 package errors
 
-// Source represents the source of an error in any form it may take.
+// `Source represents the source of an error in any form it may take.
 type Source interface {
 	// Metric returns a single metric-safe string indicating source.
 	Metric() string

@@ -1,23 +1,39 @@
-package config
+package gconfig
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/puzpuzpuz/xsync/v2"
 	"gopkg.in/yaml.v3"
 
 	"github.com/drshriveer/gcommon/pkg/errors"
+	"github.com/drshriveer/gcommon/pkg/genum"
 )
 
+// ErrConfigFailure is returned when there is a failure to read a configuration value
+// for any reason.
 var ErrConfigFailure errors.Factory = &errors.GError{
 	Name:    "ErrConfigFailure",
 	Message: "failed to read value",
 }
 
+// Config is the base configuration object that should be supplied to the generic GetX functions.
 type Config struct {
-	cached *xsync.MapOf[string, any]
-	data   map[string]any
+	dimensions map[reflect.Type]genum.Enum
+	cached     *xsync.MapOf[string, any]
+	data       map[string]any
+}
+
+// GetDimension returns the actual value of a dimension.
+// This will panic if a non-dimension is supplied.
+func GetDimension[T genum.Enum](cfg *Config) T {
+	v, ok := cfg.dimensions[reflect.TypeOf(*new(T))]
+	if !ok {
+		panic(fmt.Sprintf("%T is not included config dimensions %s", *new(T), keys(cfg.dimensions)))
+	}
+	return v.(T)
 }
 
 // Get fetches a value from the config and returns an error if there is a problem.
@@ -60,7 +76,7 @@ func getFromCache[T any](cfg *Config, key string) (T, error) {
 	})
 
 	if err != nil {
-		return r, err
+		return r, errors.Include(err, "key="+key)
 	}
 
 	return v.(T), nil
@@ -104,4 +120,12 @@ func extract(m map[string]any, keys []string) (any, bool) {
 	}
 
 	return last, ok
+}
+
+func keys[K comparable, V any](m map[K]V) []K {
+	result := make([]K, 0, len(m))
+	for k := range m {
+		result = append(result, k)
+	}
+	return result
 }

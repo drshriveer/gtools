@@ -7,7 +7,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/drshriveer/gcommon/pkg/enum/gen"
+	"github.com/drshriveer/gcommon/pkg/genum/gen"
 )
 
 var (

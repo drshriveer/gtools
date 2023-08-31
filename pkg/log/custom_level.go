@@ -1,11 +1,15 @@
 package log
 
+import (
+	"go.uber.org/zap/zapcore"
+)
+
 type customLevelCoreWrapper struct {
-	zap.Core
-	minLevel zap.Level
+	zapcore.Core
+	minLevel zapcore.Level
 }
 
 // Enable overwrites the LevelEnabler interface within zap.Core.
-func (c *customLevelCoreWrapper) Enabled(l zap.Level) bool {
+func (c *customLevelCoreWrapper) Enabled(l zapcore.Level) bool {
 	return c.minLevel <= l
 }

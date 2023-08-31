@@ -43,8 +43,7 @@ _tools-linter:
 
 # Generate
 generate: _tools-generate
-    @echo $PATH
-    @go generate ./pkg/...
+    @go generate ./...
 
 _tools-generate:
-    @go install github.com/drshriveer/gcommon/pkg/enum/genum
+    @go install github.com/drshriveer/gcommon/pkg/genum/genum

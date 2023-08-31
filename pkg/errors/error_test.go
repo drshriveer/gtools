@@ -52,7 +52,6 @@ func TestGError_Include(t *testing.T) {
 	assert.Empty(t, ErrMyError1.Source)
 	assert.Empty(t, ErrMyError1.Stack)
 	assert.Empty(t, ErrMyError1.ExtMessage)
-	// println(err.Error())
 
 	switch errors.Unwrap(err) {
 	case &ErrMyError1:
@@ -92,7 +91,6 @@ func BenchmarkGError_WithStack(b *testing.B) {
 
 // BenchmarkGError_Raw-10           	135645453	         8.868 ns/op
 // BenchmarkGError_Raw-10           	41166675	        28.91 ns/op <-- with pointer
-
 func BenchmarkGError_Raw(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = ErrMyError1.Raw()

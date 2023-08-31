@@ -26,9 +26,16 @@ type StackElem struct {
 	Line int
 }
 
+// Source returns info about where this error was porpegated including packageName, typeName, and functionName.
 func (e StackElem) Source() (packageName string, typeName string, funcName string) {
 	splitName := strings.Split(e.Name, "/")
 	last := splitName[len(splitName)-1]
+	// Next step: handle generics which show up as funcName[....]
+	// I'd love to do:
+	//    last = strings.Replace(last, "[...]", "[T]", 1)
+	// but this probably isn't metric safe.
+	// I also assume that [...] handles N types so [T] wouldn't quite work.
+	last = strings.TrimSuffix(last, "[...]")
 	vals := strings.Split(last, ".")
 
 	if len(vals) == 2 {
@@ -42,6 +49,7 @@ func (e StackElem) Source() (packageName string, typeName string, funcName strin
 	return packageName, typeName, funcName
 }
 
+// Metric returns a metric-safe(?) string of the source info.
 func (e StackElem) Metric() string {
 	pkg, tName, fName := e.Source()
 	strings.TrimPrefix(tName, "*") // remove pointer indicator

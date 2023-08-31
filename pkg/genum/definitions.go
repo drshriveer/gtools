@@ -1,4 +1,4 @@
-package enum
+package genum
 
 import (
 	"github.com/drshriveer/gcommon/pkg/errors"

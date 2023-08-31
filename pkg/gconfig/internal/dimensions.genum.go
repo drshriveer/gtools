@@ -255,3 +255,119 @@ func (e *DimensionTwo) UnmarshalYAML(unmarshal func(any) error) error {
 
 // IsEnum implements an empty function required to implement Enum.
 func (DimensionTwo) IsEnum() {}
+
+// IsValid has a terrible implementation, but returns true if the value is, well, valid.
+func (e DimensionThree) IsValid() bool {
+	_, err := e.ParseString(e.String())
+	return err == nil
+}
+
+// Values returns a list of all potential values of this enum.
+func (DimensionThree) Values() []DimensionThree {
+	return []DimensionThree{
+		D3a,
+		D3b,
+		D3c,
+	}
+}
+
+// StringValues returns a list of all potential values of this enum as strings.
+func (DimensionThree) StringValues() []string {
+	return []string{
+		"D3a",
+		"D3b",
+		"D3c",
+	}
+}
+
+// String returns a string representation of this enum.
+// Note: in the case of duplicate values only the first alphabetical definition will be choosen.
+func (e DimensionThree) String() string {
+	switch e {
+	case D3a:
+		return "D3a"
+	case D3b:
+		return "D3b"
+	case D3c:
+		return "D3c"
+	default:
+		return fmt.Sprintf("UndefinedDimensionThree:%d", e)
+	}
+}
+
+// ParseString will return a value as defined in string form.
+func (e DimensionThree) ParseString(text string) (DimensionThree, error) {
+	switch text {
+	case "D3a":
+		return D3a, nil
+	case "D3b":
+		return D3b, nil
+	case "D3c":
+		return D3c, nil
+	default:
+		return 0, fmt.Errorf("`%s` is not a valid enum of type DimensionThree", text)
+	}
+}
+
+// MarshalJSON implements the json.Marshaler interface for DimensionThree.
+func (e DimensionThree) MarshalJSON() ([]byte, error) {
+	return json.Marshal(e.String())
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface for DimensionThree.
+func (e *DimensionThree) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		var err error
+		*e, err = DimensionThree(0).ParseString(s)
+		return err
+	}
+	var i int
+	if err := json.Unmarshal(data, &i); err == nil {
+		*e = DimensionThree(i)
+		if e.IsValid() {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unable to unmarshal DimensionThree from `%v`", data)
+}
+
+// MarshalText implements the encoding.TextMarshaler interface for DimensionThree.
+func (e DimensionThree) MarshalText() ([]byte, error) {
+	return []byte(e.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface for DimensionThree.
+func (e *DimensionThree) UnmarshalText(text []byte) error {
+	var err error
+	*e, err = DimensionThree(0).ParseString(string(text))
+	return err
+}
+
+// MarshalYAML implements a YAML Marshaler for DimensionThree.
+func (e DimensionThree) MarshalYAML() (any, error) {
+	return e.String(), nil
+}
+
+// UnmarshalYAML implements a YAML Unmarshaler for DimensionThree.
+func (e *DimensionThree) UnmarshalYAML(unmarshal func(any) error) error {
+	var s string
+	if err := unmarshal(&s); err == nil {
+		var err error
+		*e, err = DimensionThree(0).ParseString(s)
+		return err
+	}
+	var i int
+	if err := unmarshal(&i); err == nil {
+		*e = DimensionThree(i)
+		if e.IsValid() {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unable to unmarshal DimensionThree from yaml")
+}
+
+// IsEnum implements an empty function required to implement Enum.
+func (DimensionThree) IsEnum() {}

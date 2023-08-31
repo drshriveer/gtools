@@ -1,4 +1,4 @@
-package config_test
+package gconfig_test
 
 import (
 	"embed"
@@ -9,8 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/drshriveer/gcommon/pkg/config"
-	"github.com/drshriveer/gcommon/pkg/config/internal"
+	"github.com/drshriveer/gcommon/pkg/gconfig/internal"
+
+	"github.com/drshriveer/gcommon/pkg/gconfig"
 )
 
 //go:embed internal/test.yaml
@@ -122,11 +123,23 @@ func TestDimensions(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(fmt.Sprintf("cfg: d1=%s, d2=%s", test.d1, test.d2), func(t *testing.T) {
-			cfg, err := config.NewBuilder().
+			cfg, err := gconfig.NewBuilder().
 				WithDimension("d1", test.d1).
 				WithDimension("d2", test.d2).
 				FromFile(testFS, "internal/test.yaml")
 			require.NoError(t, err)
+
+			t.Run("dimensions", func(t *testing.T) {
+				require.NotPanics(t, func() {
+					v1 := gconfig.GetDimension[internal.DimensionOne](cfg)
+					assert.Equal(t, test.d1, v1)
+					v2 := gconfig.GetDimension[internal.DimensionTwo](cfg)
+					assert.Equal(t, test.d2, v2)
+				})
+				assert.Panics(t, func() {
+					gconfig.GetDimension[internal.DimensionThree](cfg)
+				})
+			})
 
 			for k, tst := range test.cfgTests {
 				t.Run(k, func(t *testing.T) {
@@ -137,10 +150,10 @@ func TestDimensions(t *testing.T) {
 	}
 }
 
-type tester func(t *testing.T, cfg *config.Config, key string)
+type tester func(t *testing.T, cfg *gconfig.Config, key string)
 
 func TestGetters(t *testing.T) {
-	cfg, err := config.NewBuilder().
+	cfg, err := gconfig.NewBuilder().
 		WithDimension("d1", internal.D1b).
 		WithDimension("d2", internal.D2c).
 		FromFile(testFS, "internal/test.yaml")
@@ -335,9 +348,9 @@ func TestGetters(t *testing.T) {
 }
 
 func testGetter[T any](expected T, defaultV T) tester {
-	return func(t *testing.T, cfg *config.Config, key string) {
+	return func(t *testing.T, cfg *gconfig.Config, key string) {
 		t.Run(fmt.Sprintf("Get[%T]", *new(T)), func(t *testing.T) {
-			result, err := config.Get[T](cfg, key)
+			result, err := gconfig.Get[T](cfg, key)
 			if assert.ObjectsAreEqual(expected, defaultV) {
 				assert.Error(t, err)
 			} else {
@@ -347,7 +360,7 @@ func testGetter[T any](expected T, defaultV T) tester {
 		})
 		t.Run(fmt.Sprintf("MustGet[%T]", *new(T)), func(t *testing.T) {
 			fn := func() {
-				assert.Equal(t, expected, config.MustGet[T](cfg, key))
+				assert.Equal(t, expected, gconfig.MustGet[T](cfg, key))
 			}
 			if assert.ObjectsAreEqual(expected, defaultV) {
 				assert.Panics(t, fn)
@@ -356,7 +369,7 @@ func testGetter[T any](expected T, defaultV T) tester {
 			}
 		})
 		t.Run(fmt.Sprintf("GetOrDefault[%T]", *new(T)), func(t *testing.T) {
-			result := config.GetOrDefault[T](cfg, key, defaultV)
+			result := gconfig.GetOrDefault[T](cfg, key, defaultV)
 			assert.Equal(t, expected, result)
 		})
 	}

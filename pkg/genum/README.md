@@ -1,8 +1,16 @@
-# GEnumer
+# gEnum
 ### Getting started
 
 ```bash
-go get github.com/drshriveer/gscommon/enumer
+go install github.com/drshriveer/gscommon/pkg/genum/genum
+```
+
+```justfile
+generate: _tools-generate
+    @go generate ./...
+
+_tools-generate:
+    @go install github.com/drshriveer/gcommon/pkg/enum/genum
 ```
 
 // TODO: do we have to install this package ? 

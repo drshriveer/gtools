@@ -1,4 +1,4 @@
-package config_test
+package gconfig_test
 
 import (
 	"testing"

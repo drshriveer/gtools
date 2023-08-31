@@ -1,4 +1,4 @@
-package config
+package gconfig
 
 import (
 	"encoding"
@@ -11,8 +11,8 @@ import (
 	"github.com/puzpuzpuz/xsync/v2"
 	"gopkg.in/yaml.v3"
 
-	"github.com/drshriveer/gcommon/pkg/enum"
 	"github.com/drshriveer/gcommon/pkg/errors"
+	"github.com/drshriveer/gcommon/pkg/genum"
 	"github.com/drshriveer/gcommon/pkg/set"
 )
 
@@ -24,11 +24,11 @@ var ErrFailedParsing errors.Factory = &errors.GError{
 }
 
 type Dimension struct {
-	Default  enum.Enum
+	Default  genum.Enum
 	FlagName string
 	ParseEnv bool
 
-	parsed enum.Enum
+	parsed genum.Enum
 }
 
 func (d *Dimension) initFlag() error {
@@ -65,7 +65,7 @@ func (d *Dimension) initFlag() error {
 		if err := ptrVal.UnmarshalText([]byte(s)); err != nil {
 			return err
 		}
-		d.parsed, ok = unptr(ptrVal).(enum.Enum)
+		d.parsed, ok = unptr(ptrVal).(genum.Enum)
 		if !ok {
 			return ErrFailedParsing.WithStack()
 		}
@@ -75,7 +75,7 @@ func (d *Dimension) initFlag() error {
 	return nil
 }
 
-func (d *Dimension) get() (enum.Enum, error) {
+func (d *Dimension) get() (genum.Enum, error) {
 	if !flag.Parsed() {
 		flag.Parse()
 	}
@@ -90,7 +90,7 @@ func NewBuilder() *Builder {
 	return &Builder{}
 }
 
-func (b *Builder) WithDimension(name string, defaultVal enum.Enum) *Builder {
+func (b *Builder) WithDimension(name string, defaultVal genum.Enum) *Builder {
 	d := Dimension{
 		Default:  defaultVal,
 		FlagName: name,
@@ -132,9 +132,16 @@ func (b *Builder) FromBytes(bytes []byte) (*Config, error) {
 	if !ok {
 		return nil, ErrFailedParsing.Include("unexpected non-map result")
 	}
+
+	dims := make(map[reflect.Type]genum.Enum, len(b.Dimensions))
+	for _, d := range b.Dimensions {
+		dims[reflect.TypeOf(d.Default)] = d.parsed
+	}
+
 	cfg := &Config{
-		cached: xsync.NewMapOf[any](),
-		data:   result,
+		dimensions: dims,
+		cached:     xsync.NewMapOf[any](),
+		data:       result,
 	}
 	return cfg, nil
 }

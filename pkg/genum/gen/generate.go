@@ -12,7 +12,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/drshriveer/gcommon/pkg/enum/tmpl"
+	"github.com/drshriveer/gcommon/pkg/genum/tmpl"
 	"github.com/drshriveer/gcommon/pkg/set"
 )
 
