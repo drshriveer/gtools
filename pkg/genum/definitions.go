@@ -1,10 +1,10 @@
 package genum
 
 import (
-	"github.com/drshriveer/gcommon/pkg/errors"
+	"github.com/drshriveer/gcommon/pkg/gerrors"
 )
 
-var ErrFailedParsing errors.Factory = &errors.GError{
+var ErrFailedParsing gerrors.Factory = &gerrors.GError{
 	Name:    "ErrFailedParsing",
 	Message: "failed to read or parse configuration",
 }

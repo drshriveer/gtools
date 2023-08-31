@@ -11,14 +11,14 @@ import (
 	"github.com/puzpuzpuz/xsync/v2"
 	"gopkg.in/yaml.v3"
 
-	"github.com/drshriveer/gcommon/pkg/errors"
 	"github.com/drshriveer/gcommon/pkg/genum"
+	"github.com/drshriveer/gcommon/pkg/gerrors"
 	"github.com/drshriveer/gcommon/pkg/set"
 )
 
 const defaultKey = "default"
 
-var ErrFailedParsing errors.Factory = &errors.GError{
+var ErrFailedParsing gerrors.Factory = &gerrors.GError{
 	Name:    "ErrFailedParsing",
 	Message: "failed to read or parse configuration",
 }

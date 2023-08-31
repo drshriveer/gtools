@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/drshriveer/gcommon/pkg/errors"
+	"github.com/drshriveer/gcommon/pkg/gerrors"
 	"github.com/drshriveer/gcommon/pkg/gsync"
 )
 
@@ -17,12 +17,12 @@ func TestSelectableWaitGroup_Wait(t *testing.T) {
 	wg := gsync.NewSelectableWaitGroup()
 	wg.Add(1)
 	err := wg.WaitTimeout(100 * time.Millisecond)
-	assert.Equal(t, gsync.ErrWGTimeout, errors.Unwrap(err))
+	assert.Equal(t, gsync.ErrWGTimeout, gerrors.Unwrap(err))
 
 	ctx, done := context.WithTimeout(context.TODO(), 100*time.Millisecond)
 	defer done()
 	err = wg.WaitCTX(ctx)
-	assert.Equal(t, context.DeadlineExceeded, errors.Unwrap(err))
+	assert.Equal(t, context.DeadlineExceeded, gerrors.Unwrap(err))
 
 	ready := make(chan struct{})
 	wg2 := gsync.NewSelectableWaitGroup()

@@ -5,11 +5,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/drshriveer/gcommon/pkg/errors"
+	"github.com/drshriveer/gcommon/pkg/gerrors"
 )
 
 // ErrWGTimeout indicates a wait group timeout.
-var ErrWGTimeout errors.Factory = &errors.GError{
+var ErrWGTimeout gerrors.Factory = &gerrors.GError{
 	Name:    "ErrWGTimeout",
 	Message: "timed out waiting for SelectableWaitGroup",
 }

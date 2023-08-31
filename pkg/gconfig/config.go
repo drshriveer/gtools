@@ -8,13 +8,13 @@ import (
 	"github.com/puzpuzpuz/xsync/v2"
 	"gopkg.in/yaml.v3"
 
-	"github.com/drshriveer/gcommon/pkg/errors"
 	"github.com/drshriveer/gcommon/pkg/genum"
+	"github.com/drshriveer/gcommon/pkg/gerrors"
 )
 
 // ErrConfigFailure is returned when there is a failure to read a configuration value
 // for any reason.
-var ErrConfigFailure errors.Factory = &errors.GError{
+var ErrConfigFailure gerrors.Factory = &gerrors.GError{
 	Name:    "ErrConfigFailure",
 	Message: "failed to read value",
 }
@@ -76,7 +76,7 @@ func getFromCache[T any](cfg *Config, key string) (T, error) {
 	})
 
 	if err != nil {
-		return r, errors.Include(err, "key="+key)
+		return r, gerrors.Include(err, "key="+key)
 	}
 
 	return v.(T), nil

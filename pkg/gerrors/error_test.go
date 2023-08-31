@@ -1,14 +1,14 @@
-package errors_test
+package gerrors_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/drshriveer/gcommon/pkg/errors"
+	"github.com/drshriveer/gcommon/pkg/gerrors"
 )
 
-var ErrMyError1 = errors.GError{
+var ErrMyError1 = gerrors.GError{
 	Name:    "ErrMyError1",
 	Message: "this is error 1",
 }
@@ -23,7 +23,7 @@ func (a AType) ReturnsError() error {
 func TestGError_WithStack(t *testing.T) {
 	err := ErrMyError1.WithStack()
 	assert.NotSame(t, ErrMyError1, &err)
-	assert.Equal(t, "errors_test:TestGError_WithStack", err.Source)
+	assert.Equal(t, "gerrors_test:TestGError_WithStack", err.Source)
 	assert.NotEmpty(t, err.Stack)
 	assert.Same(t, err.SrcFactory, &ErrMyError1)
 	// ensure unchanged:
@@ -31,9 +31,9 @@ func TestGError_WithStack(t *testing.T) {
 	assert.Empty(t, ErrMyError1.Stack)
 
 	strukt := &AType{}
-	err = strukt.ReturnsError().(errors.GError)
+	err = strukt.ReturnsError().(gerrors.GError)
 	assert.NotSame(t, ErrMyError1, &err)
-	assert.Equal(t, "errors_test:AType:ReturnsError", err.Source)
+	assert.Equal(t, "gerrors_test:AType:ReturnsError", err.Source)
 	assert.NotEmpty(t, err.Stack)
 	assert.Same(t, err.SrcFactory, &ErrMyError1)
 	// ensure unchanged:
@@ -44,7 +44,7 @@ func TestGError_WithStack(t *testing.T) {
 func TestGError_Include(t *testing.T) {
 	err := ErrMyError1.Include("T-Shirts $%d", 5)
 	assert.NotSame(t, ErrMyError1, &err)
-	assert.Equal(t, "errors_test:TestGError_Include", err.Source)
+	assert.Equal(t, "gerrors_test:TestGError_Include", err.Source)
 	assert.NotEmpty(t, err.Stack)
 	assert.Equal(t, "T-Shirts $5", err.ExtMessage)
 	assert.Same(t, err.SrcFactory, &ErrMyError1)
@@ -53,7 +53,7 @@ func TestGError_Include(t *testing.T) {
 	assert.Empty(t, ErrMyError1.Stack)
 	assert.Empty(t, ErrMyError1.ExtMessage)
 
-	switch errors.Unwrap(err) {
+	switch gerrors.Unwrap(err) {
 	case &ErrMyError1:
 	default:
 		assert.Fail(t, "darn")

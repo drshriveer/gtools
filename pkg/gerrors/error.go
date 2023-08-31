@@ -1,4 +1,4 @@
-package errors
+package gerrors
 
 import (
 	"fmt"
@@ -115,7 +115,7 @@ type GError struct {
 	Stack *Stack
 
 	// consider using his as the true equality check for slices.
-	// e.g. switch errors.Unwrap(err) ...
+	// e.g. switch gerrors.Unwrap(err) ...
 	//
 	SrcFactory *GError
 }

@@ -1,4 +1,4 @@
-package errors
+package gerrors
 
 // `Source represents the source of an error in any form it may take.
 type Source interface {

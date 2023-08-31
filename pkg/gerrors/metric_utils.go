@@ -1,4 +1,4 @@
-package errors
+package gerrors
 
 // TODO: reconsider this delimiter when support for it is clearer.
 const nonNodeMetricDelimiter = ":"
