@@ -22,4 +22,14 @@ const (
 	Ant, Ant_NumLegs, Ant_IsMammal          = Creatures(iota), 6, false
 	Spider, Spider_NumLegs, Spider_IsMammal = Creatures(iota), 8, false
 	Human, Human_NumLegs, Human_IsMammal    = Creatures(iota), 2, true
+	Feline, Feline_NumLegs, Feline_IsMamal  = Cat, 5, false
+	Feline2                                 = Cat
+)
+
+type CreaturesAlt int
+
+const (
+	NotCreaturesAlt, NumLegs, IsMammal = CreaturesAlt(iota), 0, false
+	CatAlt, _, _                       = CreaturesAlt(iota), 4, true
+	AntAlt, _, _                       = CreaturesAlt(iota), 6, false
 )

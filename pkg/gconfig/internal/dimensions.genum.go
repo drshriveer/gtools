@@ -2,28 +2,27 @@
 package internal
 
 import (
-	"encoding/json"
-	"fmt"
 	"slices"
-	"strconv"
-
+    "encoding/json"
 	"gopkg.in/yaml.v3"
+	"strconv"
+    "fmt"
 )
 
 var _DimensionOneValues = []DimensionOne{
-	D1a,
-	D1b,
-	D1c,
-	D1d,
-}
+        D1a,
+        D1b,
+        D1c,
+        D1d,
+    }
 
 // IsValid returns true if the enum value is, in fact, valid.
 func (e DimensionOne) IsValid() bool {
-	for _, v := range _DimensionOneValues {
-		if v == e {
-			return true
-		}
-	}
+    for _, v := range _DimensionOneValues {
+        if v == e {
+            return true
+        }
+    }
 	return false
 }
 
@@ -35,45 +34,45 @@ func (DimensionOne) Values() []DimensionOne {
 // StringValues returns a list of all potential values of this enum as strings.
 // Note: This does not return duplicates.
 func (DimensionOne) StringValues() []string {
-	return []string{
-		"D1a",
-		"D1b",
-		"D1c",
-		"D1d",
-	}
+    return []string{
+        "D1a",
+        "D1b",
+        "D1c",
+        "D1d",
+    }
 }
 
 // String returns a string representation of this enum.
 // Note: in the case of duplicate values only the first alphabetical definition will be choosen.
 func (e DimensionOne) String() string {
-	switch e {
-	case D1a:
-		return "D1a"
-	case D1b:
-		return "D1b"
-	case D1c:
-		return "D1c"
-	case D1d:
-		return "D1d"
-	default:
-		return fmt.Sprintf("UndefinedDimensionOne:%d", e)
-	}
+    switch e {
+    case D1a:
+        return "D1a"
+    case D1b:
+        return "D1b"
+    case D1c:
+        return "D1c"
+    case D1d:
+        return "D1d"
+    default:
+        return fmt.Sprintf("UndefinedDimensionOne:%d", e)
+    }
 }
 
 // ParseString will return a value as defined in string form.
 func (e DimensionOne) ParseString(text string) (DimensionOne, error) {
-	switch text {
-	case "D1a":
-		return D1a, nil
-	case "D1b":
-		return D1b, nil
-	case "D1c":
-		return D1c, nil
-	case "D1d":
-		return D1d, nil
-	default:
-		return 0, fmt.Errorf("`%s` is not a valid enum of type DimensionOne", text)
-	}
+    switch text {
+    case "D1a":
+        return D1a, nil
+    case "D1b":
+        return D1b, nil
+    case "D1c":
+        return D1c, nil
+    case "D1d":
+        return D1d, nil
+    default:
+        return 0, fmt.Errorf("`%s` is not a valid enum of type DimensionOne", text)
+    }
 }
 
 // MarshalJSON implements the json.Marshaler interface for DimensionOne.
@@ -85,19 +84,19 @@ func (e DimensionOne) MarshalJSON() ([]byte, error) {
 func (e *DimensionOne) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		var err error
-		*e, err = DimensionOne(0).ParseString(s)
-		return err
+        var err error
+        *e, err = DimensionOne(0).ParseString(s)
+        return err
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-		*e = DimensionOne(i)
-		if e.IsValid() {
-			return nil
-		}
-	}
+        *e = DimensionOne(i)
+        if e.IsValid() {
+            return nil
+        }
+    }
 
-	return fmt.Errorf("unable to unmarshal DimensionOne from `%v`", data)
+    return fmt.Errorf("unable to unmarshal DimensionOne from `%v`", data)
 }
 
 // MarshalText implements the encoding.TextMarshaler interface for DimensionOne.
@@ -107,7 +106,7 @@ func (e DimensionOne) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for DimensionOne.
 func (e *DimensionOne) UnmarshalText(text []byte) error {
-	var err error
+    var err error
 	*e, err = DimensionOne(0).ParseString(string(text))
 	return err
 }
@@ -123,34 +122,34 @@ func (e *DimensionOne) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = DimensionOne(i)
 	} else {
-		*e, err = DimensionOne(0).ParseString(value.Value)
+	    *e, err = DimensionOne(0).ParseString(value.Value)
 	}
 	if err != nil {
-		return err
+        return err
 	} else if e.IsValid() {
-		return nil
-	}
-	return fmt.Errorf("unable to unmarshal DimensionOne from yaml `%s`", value.Value)
+        return nil
+    }
+    return fmt.Errorf("unable to unmarshal DimensionOne from yaml `%s`", value.Value)
 }
 
 // IsEnum implements an empty function required to implement Enum.
 func (DimensionOne) IsEnum() {}
 
 var _DimensionTwoValues = []DimensionTwo{
-	D2a,
-	D2b,
-	D2c,
-	D2d,
-	D2e,
-}
+        D2a,
+        D2b,
+        D2c,
+        D2d,
+        D2e,
+    }
 
 // IsValid returns true if the enum value is, in fact, valid.
 func (e DimensionTwo) IsValid() bool {
-	for _, v := range _DimensionTwoValues {
-		if v == e {
-			return true
-		}
-	}
+    for _, v := range _DimensionTwoValues {
+        if v == e {
+            return true
+        }
+    }
 	return false
 }
 
@@ -162,50 +161,50 @@ func (DimensionTwo) Values() []DimensionTwo {
 // StringValues returns a list of all potential values of this enum as strings.
 // Note: This does not return duplicates.
 func (DimensionTwo) StringValues() []string {
-	return []string{
-		"D2a",
-		"D2b",
-		"D2c",
-		"D2d",
-		"D2e",
-	}
+    return []string{
+        "D2a",
+        "D2b",
+        "D2c",
+        "D2d",
+        "D2e",
+    }
 }
 
 // String returns a string representation of this enum.
 // Note: in the case of duplicate values only the first alphabetical definition will be choosen.
 func (e DimensionTwo) String() string {
-	switch e {
-	case D2a:
-		return "D2a"
-	case D2b:
-		return "D2b"
-	case D2c:
-		return "D2c"
-	case D2d:
-		return "D2d"
-	case D2e:
-		return "D2e"
-	default:
-		return fmt.Sprintf("UndefinedDimensionTwo:%d", e)
-	}
+    switch e {
+    case D2a:
+        return "D2a"
+    case D2b:
+        return "D2b"
+    case D2c:
+        return "D2c"
+    case D2d:
+        return "D2d"
+    case D2e:
+        return "D2e"
+    default:
+        return fmt.Sprintf("UndefinedDimensionTwo:%d", e)
+    }
 }
 
 // ParseString will return a value as defined in string form.
 func (e DimensionTwo) ParseString(text string) (DimensionTwo, error) {
-	switch text {
-	case "D2a":
-		return D2a, nil
-	case "D2b":
-		return D2b, nil
-	case "D2c":
-		return D2c, nil
-	case "D2d":
-		return D2d, nil
-	case "D2e":
-		return D2e, nil
-	default:
-		return 0, fmt.Errorf("`%s` is not a valid enum of type DimensionTwo", text)
-	}
+    switch text {
+    case "D2a":
+        return D2a, nil
+    case "D2b":
+        return D2b, nil
+    case "D2c":
+        return D2c, nil
+    case "D2d":
+        return D2d, nil
+    case "D2e":
+        return D2e, nil
+    default:
+        return 0, fmt.Errorf("`%s` is not a valid enum of type DimensionTwo", text)
+    }
 }
 
 // MarshalJSON implements the json.Marshaler interface for DimensionTwo.
@@ -217,19 +216,19 @@ func (e DimensionTwo) MarshalJSON() ([]byte, error) {
 func (e *DimensionTwo) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		var err error
-		*e, err = DimensionTwo(0).ParseString(s)
-		return err
+        var err error
+        *e, err = DimensionTwo(0).ParseString(s)
+        return err
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-		*e = DimensionTwo(i)
-		if e.IsValid() {
-			return nil
-		}
-	}
+        *e = DimensionTwo(i)
+        if e.IsValid() {
+            return nil
+        }
+    }
 
-	return fmt.Errorf("unable to unmarshal DimensionTwo from `%v`", data)
+    return fmt.Errorf("unable to unmarshal DimensionTwo from `%v`", data)
 }
 
 // MarshalText implements the encoding.TextMarshaler interface for DimensionTwo.
@@ -239,7 +238,7 @@ func (e DimensionTwo) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for DimensionTwo.
 func (e *DimensionTwo) UnmarshalText(text []byte) error {
-	var err error
+    var err error
 	*e, err = DimensionTwo(0).ParseString(string(text))
 	return err
 }
@@ -255,32 +254,32 @@ func (e *DimensionTwo) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = DimensionTwo(i)
 	} else {
-		*e, err = DimensionTwo(0).ParseString(value.Value)
+	    *e, err = DimensionTwo(0).ParseString(value.Value)
 	}
 	if err != nil {
-		return err
+        return err
 	} else if e.IsValid() {
-		return nil
-	}
-	return fmt.Errorf("unable to unmarshal DimensionTwo from yaml `%s`", value.Value)
+        return nil
+    }
+    return fmt.Errorf("unable to unmarshal DimensionTwo from yaml `%s`", value.Value)
 }
 
 // IsEnum implements an empty function required to implement Enum.
 func (DimensionTwo) IsEnum() {}
 
 var _DimensionThreeValues = []DimensionThree{
-	D3a,
-	D3b,
-	D3c,
-}
+        D3a,
+        D3b,
+        D3c,
+    }
 
 // IsValid returns true if the enum value is, in fact, valid.
 func (e DimensionThree) IsValid() bool {
-	for _, v := range _DimensionThreeValues {
-		if v == e {
-			return true
-		}
-	}
+    for _, v := range _DimensionThreeValues {
+        if v == e {
+            return true
+        }
+    }
 	return false
 }
 
@@ -292,40 +291,40 @@ func (DimensionThree) Values() []DimensionThree {
 // StringValues returns a list of all potential values of this enum as strings.
 // Note: This does not return duplicates.
 func (DimensionThree) StringValues() []string {
-	return []string{
-		"D3a",
-		"D3b",
-		"D3c",
-	}
+    return []string{
+        "D3a",
+        "D3b",
+        "D3c",
+    }
 }
 
 // String returns a string representation of this enum.
 // Note: in the case of duplicate values only the first alphabetical definition will be choosen.
 func (e DimensionThree) String() string {
-	switch e {
-	case D3a:
-		return "D3a"
-	case D3b:
-		return "D3b"
-	case D3c:
-		return "D3c"
-	default:
-		return fmt.Sprintf("UndefinedDimensionThree:%d", e)
-	}
+    switch e {
+    case D3a:
+        return "D3a"
+    case D3b:
+        return "D3b"
+    case D3c:
+        return "D3c"
+    default:
+        return fmt.Sprintf("UndefinedDimensionThree:%d", e)
+    }
 }
 
 // ParseString will return a value as defined in string form.
 func (e DimensionThree) ParseString(text string) (DimensionThree, error) {
-	switch text {
-	case "D3a":
-		return D3a, nil
-	case "D3b":
-		return D3b, nil
-	case "D3c":
-		return D3c, nil
-	default:
-		return 0, fmt.Errorf("`%s` is not a valid enum of type DimensionThree", text)
-	}
+    switch text {
+    case "D3a":
+        return D3a, nil
+    case "D3b":
+        return D3b, nil
+    case "D3c":
+        return D3c, nil
+    default:
+        return 0, fmt.Errorf("`%s` is not a valid enum of type DimensionThree", text)
+    }
 }
 
 // MarshalJSON implements the json.Marshaler interface for DimensionThree.
@@ -337,19 +336,19 @@ func (e DimensionThree) MarshalJSON() ([]byte, error) {
 func (e *DimensionThree) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		var err error
-		*e, err = DimensionThree(0).ParseString(s)
-		return err
+        var err error
+        *e, err = DimensionThree(0).ParseString(s)
+        return err
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-		*e = DimensionThree(i)
-		if e.IsValid() {
-			return nil
-		}
-	}
+        *e = DimensionThree(i)
+        if e.IsValid() {
+            return nil
+        }
+    }
 
-	return fmt.Errorf("unable to unmarshal DimensionThree from `%v`", data)
+    return fmt.Errorf("unable to unmarshal DimensionThree from `%v`", data)
 }
 
 // MarshalText implements the encoding.TextMarshaler interface for DimensionThree.
@@ -359,7 +358,7 @@ func (e DimensionThree) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for DimensionThree.
 func (e *DimensionThree) UnmarshalText(text []byte) error {
-	var err error
+    var err error
 	*e, err = DimensionThree(0).ParseString(string(text))
 	return err
 }
@@ -375,14 +374,14 @@ func (e *DimensionThree) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = DimensionThree(i)
 	} else {
-		*e, err = DimensionThree(0).ParseString(value.Value)
+	    *e, err = DimensionThree(0).ParseString(value.Value)
 	}
 	if err != nil {
-		return err
+        return err
 	} else if e.IsValid() {
-		return nil
-	}
-	return fmt.Errorf("unable to unmarshal DimensionThree from yaml `%s`", value.Value)
+        return nil
+    }
+    return fmt.Errorf("unable to unmarshal DimensionThree from yaml `%s`", value.Value)
 }
 
 // IsEnum implements an empty function required to implement Enum.
