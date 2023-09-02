@@ -1,11 +1,5 @@
 package gen
 
-import (
-	"go/types"
-	"sort"
-	"strings"
-)
-
 type TraitDescs []TraitDesc
 
 func (s TraitDescs) Len() int {
@@ -21,10 +15,9 @@ func (s TraitDescs) Less(i, j int) bool {
 }
 
 type TraitDesc struct {
-	Name          string
-	Type          string
-	PackageImport string
-	Traits        TraitInstances
+	Name    string
+	TypeRef string
+	Traits  TraitInstances
 }
 
 type TraitInstances []TraitInstance
@@ -45,41 +38,14 @@ func (s TraitInstances) Less(i, j int) bool {
 
 type TraitInstance struct {
 	OwningValue  Value
-	VariableName string
-
-	// Includes all the type info.
-	Type types.Type
+	value        string
+	variableName string // optional; will be used if exists.
 }
 
-// PackageImportPath returns the package import path of the underlying type;
-// TODO: at some point we need to be able to resolve conflicts from inconsistent naming.
-func (t TraitInstance) PackageImportPath() string {
-	named, ok := t.Type.(*types.Named)
-	if !ok {
-		return ""
+// Value safely returns a reference to a constant OR an absolute value.
+func (t TraitInstance) Value() string {
+	if len(t.variableName) > 0 && t.variableName != "_" {
+		return t.variableName
 	}
-	return named.Obj().Pkg().Path()
-}
-
-func (t TraitInstance) TypeRef() string {
-	// I don't feel great about this, but some *types.Basic (string) come out as
-	// "untyped something" so I guess we'll just trim that part off...
-	// not sure how else to get the correct type.
-	return strings.TrimPrefix(t.Type.String(), "untyped ")
-}
-
-func traitsFromMap(in map[string]TraitInstances) TraitDescs {
-	result := make(TraitDescs, 0, len(in))
-	for name, traits := range in {
-		sort.Sort(traits)
-		result = append(result, TraitDesc{
-			Name:          name,
-			Type:          traits[0].TypeRef(),
-			PackageImport: traits[0].PackageImportPath(),
-			Traits:        traits,
-		},
-		)
-	}
-	sort.Sort(result)
-	return result
+	return t.value
 }

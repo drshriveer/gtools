@@ -10,8 +10,8 @@ import (
 	"gopkg.in/yaml.v3"
 	"strconv"
 	{{- end}}
-	{{- range $import := $.Imports}}
-	"{{$import}}"
+	{{- range $import := $.Imports.GetActive}}
+	{{$import.Alias}} "{{$import.PkgPath}}"
     {{- end}}
     "fmt"
 )
@@ -27,16 +27,15 @@ var _{{$enumTypeName}}Values = []{{$enumTypeName}}{
 
 // {{$trait.Name}} returns the enum's associated trait of the same name.
 // If no trait exists for the enumeration a default value will be returned.
-func (e {{$enumTypeName}}) {{$trait.Name}}() {{$trait.Type}} {
+func (e {{$enumTypeName}}) {{$trait.Name}}() {{$trait.TypeRef}} {
     switch e {
 	{{- range $instance := $trait.Traits}}
     case {{$instance.OwningValue.Name}}:
-        return {{$instance.VariableName}}
+        return {{$instance.Value}}
     {{- end }}
     }
 
-	var result {{$trait.Type}}
-	return result
+	return *new({{$trait.TypeRef}})
 }
 {{ end }}
 

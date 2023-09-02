@@ -1,9 +1,5 @@
 package gen
 
-import (
-	"strings"
-)
-
 // Values implements sort.Interface. Values must be consistently sorted to
 // keep diffs to a minimum.
 type Values []Value
@@ -45,15 +41,6 @@ type Value struct {
 	Signed       bool
 	IsDeprecated bool
 	Line         int
-}
-
-// TODO: not sure if we should enforce same-line crazies or not.
-func (v Value) HasTrait(name string, lineNo int) (string, bool) {
-	if lineNo != v.Line || v.Name == "" {
-		return "", false
-	}
-	trimmed := strings.TrimPrefix(name, v.Name+"_")
-	return trimmed, len(trimmed) < len(name)
 }
 
 func (v Value) Less(vIn Value) bool {

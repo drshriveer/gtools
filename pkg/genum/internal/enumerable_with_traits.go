@@ -4,32 +4,27 @@ import (
 	stupidTime "time"
 )
 
+type OtherType string
+
 //go:generate genum -types=EnumerableWithTraits,Creatures
 type EnumerableWithTraits int
 
 const (
-	E1, E1_Trait, E1_Timeout = EnumerableWithTraits(iota), "trait 1", 5 * stupidTime.Minute
-	E2, E2_Trait, E2_Timeout = EnumerableWithTraits(iota), "trait 2", 5 * stupidTime.Minute
-	E3, E3_Trait, E3_Timeout = EnumerableWithTraits(iota), "trait 3", 5 * stupidTime.Minute
+	// TODO: Fix this! make duration look nicer.
+	E1, _Trait, _Timeout, _TypedStringTrait = EnumerableWithTraits(iota), "trait 1", 5 * stupidTime.Minute, OtherType("OtherType0")
+	E2, _, _, _                             = EnumerableWithTraits(iota), "trait 2", 1 * stupidTime.Minute, OtherType("OtherType2")
+	E3, _, _, _                             = EnumerableWithTraits(iota), "trait 3", 2 * stupidTime.Minute, OtherType("OtherType3")
 )
 
 type Creatures int
 
 const (
-	NotCreature                             = Creatures(iota)
-	Cat, Cat_NumLegs, Cat_IsMammal          = Creatures(iota), 4, true
-	Dog, Dog_NumLegs, Dog_IsMammal          = Creatures(iota), 4, true
-	Ant, Ant_NumLegs, Ant_IsMammal          = Creatures(iota), 6, false
-	Spider, Spider_NumLegs, Spider_IsMammal = Creatures(iota), 8, false
-	Human, Human_NumLegs, Human_IsMammal    = Creatures(iota), 2, true
-	Feline, Feline_NumLegs, Feline_IsMamal  = Cat, 5, false
-	Feline2                                 = Cat
-)
-
-type CreaturesAlt int
-
-const (
-	NotCreaturesAlt, NumLegs, IsMammal = CreaturesAlt(iota), 0, false
-	CatAlt, _, _                       = CreaturesAlt(iota), 4, true
-	AntAlt, _, _                       = CreaturesAlt(iota), 6, false
+	NotCreature, _NumCreatureLegs, _IsCreatureMammal = Creatures(iota), 0, false
+	Cat, CatLegs, _                                  = Creatures(iota), 4, true
+	Dog, DogLegs, _                                  = Creatures(iota), 4, true
+	Ant, AntLegs, _                                  = Creatures(iota), 6, false
+	Spider, SpiderLegs, _                            = Creatures(iota), 8, false
+	Human, HumanLegs, _                              = Creatures(iota), 2, true
+	Feline, _, _                                     = Cat, 5, false
+	Feline2                                          = Cat
 )

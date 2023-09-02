@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	"github.com/drshriveer/gcommon/pkg/genum/tmpl"
-	"github.com/drshriveer/gcommon/pkg/set"
 )
 
 type Generate struct {
@@ -27,7 +26,7 @@ type Generate struct {
 	// derived:
 	Values  []Values
 	Traits  []TraitDescs
-	Imports []string
+	Imports ImportDescs
 	PkgName string
 }
 
@@ -43,71 +42,122 @@ func (g *Generate) Parse() error {
 		return err
 	}
 
+	if err := g.calcInitialImports(fAST.Imports, pkg); err != nil {
+		return err
+	}
+
 	g.PkgName = pkg.Name()
 	g.Values = make([]Values, len(g.EnumTypeNames))
 	g.Traits = make([]TraitDescs, len(g.EnumTypeNames))
 	pkgScope := pkg.Scope()
-
 	for i, enumType := range g.EnumTypeNames {
 		values := make(Values, 0)
-		traits := make(map[string]TraitInstances)
-		var lastValue Value
-		for _, name := range pkgScope.Names() {
-			// we only care about constants:
-			v, ok := pkgScope.Lookup(name).(*types.Const)
-			if !ok {
-				continue
-			}
-			// we only care about the target enum Type.
-			if v.Type().String() == enumType {
-				value, isUint := constant.Uint64Val(v.Val())
-				toAdd := Value{
-					Name:         name,
-					Value:        value,
-					Signed:       !isUint,
-					IsDeprecated: isDeprecated(fAST, name),
-					Line:         fSet.Position(v.Pos()).Line,
+		traits := make(TraitDescs, 0)
+		for _, decl := range fAST.Decls {
+			switch d := decl.(type) {
+			case *ast.GenDecl:
+				for _, spec := range d.Specs {
+					vSpec, ok := spec.(*ast.ValueSpec)
+					if !ok || len(vSpec.Names) == 0 {
+						continue
+					}
+					vName := vSpec.Names[0].Name
+					v, ok := pkgScope.Lookup(vName).(*types.Const)
+					if !ok || v.Type().String() != enumType {
+						continue
+					}
+					value, isUint := constant.Uint64Val(v.Val())
+					enumValue := Value{
+						Name:         vName,
+						Value:        value,
+						Signed:       !isUint,
+						IsDeprecated: isDeprecated(fAST, vName),
+						Line:         fSet.Position(v.Pos()).Line,
+					}
+					values = append(values, enumValue)
+
+					// Handle traits next:
+					if len(vSpec.Values) > 1 {
+						// if value == 0, create traits and their defaults
+						if value == 0 {
+							for j := 1; j < len(vSpec.Values); j++ {
+								// FIXME: Gavin!! decide if we want to require `_` prefix for traits.
+								name := vSpec.Names[j].Name
+								v, ok := pkgScope.Lookup(name).(*types.Const)
+								if !ok {
+									continue
+								}
+								typeRef := g.Imports.extractTypeRef(v.Type())
+								tDesc := TraitDesc{
+									Name:    strings.TrimPrefix(name, "_"),
+									TypeRef: typeRef,
+									Traits: []TraitInstance{
+										{
+											OwningValue:  enumValue,
+											variableName: name,
+											value:        v.Val().ExactString(),
+										},
+									},
+								}
+								traits = append(traits, tDesc)
+							}
+						} else if len(traits) != len(vSpec.Values)-1 {
+							// FIXME: Gavin!! improve this error message
+							return fmt.Errorf("inconsistent number of traits")
+						} else {
+							for j := 1; j < len(vSpec.Values); j++ {
+								// the code below attempts to evaluate the actual value
+								// in the AST.as a _typed_ variable.
+								xprStr := types.ExprString(vSpec.Values[j])
+								tDesc := traits[j-1]
+								tDesc.Traits = append(tDesc.Traits, TraitInstance{
+									OwningValue:  enumValue,
+									variableName: vSpec.Names[j].Name,
+									value:        xprStr,
+								})
+								sort.Sort(tDesc.Traits)
+								traits[j-1] = tDesc
+							}
+						}
+					}
 				}
-				values = append(values, toAdd)
-				lastValue = toAdd
-			} else if traitName, ok := lastValue.HasTrait(name, fSet.Position(v.Pos()).Line); ok {
-				temp, ok := traits[traitName]
-				if !ok {
-					temp = make(TraitInstances, 0, 1)
-				}
-				temp = append(temp, TraitInstance{
-					OwningValue:  lastValue,
-					VariableName: name,
-					Type:         v.Type(),
-				})
-				traits[traitName] = temp
 			}
 		}
 		sort.Sort(values)
 		warnDuplicates(values, enumType) // detect and warn duplicates
 		g.Values[i] = values
-		g.Traits[i] = traitsFromMap(traits)
+		sort.Sort(traits)
+		g.Traits[i] = traits
 	}
 
-	return g.calcImports()
+	// FIXME: Gavin! maybe check import alias conflicts here and re-assign traits if needed.
+
+	return nil
 }
 
-func (g *Generate) calcImports() error {
-	imports := make(set.Set[string])
-	for _, traitGroup := range g.Traits {
-		for _, traitDesc := range traitGroup {
-			if len(traitDesc.PackageImport) > 0 {
-				imports.Add(traitDesc.PackageImport)
-			}
+func (g *Generate) calcInitialImports(importSpecs []*ast.ImportSpec, pkg *types.Package) error {
+	g.Imports = ImportDescs{
+		currentPackage: pkg,
+		imports:        make(map[string]*ImportDesc, len(importSpecs)),
+	}
+	for _, iSpec := range importSpecs {
+		pkgPath := strings.Trim(iSpec.Path.Value, `"`)
+		g.Imports.imports[pkgPath] = &ImportDesc{
+			Alias:   iSpec.Name.Name,
+			PkgPath: pkgPath,
+			inUse:   false,
 		}
 	}
-
-	// TODO: We can to package validation here i think...
-	// look for conflicting import simple package names....
-	// need to think it through
-
-	g.Imports = imports.Slice()
-	sort.Strings(g.Imports)
+	// FIXME: consider adding json types.
+	// This might be a bit brittle because it requires the template and code
+	// to be in lock step. but it ensures we don't have odd duplicates.
+	// if g.GenJSON {
+	// 	g.Imports.imports["encoding/json"] = &ImportDesc{
+	// 		Alias:   "",
+	// 		PkgPath: "",
+	// 		inUse:   true,
+	// 	}
+	// }
 	return nil
 }
 

@@ -1,11 +1,11 @@
 package tmpl
 
 import (
-	"embed"
-	"html/template"
+	_ "embed"
+	"text/template"
 )
 
-//go:embed *.gotmpl
-var embededFS embed.FS
+//go:embed enumTemplate.gotmpl
+var tmpl string
 
-var EnumTemplate = template.Must(template.ParseFS(embededFS, "enumTemplate.gotmpl"))
+var EnumTemplate = template.Must(template.New("enum").Parse(tmpl))
