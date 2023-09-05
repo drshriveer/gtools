@@ -12,7 +12,7 @@ func TestEnumerableWithTraits(t *testing.T) {
 	generator := gen.Generate{
 		InFile:        "./enumerable_with_traits.go",
 		OutFile:       "./enumerable_with_traits.genum.go",
-		EnumTypeNames: []string{"EnumerableWithTraits"},
+		EnumTypeNames: []string{"Creatures"},
 		GenJSON:       true,
 		GenYAML:       true,
 		GenText:       true,
@@ -21,6 +21,8 @@ func TestEnumerableWithTraits(t *testing.T) {
 	require.NoError(t, generator.Parse())
 	require.NoError(t, generator.Write())
 }
+
+// FIXME!! gavin !! re-enable tests with traits.
 
 //
 // func TestCreatures_Traits(t *testing.T) {

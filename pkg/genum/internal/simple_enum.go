@@ -30,9 +30,9 @@ const (
 // These should just be treated as alternative definitions.
 const (
 	// Deprecated: old value, don't use
-	Enum1Value0Complication1, Enum1Value0Complication2 MyEnum = iota, iota
-	Enum1Value1Complication1                           MyEnum = iota
-	Enum1Value2Complication1                           MyEnum = iota
+	Enum1Value0Complication1 MyEnum = iota
+	Enum1Value1Complication1 MyEnum = iota
+	Enum1Value2Complication1 MyEnum = iota
 )
 
 // MyEnum3 is a simple, well-formed enum with nothing special.

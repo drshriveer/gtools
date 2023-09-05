@@ -162,11 +162,6 @@ func TestMyEnum(t *testing.T) {
 			duplicateDefinition: true,
 		},
 		{
-			enum:                internal.Enum1Value0Complication2,
-			sName:               "Enum1Value0",
-			duplicateDefinition: true,
-		},
-		{
 			enum:  internal.Enum1Value1,
 			sName: "Enum1Value1",
 		},

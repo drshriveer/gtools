@@ -8,11 +8,14 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
+	"log"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 
 	"github.com/drshriveer/gcommon/pkg/genum/tmpl"
+	"github.com/drshriveer/gcommon/pkg/set"
 )
 
 type Generate struct {
@@ -22,6 +25,7 @@ type Generate struct {
 	GenJSON       bool
 	GenYAML       bool
 	GenText       bool
+	DisableTraits bool
 
 	// derived:
 	Values  []Values
@@ -30,6 +34,7 @@ type Generate struct {
 	PkgName string
 }
 
+// Parses the input file and drives the attributes above.
 func (g *Generate) Parse() error {
 	fSet := token.NewFileSet()
 	fAST, err := parser.ParseFile(fSet, g.InFile, nil, parser.ParseComments)
@@ -52,7 +57,6 @@ func (g *Generate) Parse() error {
 	pkgScope := pkg.Scope()
 	for i, enumType := range g.EnumTypeNames {
 		values := make(Values, 0)
-		traits := make(TraitDescs, 0)
 		for _, decl := range fAST.Decls {
 			switch d := decl.(type) {
 			case *ast.GenDecl:
@@ -73,64 +77,51 @@ func (g *Generate) Parse() error {
 						Signed:       !isUint,
 						IsDeprecated: isDeprecated(fAST, vName),
 						Line:         fSet.Position(v.Pos()).Line,
+						astLine:      vSpec,
 					}
 					values = append(values, enumValue)
-
-					// Handle traits next:
-					if len(vSpec.Values) > 1 {
-						// if value == 0, create traits and their defaults
-						if value == 0 {
-							for j := 1; j < len(vSpec.Values); j++ {
-								// FIXME: Gavin!! decide if we want to require `_` prefix for traits.
-								name := vSpec.Names[j].Name
-								v, ok := pkgScope.Lookup(name).(*types.Const)
-								if !ok {
-									continue
-								}
-								typeRef := g.Imports.extractTypeRef(v.Type())
-								tDesc := TraitDesc{
-									Name:    strings.TrimPrefix(name, "_"),
-									TypeRef: typeRef,
-									Traits: []TraitInstance{
-										{
-											OwningValue:  enumValue,
-											variableName: name,
-											value:        v.Val().ExactString(),
-										},
-									},
-								}
-								traits = append(traits, tDesc)
-							}
-						} else if len(traits) != len(vSpec.Values)-1 {
-							// FIXME: Gavin!! improve this error message
-							return fmt.Errorf("inconsistent number of traits")
-						} else {
-							for j := 1; j < len(vSpec.Values); j++ {
-								// the code below attempts to evaluate the actual value
-								// in the AST.as a _typed_ variable.
-								xprStr := types.ExprString(vSpec.Values[j])
-								tDesc := traits[j-1]
-								tDesc.Traits = append(tDesc.Traits, TraitInstance{
-									OwningValue:  enumValue,
-									variableName: vSpec.Names[j].Name,
-									value:        xprStr,
-								})
-								sort.Sort(tDesc.Traits)
-								traits[j-1] = tDesc
-							}
-						}
-					}
 				}
 			}
 		}
 		sort.Sort(values)
-		warnDuplicates(values, enumType) // detect and warn duplicates
 		g.Values[i] = values
+
+		if g.DisableTraits || len(values) == 0 {
+			continue
+		}
+
+		// handle traits next!
+		traits, err := g.extractTraitDescs(enumType, pkgScope, values)
+		if err != nil {
+			return err
+		} else if len(traits) == 0 {
+			traits = processDuplicates(values, traits, enumType)
+			continue
+		}
+
+		for i := 1; i < len(values); i++ {
+			v := values[i]
+			for j := 1; j < len(v.astLine.Values); j++ {
+				// the code below attempts to evaluate the actual value
+				// in the AST.as a _typed_ variable.
+				xprStr := types.ExprString(v.astLine.Values[j])
+				tDesc := traits[j-1]
+				tDesc.Traits = append(tDesc.Traits, TraitInstance{
+					OwningValue:  v,
+					variableName: v.astLine.Names[j].Name,
+					value:        xprStr,
+				})
+				sort.Sort(tDesc.Traits)
+				traits[j-1] = tDesc
+			}
+		}
+
+		traits = processDuplicates(values, traits, enumType) // detect and warn duplicates
 		sort.Sort(traits)
 		g.Traits[i] = traits
 	}
 
-	// FIXME: Gavin! maybe check import alias conflicts here and re-assign traits if needed.
+	// XXX: Consider further import inspection and correction.
 
 	return nil
 }
@@ -148,17 +139,75 @@ func (g *Generate) calcInitialImports(importSpecs []*ast.ImportSpec, pkg *types.
 			inUse:   false,
 		}
 	}
-	// FIXME: consider adding json types.
-	// This might be a bit brittle because it requires the template and code
-	// to be in lock step. but it ensures we don't have odd duplicates.
-	// if g.GenJSON {
-	// 	g.Imports.imports["encoding/json"] = &ImportDesc{
-	// 		Alias:   "",
-	// 		PkgPath: "",
-	// 		inUse:   true,
-	// 	}
-	// }
 	return nil
+}
+
+// extractTraitDefs attempts to extract trait definitions, and does some (minor) validation in the process.
+// TraitDescs come from the first type value of an enum. Generally this is 0, but on occasion it can be
+// a negative value...
+// Note: this expects values to have been sorted.
+func (g *Generate) extractTraitDescs(tName string, pkgScope *types.Scope, values Values) (TraitDescs, error) {
+	if len(values) == 0 {
+		return nil, nil
+	}
+	firstV := values[0]
+	traits := make(TraitDescs, 0, len(firstV.astLine.Values)-1)
+	for j := 1; j < len(firstV.astLine.Values); j++ {
+		name := firstV.astLine.Names[j].Name
+		v, ok := pkgScope.Lookup(name).(*types.Const)
+		if !ok {
+			continue // XXX: consider throwing here.. this is probably an invalid condition.
+		}
+
+		typeRef := g.Imports.extractTypeRef(v.Type())
+		// Trait names can be constants or they can be prefixed with `_`
+		// which makes them private to the package.
+		traitName := strings.TrimPrefix(name, "_")
+		if traitName == "" || traitName == "_" {
+			return nil, fmt.Errorf(
+				"Enum: %s, value: %s (%d) trait %d has no name that can be converted "+
+					"into a trait function; this is a violation of the genum contract for "+
+					"traits which expects the first enum (by number) to define trait names. "+
+					"If this is unexpected, consider setting the DisableTraits falg.",
+				tName, firstV.Name, firstV.Value, j,
+			)
+		}
+		tDesc := TraitDesc{
+			Name:    traitName,
+			TypeRef: typeRef,
+			Traits: []TraitInstance{
+				{
+					OwningValue:  firstV,
+					variableName: name,
+					value:        v.Val().ExactString(),
+				},
+			},
+		}
+		traits = append(traits, tDesc)
+	}
+
+	// now some validation...
+	foundWithValidValues := make(set.Set[uint64], len(values))
+	for _, v := range values {
+		// note: we could do more here by ensuring consistent types
+		// however inconsistent types will fail a compiler after generation anyway
+		// soo... who cares.
+		if len(v.astLine.Values)-1 == len(traits) {
+			foundWithValidValues.Add(v.Value)
+		}
+	}
+
+	for _, v := range values {
+		if !foundWithValidValues.Has(v.Value) && len(v.astLine.Values) > 1 {
+			return nil, fmt.Errorf(
+				"Enum: %s. value: %s (%d) has inconsistent trait defintions. "+
+					"Expected %d traits, found %d without well-defined duplicated value "+
+					"witth expected number of traits.",
+				tName, v.Name, v.Value, len(traits), len(v.astLine.Values)-1)
+		}
+	}
+
+	return traits, nil
 }
 
 func (g *Generate) Write() error {
@@ -174,33 +223,43 @@ func (g *Generate) Write() error {
 	return tmpl.EnumTemplate.Execute(f, g)
 }
 
-func warnDuplicates(values Values, enumTypeName string) {
+// processDuplicates prints duplicate warnings and selects the "primary" value(s) of traits.
+func processDuplicates(values Values, traits TraitDescs, enumTypeName string) TraitDescs {
 	if len(values) == 0 {
-		return
+		return traits
 	}
 
-	var lastVal = values[0].Value
-	var duplicates []string
+	data := make(map[uint64]Values, len(values))
 	for _, v := range values {
-		if lastVal != v.Value {
-			if len(duplicates) > 1 {
-				println(
-					fmt.Sprintf(
-						"[WARN] - Definitions `%v` of `%s` share the same value `%d`. "+
-							"`%s` will be arbitarily chosen as the primary value when stringifying enums. "+
-							"If this is undesireable, please mark values other than the primary Deprecated.",
-						duplicates, enumTypeName, lastVal, duplicates[0],
-					),
-				)
-			}
-			// reset
-			duplicates = nil
-			lastVal = v.Value
+		duplicates, ok := data[v.Value]
+		if ok {
+			duplicates = append(duplicates, v)
+		} else {
+			duplicates = Values{v}
 		}
-		if lastVal == v.Value && !v.IsDeprecated {
-			duplicates = append(duplicates, v.Name)
+		data[v.Value] = duplicates
+	}
+
+	for _, duplicates := range data {
+		primary, safe := duplicates.getPrimary()
+		if safe {
+			continue
+		}
+		// warn about potentially unsafe duplicates.
+		log.Printf("[WARN] - Definitions `%v` of `%s` share the same value `%d`. "+
+			"`%s` will be arbitarily chosen as the primary value when stringifying enums. "+
+			"If this is undesireable, please mark values other than the primary Deprecated.",
+			duplicates.stringList(), enumTypeName, primary.Value, primary.Name)
+
+		// correct any traits.
+		for i, td := range traits {
+			traits[i].Traits = slices.DeleteFunc(td.Traits, func(t TraitInstance) bool {
+				return t.OwningValue.Value == primary.Value && t.OwningValue.Name != primary.Name
+			})
 		}
 	}
+	sort.Sort(traits)
+	return traits
 }
 
 func isDeprecated(fAST *ast.File, name string) bool {

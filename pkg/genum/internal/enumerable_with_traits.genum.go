@@ -175,3 +175,193 @@ func (e *EnumerableWithTraits) UnmarshalYAML(value *yaml.Node) error {
 
 // IsEnum implements an empty function required to implement Enum.
 func (EnumerableWithTraits) IsEnum() {}
+
+var _CreaturesValues = []Creatures{
+	NotCreature,
+	Cat,
+	Dog,
+	Ant,
+	Spider,
+	Human,
+	SeaAnemone,
+}
+
+// IsCreatureMammal returns the enum's associated trait of the same name.
+// If no trait exists for the enumeration a default value will be returned.
+func (e Creatures) IsCreatureMammal() bool {
+	switch e {
+	case NotCreature:
+		return _IsCreatureMammal
+	case Cat:
+		return true
+	case Dog:
+		return true
+	case Ant:
+		return false
+	case Spider:
+		return false
+	case Human:
+		return true
+	}
+
+	return *new(bool)
+}
+
+// NumCreatureLegs returns the enum's associated trait of the same name.
+// If no trait exists for the enumeration a default value will be returned.
+func (e Creatures) NumCreatureLegs() int {
+	switch e {
+	case NotCreature:
+		return _NumCreatureLegs
+	case Cat:
+		return CatLegs
+	case Dog:
+		return DogLegs
+	case Ant:
+		return AntLegs
+	case Spider:
+		return SpiderLegs
+	case Human:
+		return HumanLegs
+	}
+
+	return *new(int)
+}
+
+// IsValid returns true if the enum value is, in fact, valid.
+func (e Creatures) IsValid() bool {
+	for _, v := range _CreaturesValues {
+		if v == e {
+			return true
+		}
+	}
+	return false
+}
+
+// Values returns a list of all potential values of this enum.
+func (Creatures) Values() []Creatures {
+	return slices.Clone(_CreaturesValues)
+}
+
+// StringValues returns a list of all potential values of this enum as strings.
+// Note: This does not return duplicates.
+func (Creatures) StringValues() []string {
+	return []string{
+		"NotCreature",
+		"Cat",
+		"Dog",
+		"Ant",
+		"Spider",
+		"Human",
+		"SeaAnemone",
+	}
+}
+
+// String returns a string representation of this enum.
+// Note: in the case of duplicate values only the first alphabetical definition will be choosen.
+func (e Creatures) String() string {
+	switch e {
+	case NotCreature:
+		return "NotCreature"
+	case Cat:
+		return "Cat"
+	case Dog:
+		return "Dog"
+	case Ant:
+		return "Ant"
+	case Spider:
+		return "Spider"
+	case Human:
+		return "Human"
+	case SeaAnemone:
+		return "SeaAnemone"
+	default:
+		return fmt.Sprintf("UndefinedCreatures:%d", e)
+	}
+}
+
+// ParseString will return a value as defined in string form.
+func (e Creatures) ParseString(text string) (Creatures, error) {
+	switch text {
+	case "NotCreature":
+		return NotCreature, nil
+	case "Cat":
+		return Cat, nil
+	case "Feline":
+		return Feline, nil
+	case "Feline2":
+		return Feline2, nil
+	case "Dog":
+		return Dog, nil
+	case "Ant":
+		return Ant, nil
+	case "Spider":
+		return Spider, nil
+	case "Human":
+		return Human, nil
+	case "SeaAnemone":
+		return SeaAnemone, nil
+	default:
+		return 0, fmt.Errorf("`%s` is not a valid enum of type Creatures", text)
+	}
+}
+
+// MarshalJSON implements the json.Marshaler interface for Creatures.
+func (e Creatures) MarshalJSON() ([]byte, error) {
+	return json.Marshal(e.String())
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface for Creatures.
+func (e *Creatures) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		var err error
+		*e, err = Creatures(0).ParseString(s)
+		return err
+	}
+	var i int
+	if err := json.Unmarshal(data, &i); err == nil {
+		*e = Creatures(i)
+		if e.IsValid() {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unable to unmarshal Creatures from `%v`", data)
+}
+
+// MarshalText implements the encoding.TextMarshaler interface for Creatures.
+func (e Creatures) MarshalText() ([]byte, error) {
+	return []byte(e.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface for Creatures.
+func (e *Creatures) UnmarshalText(text []byte) error {
+	var err error
+	*e, err = Creatures(0).ParseString(string(text))
+	return err
+}
+
+// MarshalYAML implements a YAML Marshaler for Creatures.
+func (e Creatures) MarshalYAML() (any, error) {
+	return e.String(), nil
+}
+
+// UnmarshalYAML implements a YAML Unmarshaler for Creatures.
+func (e *Creatures) UnmarshalYAML(value *yaml.Node) error {
+	i, err := strconv.ParseInt(value.Value, 10, 64)
+	if err == nil {
+		*e = Creatures(i)
+	} else {
+		*e, err = Creatures(0).ParseString(value.Value)
+	}
+	if err != nil {
+		return err
+	} else if e.IsValid() {
+		return nil
+	}
+	return fmt.Errorf("unable to unmarshal Creatures from yaml `%s`", value.Value)
+}
+
+// IsEnum implements an empty function required to implement Enum.
+func (Creatures) IsEnum() {}

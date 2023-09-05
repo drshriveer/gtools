@@ -15,7 +15,6 @@ type ImportDesc struct {
 }
 
 // ImportDescs a collection of import descriptions indexed by package path.
-// FIXME: this may need the concept of "current" package
 type ImportDescs struct {
 	currentPackage *types.Package
 	imports        map[string]*ImportDesc

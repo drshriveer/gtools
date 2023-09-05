@@ -10,7 +10,6 @@ type OtherType string
 type EnumerableWithTraits int
 
 const (
-	// TODO: Fix this! make duration look nicer.
 	E1, _Trait, _Timeout, _TypedStringTrait = EnumerableWithTraits(iota), "trait 1", 5 * stupidTime.Minute, OtherType("OtherType0")
 	E2, _, _, _                             = EnumerableWithTraits(iota), "trait 2", 1 * stupidTime.Minute, OtherType("OtherType2")
 	E3, _, _, _                             = EnumerableWithTraits(iota), "trait 3", 2 * stupidTime.Minute, OtherType("OtherType3")
@@ -27,4 +26,5 @@ const (
 	Human, HumanLegs, _                              = Creatures(iota), 2, true
 	Feline, _, _                                     = Cat, 5, false
 	Feline2                                          = Cat
+	SeaAnemone                                       = Creatures(iota)
 )

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"strings"
@@ -11,12 +12,13 @@ import (
 )
 
 var (
-	typeNames   = flag.String("types", "", "[Required] comma-separated names of types to generate enum code for")
-	inFileArg   = flag.String("in", "", "path to input file (defaults to go:generate context)")
-	outFileName = flag.String("out", "", "name of output file (defaults to go:generate context filename.enum.go)")
-	genJSON     = flag.Bool("json", true, "generate json marshal methods (default true)")
-	genYAML     = flag.Bool("yaml", true, "generate yaml marshal methods (default true)")
-	genText     = flag.Bool("text", true, "generate text marshal methods (default true)")
+	typeNames     = flag.String("types", "", "[Required] comma-separated names of types to generate enum code for")
+	inFileArg     = flag.String("in", "", "path to input file (defaults to go:generate context)")
+	outFileName   = flag.String("out", "", "name of output file (defaults to go:generate context filename.enum.go)")
+	genJSON       = flag.Bool("json", true, "generate json marshal methods (default true)")
+	genYAML       = flag.Bool("yaml", true, "generate yaml marshal methods (default true)")
+	genText       = flag.Bool("text", true, "generate text marshal methods (default true)")
+	disableTraits = flag.Bool("disableTraits", false, "disable trait syntax inspection (default false)")
 )
 
 func main() {
@@ -52,13 +54,14 @@ func main() {
 		GenJSON:       *genJSON,
 		GenYAML:       *genYAML,
 		GenText:       *genText,
+		DisableTraits: *disableTraits,
 	}
 
 	if err := g.Parse(); err != nil {
-		panic(err)
+		log.Fatalf("parsing failed: %+v", err)
 	}
 
 	if err := g.Write(); err != nil {
-		panic(err)
+		log.Fatalf("writing failed: %+v", err)
 	}
 }
