@@ -11,9 +11,24 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/drshriveer/gcommon/pkg/genum"
+	"github.com/drshriveer/gcommon/pkg/genum/gen"
 	"github.com/drshriveer/gcommon/pkg/genum/internal"
 	"github.com/drshriveer/gcommon/pkg/rutils"
 )
+
+func TestSimpleEnumGeneration(t *testing.T) {
+	generator := gen.Generate{
+		InFile:        "./simple_enum.go",
+		OutFile:       "./simple_enum.genum.go",
+		EnumTypeNames: []string{"MyEnum", "MyEnum2", "MyEnum3"},
+		GenJSON:       true,
+		GenYAML:       true,
+		GenText:       true,
+	}
+
+	require.NoError(t, generator.Parse())
+	// require.NoError(t, generator.Write())
+}
 
 func TestImplementsEnumInterface(t *testing.T) {
 	assert.Implements(t, (*genum.Enum)(nil), internal.Enum1Value0)

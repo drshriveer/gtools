@@ -248,7 +248,8 @@ func processDuplicates(values Values, traits TraitDescs, enumTypeName string) Tr
 		// warn about potentially unsafe duplicates.
 		log.Printf("[WARN] - Definitions `%v` of `%s` share the same value `%d`. "+
 			"`%s` will be arbitarily chosen as the primary value when stringifying enums. "+
-			"If this is undesireable, please mark values other than the primary Deprecated.",
+			"If this is undesireable, please mark values other than the intented primary "+
+			"as Deprecated.",
 			duplicates.stringList(), enumTypeName, primary.Value, primary.Name)
 
 		// correct any traits.

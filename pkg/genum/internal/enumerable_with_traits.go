@@ -1,12 +1,13 @@
 package internal
 
+//go:generate genum -types=EnumerableWithTraits,Creatures
+
 import (
 	stupidTime "time"
 )
 
 type OtherType string
 
-//go:generate genum -types=EnumerableWithTraits,Creatures
 type EnumerableWithTraits int
 
 const (

@@ -1,7 +1,6 @@
 package internal
 
 //go:generate genum -types=MyEnum,MyEnum2,MyEnum3
-//go:generate
 
 // MyEnum is a mess of a definition;
 // - multiple constants resolve to the same value
