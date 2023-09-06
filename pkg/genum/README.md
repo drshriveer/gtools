@@ -54,6 +54,11 @@ const (
 )
 ```
 
+- Define the enum (`Creatures` above) in a file (e.g. `filename.go`)
+- Add the generate directive: `//go:generate genum -types=Creatures`.
+- Run the `go generate` command.
+- Code will be generated and written to file `<filanme>.genum.go` in the same package.
+
 ###### Traits
 
 Traits tie other constant values to an enum values. 
@@ -116,3 +121,6 @@ Usage of ./bin/genum:
 1. Enum definitions must be in a single file.
 2. Currently no string transformation support.
 3. [Duplicate Values](#duplicate-values) can cause some issues; prefer not to use them. 
+
+### TODO: 
+- consider making traits explicitly defined in comments or as input value. 
