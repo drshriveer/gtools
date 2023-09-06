@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"path"
@@ -28,24 +27,21 @@ func main() {
 	pwd := os.Getenv("PWD")
 	inFile := path.Join(pwd, gofile)
 	if len(gofile) == 0 && len(*inFileArg) == 0 {
-		println("this command should be run in a go:generate context or with -in file set")
-		os.Exit(2)
+		log.Fatal("this command should be run in a go:generate context or with -in file set")
 	} else if len(gofile) == 0 {
 		inFile = inFile
 	}
 
 	outFile := path.Join(pwd, strings.TrimSuffix(gofile, ".go")+".genum.go")
 	if len(gofile) == 0 && len(*outFileName) == 0 {
-		println("this command should be run in a go:generate context or with -out file set")
-		os.Exit(2)
+		log.Fatal("this command should be run in a go:generate context or with -out file set")
 	} else if len(gofile) == 0 {
 		outFile = path.Join(path.Dir(inFile), *outFileName)
 	}
 	if len(*typeNames) == 0 {
-		println("type is required")
-		os.Exit(2)
+		log.Fatal("type is required")
 	}
-	println(fmt.Sprintf("genum: %s::%s => %s", inFile, *typeNames, outFile))
+	log.Printf("genum: %s::%s => %s", inFile, *typeNames, outFile)
 
 	g := gen.Generate{
 		InFile:        inFile,

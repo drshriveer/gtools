@@ -27,7 +27,6 @@ func TestSimpleEnumGeneration(t *testing.T) {
 	}
 
 	require.NoError(t, generator.Parse())
-	// require.NoError(t, generator.Write())
 }
 
 func TestImplementsEnumInterface(t *testing.T) {

@@ -199,6 +199,13 @@ func (g *Generate) extractTraitDescs(tName string, pkgScope *types.Scope, values
 
 	for _, v := range values {
 		if !foundWithValidValues.Has(v.Value) && len(v.astLine.Values) > 1 {
+			if len(traits) == 0 {
+				return nil, fmt.Errorf(
+					"Enum: %s. value: %s (%d) has invalid trait defintions; were trait names defined?. "+
+						"Expected %d traits, found %d without well-defined duplicated value "+
+						"witth expected number of traits.",
+					tName, v.Name, v.Value, len(traits), len(v.astLine.Values)-1)
+			}
 			return nil, fmt.Errorf(
 				"Enum: %s. value: %s (%d) has inconsistent trait defintions. "+
 					"Expected %d traits, found %d without well-defined duplicated value "+
