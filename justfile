@@ -1,11 +1,15 @@
 GO_LINT_VERSION := '1.53.3'
 PKG := `go list -m`
 PKG_ROOT := `pwd`
+MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
 export GOBIN := PKG_ROOT + "/bin"
 
+tidy-all:
+    {{ MODS }} | xargs -L1 go mod tidy -C
+
 test:
-    @go test --race ./...
+    @go test --race ./gconfig/...
 
 check: check-format lint
 
@@ -46,4 +50,4 @@ generate: _tools-generate
     @go generate ./...
 
 _tools-generate:
-    @go install github.com/drshriveer/gcommon/pkg/genum/genum
+    @go install github.com/drshriveer/gtools/pkg/genum/genum

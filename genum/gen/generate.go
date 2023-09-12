@@ -1,0 +1,292 @@
+package gen
+
+import (
+	"fmt"
+	"go/ast"
+	"go/constant"
+	"go/importer"
+	"go/parser"
+	"go/token"
+	"go/types"
+	"log"
+	"os"
+	"slices"
+	"sort"
+	"strings"
+
+	"github.com/drshriveer/gtools/set"
+
+	"github.com/drshriveer/gtools/genum/tmpl"
+)
+
+type Generate struct {
+	InFile        string
+	OutFile       string
+	EnumTypeNames []string
+	GenJSON       bool
+	GenYAML       bool
+	GenText       bool
+	DisableTraits bool
+
+	// derived:
+	Values  []Values
+	Traits  []TraitDescs
+	Imports ImportDescs
+	PkgName string
+}
+
+// Parses the input file and drives the attributes above.
+func (g *Generate) Parse() error {
+	fSet := token.NewFileSet()
+	fAST, err := parser.ParseFile(fSet, g.InFile, nil, parser.ParseComments)
+	if err != nil {
+		return err
+	}
+	conf := types.Config{Importer: importer.Default()}
+	pkg, err := conf.Check("", fSet, []*ast.File{fAST}, nil)
+	if err != nil {
+		return err
+	}
+
+	if err := g.calcInitialImports(fAST.Imports, pkg); err != nil {
+		return err
+	}
+
+	g.PkgName = pkg.Name()
+	g.Values = make([]Values, len(g.EnumTypeNames))
+	g.Traits = make([]TraitDescs, len(g.EnumTypeNames))
+	pkgScope := pkg.Scope()
+	for i, enumType := range g.EnumTypeNames {
+		values := make(Values, 0)
+		for _, decl := range fAST.Decls {
+			switch d := decl.(type) {
+			case *ast.GenDecl:
+				for _, spec := range d.Specs {
+					vSpec, ok := spec.(*ast.ValueSpec)
+					if !ok || len(vSpec.Names) == 0 {
+						continue
+					}
+					vName := vSpec.Names[0].Name
+					v, ok := pkgScope.Lookup(vName).(*types.Const)
+					if !ok || v.Type().String() != enumType {
+						continue
+					}
+					value, isUint := constant.Uint64Val(v.Val())
+					enumValue := Value{
+						Name:         vName,
+						Value:        value,
+						Signed:       !isUint,
+						IsDeprecated: isDeprecated(fAST, vName),
+						Line:         fSet.Position(v.Pos()).Line,
+						astLine:      vSpec,
+					}
+					values = append(values, enumValue)
+				}
+			}
+		}
+		sort.Sort(values)
+		g.Values[i] = values
+
+		if g.DisableTraits || len(values) == 0 {
+			continue
+		}
+
+		// handle traits next!
+		traits, err := g.extractTraitDescs(enumType, pkgScope, values)
+		if err != nil {
+			return err
+		} else if len(traits) == 0 {
+			traits = processDuplicates(values, traits, enumType)
+			continue
+		}
+
+		for i := 1; i < len(values); i++ {
+			v := values[i]
+			for j := 1; j < len(v.astLine.Values); j++ {
+				// the code below attempts to evaluate the actual value
+				// in the AST.as a _typed_ variable.
+				xprStr := types.ExprString(v.astLine.Values[j])
+				tDesc := traits[j-1]
+				tDesc.Traits = append(tDesc.Traits, TraitInstance{
+					OwningValue:  v,
+					variableName: v.astLine.Names[j].Name,
+					value:        xprStr,
+				})
+				sort.Sort(tDesc.Traits)
+				traits[j-1] = tDesc
+			}
+		}
+
+		traits = processDuplicates(values, traits, enumType) // detect and warn duplicates
+		sort.Sort(traits)
+		g.Traits[i] = traits
+	}
+
+	// XXX: Consider further import inspection and correction.
+
+	return nil
+}
+
+func (g *Generate) calcInitialImports(importSpecs []*ast.ImportSpec, pkg *types.Package) error {
+	g.Imports = ImportDescs{
+		currentPackage: pkg,
+		imports:        make(map[string]*ImportDesc, len(importSpecs)),
+	}
+	for _, iSpec := range importSpecs {
+		pkgPath := strings.Trim(iSpec.Path.Value, `"`)
+		g.Imports.imports[pkgPath] = &ImportDesc{
+			Alias:   iSpec.Name.Name,
+			PkgPath: pkgPath,
+			inUse:   false,
+		}
+	}
+	return nil
+}
+
+// extractTraitDefs attempts to extract trait definitions, and does some (minor) validation in the process.
+// TraitDescs come from the first type value of an enum. Generally this is 0, but on occasion it can be
+// a negative value...
+// Note: this expects values to have been sorted.
+func (g *Generate) extractTraitDescs(tName string, pkgScope *types.Scope, values Values) (TraitDescs, error) {
+	if len(values) == 0 {
+		return nil, nil
+	}
+	firstV := values[0]
+	traits := make(TraitDescs, 0, len(firstV.astLine.Values)-1)
+	for j := 1; j < len(firstV.astLine.Values); j++ {
+		name := firstV.astLine.Names[j].Name
+		v, ok := pkgScope.Lookup(name).(*types.Const)
+		if !ok {
+			continue // XXX: consider throwing here.. this is probably an invalid condition.
+		}
+
+		typeRef := g.Imports.extractTypeRef(v.Type())
+		// Trait names can be constants or they can be prefixed with `_`
+		// which makes them private to the package.
+		traitName := strings.TrimPrefix(name, "_")
+		if traitName == "" || traitName == "_" {
+			return nil, fmt.Errorf(
+				"Enum: %s, value: %s (%d) trait %d has no name that can be converted "+
+					"into a trait function; this is a violation of the genum contract for "+
+					"traits which expects the first enum (by number) to define trait names. "+
+					"If this is unexpected, consider setting the DisableTraits falg.",
+				tName, firstV.Name, firstV.Value, j,
+			)
+		}
+		tDesc := TraitDesc{
+			Name:    traitName,
+			TypeRef: typeRef,
+			Traits: []TraitInstance{
+				{
+					OwningValue:  firstV,
+					variableName: name,
+					value:        v.Val().ExactString(),
+				},
+			},
+		}
+		traits = append(traits, tDesc)
+	}
+
+	// now some validation...
+	foundWithValidValues := make(set.Set[uint64], len(values))
+	for _, v := range values {
+		// note: we could do more here by ensuring consistent types
+		// however inconsistent types will fail a compiler after generation anyway
+		// soo... who cares.
+		if len(v.astLine.Values)-1 == len(traits) {
+			foundWithValidValues.Add(v.Value)
+		}
+	}
+
+	for _, v := range values {
+		if !foundWithValidValues.Has(v.Value) && len(v.astLine.Values) > 1 {
+			if len(traits) == 0 {
+				return nil, fmt.Errorf(
+					"Enum: %s. value: %s (%d) has invalid trait defintions; were trait names defined?. "+
+						"Expected %d traits, found %d without well-defined duplicated value "+
+						"witth expected number of traits.",
+					tName, v.Name, v.Value, len(traits), len(v.astLine.Values)-1)
+			}
+			return nil, fmt.Errorf(
+				"Enum: %s. value: %s (%d) has inconsistent trait defintions. "+
+					"Expected %d traits, found %d without well-defined duplicated value "+
+					"witth expected number of traits.",
+				tName, v.Name, v.Value, len(traits), len(v.astLine.Values)-1)
+		}
+	}
+
+	return traits, nil
+}
+
+func (g *Generate) Write() error {
+	if len(g.Values) == 0 {
+		return fmt.Errorf("no values to generate; was generate called?")
+	}
+	f, err := os.OpenFile(g.OutFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	return tmpl.EnumTemplate.Execute(f, g)
+}
+
+// processDuplicates prints duplicate warnings and selects the "primary" value(s) of traits.
+func processDuplicates(values Values, traits TraitDescs, enumTypeName string) TraitDescs {
+	if len(values) == 0 {
+		return traits
+	}
+
+	data := make(map[uint64]Values, len(values))
+	for _, v := range values {
+		duplicates, ok := data[v.Value]
+		if ok {
+			duplicates = append(duplicates, v)
+		} else {
+			duplicates = Values{v}
+		}
+		data[v.Value] = duplicates
+	}
+
+	for _, duplicates := range data {
+		primary, safe := duplicates.getPrimary()
+		if safe {
+			continue
+		}
+		// warn about potentially unsafe duplicates.
+		log.Printf("[WARN] - Definitions `%v` of `%s` share the same value `%d`. "+
+			"`%s` will be arbitarily chosen as the primary value when stringifying enums. "+
+			"If this is undesireable, please mark values other than the intented primary "+
+			"as Deprecated.",
+			duplicates.stringList(), enumTypeName, primary.Value, primary.Name)
+
+		// correct any traits.
+		for i, td := range traits {
+			traits[i].Traits = slices.DeleteFunc(td.Traits, func(t TraitInstance) bool {
+				return t.OwningValue.Value == primary.Value && t.OwningValue.Name != primary.Name
+			})
+		}
+	}
+	sort.Sort(traits)
+	return traits
+}
+
+func isDeprecated(fAST *ast.File, name string) bool {
+	obj := fAST.Scope.Lookup(name)
+	spec, ok := obj.Decl.(*ast.ValueSpec)
+	if !ok {
+		return false
+	}
+	if spec.Doc == nil {
+		return false
+	}
+
+	for _, comment := range spec.Doc.List {
+		trimmed := strings.TrimPrefix(comment.Text, "//")
+		trimmed = strings.TrimSpace(trimmed)
+		if strings.HasPrefix(trimmed, "Deprecated:") {
+			return true
+		}
+	}
+	return false
+}
