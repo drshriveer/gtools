@@ -1,9 +1,12 @@
 go 1.21.0
 
 use (
+	./gconfig
 	./genum
 	./gerrors
+	./gsync
 	./math
+	./log
 	./rutils
 	./set
 )

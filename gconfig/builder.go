@@ -8,6 +8,10 @@ import (
 	"io/fs"
 	"reflect"
 
+	"gopkg.in/yaml.v3"
+
+	"github.com/puzpuzpuz/xsync/v2"
+
 	"github.com/drshriveer/gtools/genum"
 	"github.com/drshriveer/gtools/gerrors"
 	"github.com/drshriveer/gtools/rutils"
@@ -73,11 +77,11 @@ func (d *Dimension) initFlag() error {
 	return nil
 }
 
-func (d *Dimension) get() (genum.Enum, error) {
+func (d *Dimension) get() genum.Enum {
 	if !flag.Parsed() {
 		flag.Parse()
 	}
-	return d.parsed, nil
+	return d.parsed
 }
 
 type Builder struct {
@@ -133,7 +137,7 @@ func (b *Builder) FromBytes(bytes []byte) (*Config, error) {
 
 	dims := make(map[reflect.Type]genum.Enum, len(b.Dimensions))
 	for _, d := range b.Dimensions {
-		dims[reflect.TypeOf(d.Default)] = d.parsed
+		dims[reflect.TypeOf(d.Default)] = d.get()
 	}
 
 	cfg := &Config{
@@ -214,7 +218,7 @@ func reduce(in map[string]any, dimensions []Dimension, dIndex int) (any, error) 
 	// 1. This is just a completely invalid config
 	// 2. These keys are meant to be part of a map... i.e. intentionally missing properties.
 	// ...going with #1.
-	keys, hasDefault = keySet(in)
+	keys, _ = keySet(in)
 	return nil, ErrFailedParsing.Include(
 		"broken dimension key! %T dimensions identified around keys %s, but no `default` or `%s` value found.",
 		dimension.Default, keys.Slice(), dimension.parsed)

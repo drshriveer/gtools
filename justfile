@@ -1,37 +1,36 @@
 GO_LINT_VERSION := '1.53.3'
-PKG := `go list -m`
+PKG := 'github.com/drshriveer/gtools'
 PKG_ROOT := `pwd`
 MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
 export GOBIN := PKG_ROOT + "/bin"
 
-tidy-all:
-    {{ MODS }} | xargs -L1 go mod tidy -C
+tidy target='all':
+    @just _invokeMod "go mod tidy -C {}" "{{ target }}"
 
-test:
-    @go test --race ./gconfig/...
+test target='all':
+    @just _invokeMod "go test --race {}" "{{ target }}"
 
 check: check-format lint
 
 # Format
 format: _tools-format
     @just --fmt --unstable
-    @goimports -l -w -local {{ PKG }} {{ PKG_ROOT }}/pkg
+    @goimports -l -w -local {{ PKG }} {{ PKG_ROOT }}
 
 check-format: _tools-format
     @just --check --fmt --unstable
-    @goimports -l -d -local {{ PKG }} {{ PKG_ROOT }}/pkg
-    @echo "Format Check Successful!"
+    @goimports -l -d -local {{ PKG }} {{ PKG_ROOT }}
 
 _tools-format:
     @go install golang.org/x/tools/cmd/goimports@latest
 
 # Lint
-lint: _tools-linter
-    @golangci-lint run ./...
+lint target='all': _tools-linter
+    @just _invokeMod "golangci-lint run {}" "{{ target }}"
 
-lint-fix: _tools-linter
-    @golangci-lint run -fix ./...
+lint-fix target='all': _tools-linter
+    @just _invokeMod "golangci-lint run -fix {}" "{{ target }}"
 
 _tools-linter:
     #!/usr/bin/env sh
@@ -51,3 +50,14 @@ generate: _tools-generate
 
 _tools-generate:
     @go install github.com/drshriveer/gtools/pkg/genum/genum
+
+# invokeMod invokes a command on a module target or all the input command must include
+
+# a the placeholder `{}` which is the path to the correct module.
+_invokeMod cmd target='all':
+    #!/usr/bin/env sh
+    if [ "{{ target }}" = "all" ]; then
+      xargs -L1 -t -I {} {{ cmd }} <<< "{{ MODS }}"
+     else
+      xargs -L1 -t -I {} {{ cmd }} <<< "{{ target }}"
+    fi

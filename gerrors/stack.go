@@ -52,7 +52,7 @@ func (e StackElem) Source() (packageName string, typeName string, funcName strin
 // Metric returns a metric-safe(?) string of the source info.
 func (e StackElem) Metric() string {
 	pkg, tName, fName := e.Source()
-	strings.TrimPrefix(tName, "*") // remove pointer indicator
+	tName = strings.TrimPrefix(tName, "*") // remove pointer indicator
 	return convertToMetricNode(pkg, tName, fName)
 }
 

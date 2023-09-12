@@ -1,0 +1,31 @@
+run:
+  skip-files:
+    - ".*/libexec/src/slices/sort.go$" # somehow slices (an internal library) fails.
+  allow-parallel-runners: true
+  go: '1.21'
+linters:
+  enable:
+    # defauls:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    # added:
+    - bodyclose
+    - contextcheck
+    - depguard
+    - dupl
+    - errname
+    - exhaustive
+    - exhaustruct # MAYBE NOT THIS ONE
+    - exportloopref
+    - gocheckcompilerdirectives
+    - gocritic # MAYBE NOT THIS ONE
+    - godot
+    - goimports
+
+linters-settings:
+  goimports:
+    local-prefixes: github.com/drshriveer/gtools
