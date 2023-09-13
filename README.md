@@ -17,7 +17,7 @@ Each tool has its own readme.
 ## Contributing:
 
 ## TODO:
-- Add linter!
 - Add github actions
 - complete gerrors
-- split into independent modules (and consider flattening out the `/pkg/` directory)
+- faster set impl + tests
+- logger test
