@@ -39,8 +39,8 @@ _tools-linter:
     fi
 
 # Runs `go generate` on all go modules or a single specified target.
-generate: _tools-generate
-    @go generate ./...
+generate target='all': _tools-generate
+    @just _invokeMod "go generate -C {} ./..." "{{ target }}"
 
 _tools-generate:
     @go install github.com/drshriveer/gtools/genum/genum@{{ GENUM_VERSION }}
