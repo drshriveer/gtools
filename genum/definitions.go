@@ -1,14 +1,8 @@
 package genum
 
 import (
-	"github.com/drshriveer/gtools/gerrors"
 	"github.com/drshriveer/gtools/math"
 )
-
-var ErrFailedParsing gerrors.Factory = &gerrors.GError{
-	Name:    "ErrFailedParsing",
-	Message: "failed to read or parse configuration",
-}
 
 // EnumLike is a generic type for something that looks like an enum.
 type EnumLike math.Integer

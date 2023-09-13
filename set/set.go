@@ -7,6 +7,7 @@ var setVal = struct{}{}
 // 2. benchmark especially for Add(singleItem T, moreItems T) optimization.
 // 3. consider separating them all... Add(single) AddAll(multi), Has, HasAll, HasAny
 
+// Set is a generic se type.
 type Set[T comparable] map[T]struct{}
 
 // Make creates a set.
@@ -50,12 +51,11 @@ func (s *Set[T]) Add(items ...T) bool {
 	return added
 }
 
-// Add returns true if any were added.
+// AddSet adds an input set to the current set and returns true if any were added.
 func (s *Set[T]) AddSet(items Set[T]) bool {
 	if s == nil {
 		*s = make(Set[T])
 	}
-	// TODO: benchmark variations of this.
 	added := false
 	for item := range items {
 		if !added {
@@ -85,8 +85,24 @@ func (s *Set[T]) Remove(items ...T) bool {
 	return removed
 }
 
-// Remove returns true if ALL items are contained.
+// RemoveSet removes the input set from the current set and returns true if any items were removed.
+func (s *Set[T]) RemoveSet(items Set[T]) bool {
+	removed := false
+	for item := range items {
+		if !removed {
+			if _, ok := (*s)[item]; ok {
+				removed = true
+			}
+		}
+		delete(*s, item)
+	}
+
+	return removed
+}
+
+// Has returns true if ALL items are contained.
 func (s *Set[T]) Has(items ...T) bool {
+	// TODO: use more efficient variation of this!
 	if s == nil || len(*s) < len(items) {
 		return false
 	}

@@ -1,5 +1,4 @@
 GO_LINT_VERSION := '1.53.3'
-PKG := 'github.com/drshriveer/gtools'
 PKG_ROOT := `pwd`
 MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
@@ -11,26 +10,14 @@ tidy target='all':
 test target='all':
     @just _invokeMod "go test --race {}" "{{ target }}"
 
-check: check-format lint
-
-# Format
-format: _tools-format
-    @just --fmt --unstable
-    @goimports -l -w -local {{ PKG }} {{ PKG_ROOT }}
-
-check-format: _tools-format
-    @just --check --fmt --unstable
-    @goimports -l -d -local {{ PKG }} {{ PKG_ROOT }}
-
-_tools-format:
-    @go install golang.org/x/tools/cmd/goimports@latest
+check: lint test
 
 # Lint
 lint target='all': _tools-linter
     @just _invokeMod "golangci-lint run {}" "{{ target }}"
 
-lint-fix target='all': _tools-linter
-    @just _invokeMod "golangci-lint run -fix {}" "{{ target }}"
+fix target='all': _tools-linter
+    @just _invokeMod "golangci-lint run --fix {}" "{{ target }}"
 
 _tools-linter:
     #!/usr/bin/env sh

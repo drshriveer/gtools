@@ -9,7 +9,7 @@ import (
 // A Stack represents each line of a Stack trace.
 type Stack []StackElem
 
-// String returns a formatted sting with all
+// String returns a formatted sting with all.
 func (s Stack) String() string {
 	sb := strings.Builder{}
 	for _, e := range s {
@@ -56,11 +56,9 @@ func (e StackElem) Metric() string {
 	return convertToMetricNode(pkg, tName, fName)
 }
 
-func (StackElem) isSource() {}
-
 func makeStack(depth, skip int) *Stack {
 	pcs := make([]uintptr, depth)
-	n := runtime.Callers(skip, pcs[:])
+	n := runtime.Callers(skip, pcs)
 	pcs = pcs[0:n] // drop unwritten elements.
 	stack := make(Stack, n)
 	for i := range stack {

@@ -90,7 +90,7 @@ func BenchmarkGError_WithStack(b *testing.B) {
 }
 
 // BenchmarkGError_Raw-10           	135645453	         8.868 ns/op
-// BenchmarkGError_Raw-10           	41166675	        28.91 ns/op <-- with pointer
+// BenchmarkGError_Raw-10           	41166675	        28.91 ns/op <-- with pointer.
 func BenchmarkGError_Raw(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = ErrMyError1.Raw()

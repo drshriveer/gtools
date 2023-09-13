@@ -21,11 +21,14 @@ func init() {
 	close(closedChan)
 }
 
+// SelectableWaitGroup is a wait group that can be used in a select block!
+// you _must_ use the `NewSelectableWaitGroup` function to construct one.
 type SelectableWaitGroup struct {
 	count atomic.Int64
 	wChan atomic.Pointer[chan struct{}]
 }
 
+// NewSelectableWaitGroup creates a new SelectableWaitGroup.
 func NewSelectableWaitGroup() *SelectableWaitGroup {
 	wg := &SelectableWaitGroup{
 		count: atomic.Int64{},
@@ -45,6 +48,7 @@ func (wg *SelectableWaitGroup) Dec() int {
 	return wg.Add(-1)
 }
 
+// Add can be used to add or subtract a number from the wait group.
 func (wg *SelectableWaitGroup) Add(delta int) int {
 	newV := wg.count.Add(int64(delta))
 	if newV == 0 {
@@ -62,10 +66,12 @@ func (wg *SelectableWaitGroup) Add(delta int) int {
 	return int(newV)
 }
 
+// Count returns current count of the wait group.
 func (wg *SelectableWaitGroup) Count() int {
 	return int(wg.count.Load())
 }
 
+// Wait returns a channel to use in a select block when the wait group reaches zero.
 func (wg *SelectableWaitGroup) Wait() <-chan struct{} {
 	// there is a race between updating the counter and updating the channel
 	// .. so to make sure we have a consistent state check that we don't have a > zero count

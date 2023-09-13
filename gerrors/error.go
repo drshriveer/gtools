@@ -69,11 +69,7 @@ type Factory interface {
 	Convert(err error) GError
 }
 
-type MonitoredError struct {
-	Count       int
-	AlertSpaces []string
-}
-
+// ErrorInterface is the basic advanced-error interface.
 type ErrorInterface interface {
 	// humm... how do I want to re-implement this to make it better
 	// than before?
@@ -101,6 +97,7 @@ type ErrorInterface interface {
 	Unwrap() error // XXX: what would we unwrap to? a separate unknown source? a factory?
 }
 
+// GError is the error type which (currently) may represent an actual error or a factory.
 type GError struct {
 	// The things that have to be equal:
 	Name    string
@@ -120,7 +117,7 @@ type GError struct {
 	SrcFactory *GError
 }
 
-// implements the "error" interface.
+// Error implements the "error" interface.
 func (e GError) Error() string {
 	// FIXME:
 	//   - only include elements if they're present...
@@ -129,6 +126,7 @@ func (e GError) Error() string {
 		e.Name, e.MTag, e.Source, e.Message, e.ExtMessage, e.Stack)
 }
 
+// Is implements the required errors.Is interface.
 func (e GError) Is(err error) bool {
 	gerr, ok := err.(GError)
 	if !ok {
@@ -136,22 +134,26 @@ func (e GError) Is(err error) bool {
 	}
 	// this is a possiblity
 	// return e.SrcFactory == err.SrcFactory
-	// or whatever critera
+	// or whatever criteria
 	return e.Message == gerr.Message && e.Name == gerr.Name
 }
 
+// WithStack is a factory method for cloning the base error with a full sack trace.
 func (e *GError) WithStack() GError {
 	return e.clone(defaultStack)
 }
 
+// WithSource is a factory method for cloning the base error and adding source info only (a limited stack trace).
 func (e *GError) WithSource() GError {
 	return e.clone(sourceOnly)
 }
 
+// Raw clones the base error but does not add any tracing info.
 func (e *GError) Raw() GError {
 	return e.clone(noStack)
 }
 
+// Merge clones the base errors but overwrites fields passed in.
 func (e *GError) Merge(gError GError) GError {
 	clone := e.clone(noStack)
 	if len(gError.Name) > 0 {
@@ -176,12 +178,14 @@ func (e *GError) Merge(gError GError) GError {
 	return clone
 }
 
+// Include clones the base error and adds an extended message.
 func (e *GError) Include(format string, elems ...any) GError {
 	clone := e.clone(defaultStack)
 	clone.ExtMessage = fmt.Sprintf(format, elems...)
 	return clone
 }
 
+// DInclude clones the base error and adds an extended message and metric tag.
 func (e *GError) DInclude(mTag string, format string, elems ...any) GError {
 	clone := e.clone(defaultStack)
 	clone.ExtMessage = fmt.Sprintf(format, elems...)
@@ -189,6 +193,7 @@ func (e *GError) DInclude(mTag string, format string, elems ...any) GError {
 	return clone
 }
 
+// MetricTag clones the base error and adds a metric tag.
 func (e *GError) MetricTag(mTag string) GError {
 	clone := e.clone(defaultStack)
 	clone.MTag = mTag
@@ -213,6 +218,7 @@ func (e *GError) clone(st stackType) GError {
 	return clone
 }
 
+// Convert attempts translates a non-gerror of an unknown kind into this base error.
 func (e *GError) Convert(err error) GError {
 	switch v := err.(type) {
 	case GError:
@@ -227,6 +233,7 @@ func (e *GError) Convert(err error) GError {
 	return clone
 }
 
+// Unwrap is for unwrapping errors to get to the source.
 func (e *GError) Unwrap() error {
 	if e.SrcFactory != nil {
 		return e.SrcFactory
@@ -234,6 +241,7 @@ func (e *GError) Unwrap() error {
 	return e
 }
 
+// Unwrap finds the base error.
 func Unwrap(err error) error {
 	switch v := err.(type) {
 	case GError:

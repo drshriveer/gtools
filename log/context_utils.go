@@ -18,6 +18,8 @@ type logHolder struct {
 	atomic.Pointer[zap.Logger]
 }
 
+// InitLogger with fields supplied (if so supplied). If a context already has a logger,
+// the fields will be added to it.
 func InitLogger(ctx context.Context, fields ...zap.Field) context.Context {
 	lh, ok := getOrDefault(ctx)
 	if !ok {
@@ -28,6 +30,9 @@ func InitLogger(ctx context.Context, fields ...zap.Field) context.Context {
 	return ctx
 }
 
+// ChildLogger _always_ creates a new logger with the fields of the parent.
+// This will prevent propagation of fields higher up the stack so is useful when
+// spawning child routines which may write the same field name but be meaningfully different.
 func ChildLogger(ctx context.Context, fields ...zap.Field) context.Context {
 	lh, _ := getOrDefault(ctx)
 	newLogger := lh.Load().With(fields...)
@@ -37,15 +42,18 @@ func ChildLogger(ctx context.Context, fields ...zap.Field) context.Context {
 	return ctx
 }
 
+// Log returns the underlying logger with is latest fields.
 func Log(ctx context.Context) *zap.Logger {
 	lh, _ := getOrDefault(ctx)
 	return lh.Load()
 }
 
+// EnableDebug turns on debug logs for this context.
 func EnableDebug(ctx context.Context) context.Context {
 	return SetLevel(ctx, zapcore.DebugLevel)
 }
 
+// SetLevel sets a specific log level for this context.
 func SetLevel(ctx context.Context, level zapcore.Level) context.Context {
 	lh, ok := getOrDefault(ctx)
 	logger := lh.Load()
@@ -60,6 +68,8 @@ func SetLevel(ctx context.Context, level zapcore.Level) context.Context {
 	return ctx
 }
 
+// WithFields adds log fields to a context. These will propagate to the nearest initialized or
+// child logger.
 func WithFields(ctx context.Context, fields ...zap.Field) context.Context {
 	lh, ok := getOrDefault(ctx)
 	logger := lh.Load()

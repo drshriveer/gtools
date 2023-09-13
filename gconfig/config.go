@@ -106,14 +106,14 @@ func extractAndConvert[T any](m map[string]any, key string) (T, error) {
 }
 
 func extract(m map[string]any, keys []string) (any, bool) {
-	var last any = nil
+	var last any
 	ok := false
 	for i, k := range keys {
 		last, ok = m[k]
 		if !ok {
 			return nil, false
 		}
-		mOK := false
+		var mOK bool
 		m, mOK = last.(map[string]any)
 		if !mOK && i < len(keys)-1 {
 			return nil, false
