@@ -5,8 +5,8 @@ use (
 	./genum
 	./gerrors
 	./gsync
-	./math
 	./log
+	./math
 	./rutils
 	./set
 )

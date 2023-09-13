@@ -1,7 +1,5 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/drshriveer/gtools/gerrors v0.0.0-20230912011444-c667b3c15d24 h1:V1t1pxyiTURx7NpG/fbOED2mGcqLBr2ueaxHcohmYSM=
-github.com/drshriveer/gtools/gerrors v0.0.0-20230912011444-c667b3c15d24/go.mod h1:TM5oCeeYZnsS7OTT3VL6JBXcPaZlveUUzbIh30FTpT8=
 github.com/drshriveer/gtools/math v0.0.0-20230912011444-c667b3c15d24 h1:8krqSX29YGvqNqQGiUZetx4loA3cZdQeJpF3Nhj58iE=
 github.com/drshriveer/gtools/math v0.0.0-20230912011444-c667b3c15d24/go.mod h1:eqIZax0uwm1gmKltWOfw1gqZ061O34OIPUCb/0e271Y=
 github.com/drshriveer/gtools/rutils v0.0.0-20230912011444-c667b3c15d24 h1:CnrBbwc0HOzYYq5bO5h+ND/Y7sg2tM1b1HtqW2b8Lsk=

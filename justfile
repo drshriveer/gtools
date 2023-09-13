@@ -7,7 +7,7 @@ export GOBIN := PKG_ROOT + "/bin"
 
 # Runs `go mod tidy` all modules or a single specified target, then sync go workspaces.
 tidy target='all':
-    @just _invokeMod "go mod tidy -C {}"{{ target }}"
+    @just _invokeMod "go mod tidy -C {}" "{{ target }}"
     go work sync
 
 # Runs `go test --race ` all modules or a single specified target.
