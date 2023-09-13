@@ -12,7 +12,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// XXX: consider moving this to a different package.
 type logHolderKeyType struct{}
 
 var logHolderKey = logHolderKeyType{}
@@ -21,15 +20,12 @@ type logHolder struct {
 	atomic.Pointer[zap.Logger]
 }
 
-// InitLogger with fields supplied (if so supplied). If a context already has a logger,
-// the fields will be added to it.
+// InitLogger with fields supplied (if so supplied).
+// If a context already has a logger, is configuration will be lost.
 func InitLogger(ctx context.Context, fields ...zap.Field) context.Context {
-	lh, ok := getOrDefault(ctx)
-	if !ok {
-		ctx = context.WithValue(ctx, logHolderKey, lh)
-	}
-	newLogger := lh.Load().With(fields...)
-	lh.Store(newLogger)
+	lh := &logHolder{}
+	lh.Store(zap.L().With(fields...))
+	ctx = context.WithValue(ctx, logHolderKey, lh)
 	return ctx
 }
 
@@ -45,7 +41,7 @@ func ChildLogger(ctx context.Context, fields ...zap.Field) context.Context {
 	return ctx
 }
 
-// Log returns the underlying logger with is latest fields.
+// Log returns the underlying logger with its latest fields.
 func Log(ctx context.Context) *zap.Logger {
 	lh, _ := getOrDefault(ctx)
 	return lh.Load()
@@ -55,7 +51,9 @@ func Log(ctx context.Context) *zap.Logger {
 func TestContext(t *testing.T) context.Context {
 	lh := &logHolder{}
 	lh.Store(zaptest.NewLogger(t))
-	return context.WithValue(context.TODO(), logHolderKey, lh)
+	ctx, cancel := context.WithCancel(context.TODO())
+	t.Cleanup(cancel)
+	return context.WithValue(ctx, logHolderKey, lh)
 }
 
 // EnableDebug turns on debug logs for this context.
@@ -66,12 +64,14 @@ func EnableDebug(ctx context.Context) context.Context {
 // SetLevel sets a specific log level for this context.
 func SetLevel(ctx context.Context, level zapcore.Level) context.Context {
 	lh, ok := getOrDefault(ctx)
-	logger := lh.Load()
-	coreWrapper := &customLevelCoreWrapper{
-		Core:     logger.Core(),
-		minLevel: level,
-	}
-	lh.Store(zap.New(coreWrapper))
+	logger := lh.Load().WithOptions(zap.WrapCore(func(core zapcore.Core) zapcore.Core {
+		return &customLevelCoreWrapper{
+			Core:     core,
+			minLevel: level,
+		}
+	}))
+
+	lh.Store(logger)
 	if !ok {
 		ctx = context.WithValue(ctx, logHolderKey, logger)
 	}

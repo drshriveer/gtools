@@ -2,20 +2,18 @@
 
 gConfig is a simple, light-weight static configuration library that leverages generics and yaml. 
 
+[Docs](https://pkg.go.dev/github.com/drshriveer/gtools/gconfig)
+
 ### Getting started
 
 ```bash
-go get -u github.com/drshriveer/gtools/pkg/gconfig
+go get -u github.com/drshriveer/gtools/gconfig
 ```
 
 #### Requirements:
 
 - golang 1.19+
-- [genum](github.com/drshriveer/gtools/pkg/genum) - for dimensions
-
-### Docs:
-
-https://pkg.go.dev/github.com/drshriveer/gtools/pkg/gconfig
+- [genum](github.com/drshriveer/gtools/genum) - for dimensions
 
 ### Features
 - __Generics:__ This library uses generics to fetch configuration values from a yaml file. This works with primitives, slices, maps<sup>†</sup>, and structs (supporting yaml). The same key can be resolved into multiple types. _<sup>†</sup> - note: maps with dimensional keys do not currently work_

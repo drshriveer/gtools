@@ -16,6 +16,8 @@ Each tool has its own readme.
 
 ## Contributing:
 
+Submit a PR!
+
 ## TODO:
 - Add github actions
 - complete gerrors
