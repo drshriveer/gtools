@@ -1,3 +1,4 @@
+//nolint:all // this code exists for benchmark comparisons only.
 package internal
 
 import (
@@ -8,7 +9,7 @@ import (
 	"github.com/drshriveer/gtools/gsync"
 )
 
-// TODO: benchmark with various impl & against sync.WG
+// TODO: benchmark with various impl & against sync.WG.
 type SelectableWaitGroup3 struct {
 	v atomic.Pointer[wg3internal]
 }

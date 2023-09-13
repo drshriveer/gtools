@@ -1,3 +1,4 @@
+//nolint:all // this code exists for benchmark comparisons only.
 package internal
 
 import (
@@ -15,7 +16,7 @@ func init() {
 	close(closedChan)
 }
 
-// TODO: benchmark with various impl & against sync.WG
+// TODO: benchmark with various impl & against sync.WG.
 type SelectableWaitGroup1 struct {
 	mu    sync.RWMutex
 	count int

@@ -32,7 +32,7 @@ import (
 // BenchmarkSelectableWaitGroup4_Add/single
 // BenchmarkSelectableWaitGroup4_Add/single-10         	174314197	         6.879 ns/op
 // BenchmarkSelectableWaitGroup4_Add/parallel
-// BenchmarkSelectableWaitGroup4_Add/parallel-10       	17471242	        70.04 ns/op
+// BenchmarkSelectableWaitGroup4_Add/parallel-10       	17471242	        70.04 ns/op.
 func BenchmarkSyncWaitGroup_Add(b *testing.B) {
 	b.Run("single", func(b *testing.B) {
 		wg := &sync.WaitGroup{}

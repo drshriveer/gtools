@@ -120,13 +120,13 @@ func TestEnumerableWithTraits_Traits(t *testing.T) {
 			enum:       internal.E2,
 			trait:      "trait 2",
 			timeout:    1 * time.Minute,
-			typedTrait: "OtherType3",
+			typedTrait: "OtherType2",
 		},
 		{
 			enum:       internal.E3,
 			trait:      "trait 3",
 			timeout:    2 * time.Minute,
-			typedTrait: "OtherType2",
+			typedTrait: "OtherType3",
 		},
 	}
 

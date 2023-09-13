@@ -19,16 +19,16 @@ const (
 type Creatures int
 
 const (
-	Cat, CatLegs, _       = Creatures(iota), 4, true
-	Dog, DogLegs, _       = Creatures(iota), 4, true
-	Ant, AntLegs, _       = Creatures(iota), 6, false
-	Spider, SpiderLegs, _ = Creatures(iota), 8, false
-	Human, HumanLegs, _   = Creatures(iota), 2, true
-	// Feline traits will be ignored in favor of cat traits.
-	Feline, _, _                                     = Cat, 5, false
-	Feline2                                          = Cat
-	SeaAnemone                                       = Creatures(iota)
 	NotCreature, _NumCreatureLegs, _IsCreatureMammal = Creatures(iota), 0, false
+	Cat, CatLegs, _                                  = Creatures(iota), 4, true
+	Dog, DogLegs, _                                  = Creatures(iota), 4, true
+	Ant, AntLegs, _                                  = Creatures(iota), 6, false
+	Spider, SpiderLegs, _                            = Creatures(iota), 8, false
+	Human, HumanLegs, _                              = Creatures(iota), 2, true
+	// Feline traits will be ignored in favor of cat traits.
+	Feline, _, _ = Cat, 5, false
+	Feline2      = Cat
+	SeaAnemone   = Creatures(iota)
 )
 
 // This enum fails to generate because it has an inconsisitnet number of traits.

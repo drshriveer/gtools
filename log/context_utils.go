@@ -3,6 +3,9 @@ package log
 import (
 	"context"
 	"sync/atomic"
+	"testing"
+
+	"go.uber.org/zap/zaptest"
 
 	"go.uber.org/zap/zapcore"
 
@@ -46,6 +49,13 @@ func ChildLogger(ctx context.Context, fields ...zap.Field) context.Context {
 func Log(ctx context.Context) *zap.Logger {
 	lh, _ := getOrDefault(ctx)
 	return lh.Load()
+}
+
+// TestContext returns a context with a zaptest.Logger tied to a test object.
+func TestContext(t *testing.T) context.Context {
+	lh := &logHolder{}
+	lh.Store(zaptest.NewLogger(t))
+	return context.WithValue(context.TODO(), logHolderKey, lh)
 }
 
 // EnableDebug turns on debug logs for this context.
