@@ -36,7 +36,7 @@ generate: _tools-generate
     @go generate ./...
 
 _tools-generate:
-    @go install github.com/drshriveer/gtools/pkg/genum/genum
+    @go install github.com/drshriveer/gtools/genum/genum@latest
 
 # invokeMod invokes a command on a module target or all the input command must include
 
