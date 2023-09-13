@@ -1,22 +1,29 @@
 GO_LINT_VERSION := '1.53.3'
+GENUM_VERSION := 'latest'
 PKG_ROOT := `pwd`
 MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
 export GOBIN := PKG_ROOT + "/bin"
 
+# Runs `go mod tidy` all modules or a single specified target, then sync go workspaces.
 tidy target='all':
     @just _invokeMod "go mod tidy -C {}" "{{ target }}"
+    go work sync
 
+# Runs `go test --race ` all modules or a single specified target.
 test target='all':
     @just _invokeMod "go test --race {}" "{{ target }}"
 
+# Runs lint and test on all modules.
 check: lint test
 
-# Lint
+# Runs lint and format checkers all modules or a single specified target.
 lint target='all': _tools-linter
     @just _invokeMod "golangci-lint run {}" "{{ target }}"
 
+# Fixes all auto-fixable format and lint errors on all modules or a single specified target.
 fix target='all': _tools-linter
+    just --fmt --unstable
     @just _invokeMod "golangci-lint run --fix {}" "{{ target }}"
 
 _tools-linter:
@@ -31,12 +38,12 @@ _tools-linter:
       curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v{{ GO_LINT_VERSION }}
     fi
 
-# Generate
+# Runs `go generate` on all go modules or a single specified target.
 generate: _tools-generate
     @go generate ./...
 
 _tools-generate:
-    @go install github.com/drshriveer/gtools/genum/genum@latest
+    @go install github.com/drshriveer/gtools/genum/genum@{{ GENUM_VERSION }}
 
 # invokeMod invokes a command on a module target or all the input command must include
 
