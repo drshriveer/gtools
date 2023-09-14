@@ -6,7 +6,6 @@ use (
 	./gerrors
 	./gsync
 	./log
-	./math
 	./rutils
 	./set
 )

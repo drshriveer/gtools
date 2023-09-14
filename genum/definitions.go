@@ -1,11 +1,10 @@
 package genum
 
-import (
-	"github.com/drshriveer/gtools/math"
-)
-
 // EnumLike is a generic type for something that looks like an enum.
-type EnumLike math.Integer
+type EnumLike interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
+}
 
 // Enum is the base interface all generated enums implement.
 type Enum interface {
