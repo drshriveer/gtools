@@ -44,4 +44,3 @@ jobs:
         with:
           go-version-file: go.work
       - run: just test
-

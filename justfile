@@ -43,6 +43,7 @@ generate target='all': _tools-generate
 
 # always rebuild the genum executable in this package for testing.
 # other packages should use something like:
+
 # @go install github.com/drshriveer/gtools/genum/genum@{{ GENUM_VERSION }}
 _tools-generate:
     go build -o bin/genum genum/genum/main.go
