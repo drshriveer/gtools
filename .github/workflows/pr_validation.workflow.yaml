@@ -3,7 +3,7 @@ run-name: PR check of ${{ github.event.pull_request.head.ref }} by @${{ github.a
 on: pull_request
 
 jobs:
-  detect-changes:
+  changes:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -20,7 +20,8 @@ jobs:
               - '**/*.go'
 
   lint:
-    needs: detect-changes
+    needs: changes
+    if: ${{ needs.changes.outputs.changes == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
@@ -33,7 +34,8 @@ jobs:
       - run: just lint
 
   test:
-    needs: detect-changes
+    needs: changes
+    if: ${{ needs.changes.outputs.changes == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
