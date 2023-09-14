@@ -1,0 +1,35 @@
+name: Go PR Validation
+run-name: GO PR Validator
+on: pull_request
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      # FIXME this looks recursive!
+      changes: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            changes:
+              - '**/*.go'
+
+  check-all:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v3
+      - uses: extractions/setup-just@v1
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      - run: just check
+
