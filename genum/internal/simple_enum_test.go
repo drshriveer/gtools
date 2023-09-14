@@ -43,7 +43,7 @@ type enumTest[T genum.EnumLike] struct {
 	duplicateDefinition bool
 }
 
-func (e *enumTest[T]) roundTripJson(t *testing.T) {
+func (e *enumTest[T]) roundTripJSON(t *testing.T) {
 	require.Implements(t, (*json.Unmarshaler)(nil), reflect.New(reflect.TypeOf(e.enum)).Interface())
 	require.Implements(t, (*json.Marshaler)(nil), e.enum)
 	bytes, err := json.Marshal(e.enum)
@@ -114,7 +114,7 @@ func testRunner[T genum.EnumLike](t *testing.T, tests []enumTest[T]) {
 			assert.Equal(t, test.enum, r)
 
 			// marshals:
-			test.roundTripJson(t)
+			test.roundTripJSON(t)
 			test.roundTripYaml(t)
 			test.roundTripText(t)
 		})

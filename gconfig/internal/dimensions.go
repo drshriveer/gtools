@@ -1,3 +1,4 @@
+//nolint:revive // test only
 package internal
 
 //go:generate genum -types=DimensionOne,DimensionTwo,DimensionThree

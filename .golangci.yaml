@@ -1,11 +1,9 @@
 run:
-  skip-files:
-    - ".*/libexec/src/slices/sort.go$" # somehow slices (an internal library) fails.
   allow-parallel-runners: true
   go: '1.21'
 linters:
   enable:
-    # defauls:
+    # defaults:
     - errcheck
     - gosimple
     - govet
@@ -26,7 +24,7 @@ linters:
     - gosec
     - importas
     - misspell
-    - musttag
+#    - musttag
     - noctx
     - prealloc
     - revive

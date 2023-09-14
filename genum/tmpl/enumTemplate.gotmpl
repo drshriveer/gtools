@@ -3,37 +3,37 @@ package {{.PkgName}}
 
 import (
 	"slices"
-    {{- if .GenJSON}}
-    "encoding/json"
-    {{- end}}
+	{{- if .GenJSON}}
+	"encoding/json"
+	{{- end}}
 	{{- if .GenYAML}}
 	"gopkg.in/yaml.v3"
 	"strconv"
 	{{- end}}
 	{{- range $import := $.Imports.GetActive}}
 	{{$import.Alias}} "{{$import.PkgPath}}"
-    {{- end}}
-    "fmt"
+	{{- end}}
+	"fmt"
 )
 {{- range $i, $enumTypeName := .EnumTypeNames}}
 {{- $values := (index $.Values $i)}}
 
 var _{{$enumTypeName}}Values = []{{$enumTypeName}}{
-    {{- range $val := $values.ValueDeduplicatedSet}}
-        {{$val.Name}},
-    {{- end }}
-    }
+{{- range $val := $values.ValueDeduplicatedSet}}
+	{{$val.Name}},
+{{- end }}
+}
 {{- range $trait := (index $.Traits $i)}}
 
 // {{$trait.Name}} returns the enum's associated trait of the same name.
 // If no trait exists for the enumeration a default value will be returned.
 func (e {{$enumTypeName}}) {{$trait.Name}}() {{$trait.TypeRef}} {
-    switch e {
+	switch e {
 	{{- range $instance := $trait.Traits}}
-    case {{$instance.OwningValue.Name}}:
-        return {{$instance.Value}}
-    {{- end }}
-    }
+	case {{$instance.OwningValue.Name}}:
+		return {{$instance.Value}}
+	{{- end }}
+	}
 
 	return *new({{$trait.TypeRef}})
 }
@@ -43,14 +43,14 @@ func (e {{$enumTypeName}}) {{$trait.Name}}() {{$trait.TypeRef}} {
 func (e {{$enumTypeName}}) IsValid() bool {
 	{{- /*turns out it's probably faster to do a binary search if there are more than 15 values.*/}}
 	{{- if gt (len $values) 15}}
-    _, ok := slices.BinarySearch(_{{$enumTypeName}}Values, e)
+	_, ok := slices.BinarySearch(_{{$enumTypeName}}Values, e)
 	return ok
 	{{- else}}
-    for _, v := range _{{$enumTypeName}}Values {
-        if v == e {
-            return true
-        }
-    }
+	for _, v := range _{{$enumTypeName}}Values {
+		if v == e {
+			return true
+		}
+	}
 	return false
 	{{- end}}
 }
@@ -63,36 +63,36 @@ func ({{$enumTypeName}}) Values() []{{$enumTypeName}} {
 // StringValues returns a list of all potential values of this enum as strings.
 // Note: This does not return duplicates.
 func ({{$enumTypeName}}) StringValues() []string {
-    return []string{
-    {{- range $val := $values.ValueDeduplicatedSet}}
-        "{{$val.Name}}",
-    {{- end }}
-    }
+	return []string{
+	{{- range $val := $values.ValueDeduplicatedSet}}
+		"{{$val.Name}}",
+	{{- end }}
+	}
 }
 
 // String returns a string representation of this enum.
 // Note: in the case of duplicate values only the first alphabetical definition will be choosen.
 func (e {{$enumTypeName}}) String() string {
-    switch e {
-    {{- range $val := $values.ValueDeduplicatedSet}}
-    case {{$val.Name}}:
-        return "{{$val.Name}}"
-    {{- end }}
-    default:
-        return fmt.Sprintf("Undefined{{$enumTypeName}}:%d", e)
-    }
+	switch e {
+	{{- range $val := $values.ValueDeduplicatedSet}}
+	case {{$val.Name}}:
+		return "{{$val.Name}}"
+	{{- end }}
+	default:
+		return fmt.Sprintf("Undefined{{$enumTypeName}}:%d", e)
+	}
 }
 
 // ParseString will return a value as defined in string form.
 func (e {{$enumTypeName}}) ParseString(text string) ({{$enumTypeName}}, error) {
-    switch text {
-    {{- range $val := $values}}
-    case "{{$val.Name}}":
-        return {{$val.Name}}, nil
-    {{- end }}
-    default:
-        return 0, fmt.Errorf("`%s` is not a valid enum of type {{$enumTypeName}}", text)
-    }
+	switch text {
+	{{- range $val := $values}}
+	case "{{$val.Name}}":
+		return {{$val.Name}}, nil
+	{{- end }}
+	default:
+		return 0, fmt.Errorf("`%s` is not a valid enum of type {{$enumTypeName}}", text)
+	}
 }
 {{- if $.GenJSON }}
 
@@ -105,19 +105,19 @@ func (e {{$enumTypeName}}) MarshalJSON() ([]byte, error) {
 func (e *{{$enumTypeName}}) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-        var err error
-        *e, err = {{$enumTypeName}}(0).ParseString(s)
-        return err
+		var err error
+		*e, err = {{$enumTypeName}}(0).ParseString(s)
+		return err
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-        *e = {{$enumTypeName}}(i)
-        if e.IsValid() {
-            return nil
-        }
-    }
+		*e = {{$enumTypeName}}(i)
+		if e.IsValid() {
+			return nil
+		}
+	}
 
-    return fmt.Errorf("unable to unmarshal {{$enumTypeName}} from `%v`", data)
+	return fmt.Errorf("unable to unmarshal {{$enumTypeName}} from `%v`", data)
 }
 {{- end}}
 {{- if $.GenText }}
@@ -129,7 +129,7 @@ func (e {{$enumTypeName}}) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for {{$enumTypeName}}.
 func (e *{{$enumTypeName}}) UnmarshalText(text []byte) error {
-    var err error
+	var err error
 	*e, err = {{$enumTypeName}}(0).ParseString(string(text))
 	return err
 }
@@ -147,14 +147,14 @@ func (e *{{$enumTypeName}}) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = {{$enumTypeName}}(i)
 	} else {
-	    *e, err = {{$enumTypeName}}(0).ParseString(value.Value)
+		*e, err = {{$enumTypeName}}(0).ParseString(value.Value)
 	}
 	if err != nil {
-        return err
+		return err
 	} else if e.IsValid() {
-        return nil
-    }
-    return fmt.Errorf("unable to unmarshal {{$enumTypeName}} from yaml `%s`", value.Value)
+		return nil
+	}
+	return fmt.Errorf("unable to unmarshal {{$enumTypeName}} from yaml `%s`", value.Value)
 }
 
 // IsEnum implements an empty function required to implement Enum.

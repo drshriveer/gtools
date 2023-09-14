@@ -28,8 +28,6 @@ func main() {
 	inFile := path.Join(pwd, gofile)
 	if len(gofile) == 0 && len(*inFileArg) == 0 {
 		log.Fatal("this command should be run in a go:generate context or with -in file set")
-	} else if len(gofile) == 0 {
-		inFile = inFile
 	}
 
 	outFile := path.Join(pwd, strings.TrimSuffix(gofile, ".go")+".genum.go")
