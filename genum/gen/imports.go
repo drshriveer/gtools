@@ -52,6 +52,7 @@ func (id ImportDescs) extractTypeRef(t types.Type) string {
 }
 
 // GetActive returns ordered, active imports.
+// Used by templates.
 func (id ImportDescs) GetActive() []ImportDesc {
 	result := make([]ImportDesc, 0, len(id.imports))
 	for _, i := range id.imports {

@@ -24,7 +24,6 @@ linters:
     - gosec
     - importas
     - misspell
-#    - musttag
     - noctx
     - prealloc
     - revive
@@ -32,6 +31,8 @@ linters:
     - unconvert
     - unparam
     - wastedassign
+    # currently broken:
+    # - musttag
 
 linters-settings:
   goimports:
