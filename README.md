@@ -19,7 +19,5 @@ Each tool has its own readme.
 Submit a PR!
 
 ## TODO:
-- Add github actions
 - complete gerrors
 - faster set impl + tests
-- logger test
