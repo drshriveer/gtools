@@ -1,5 +1,5 @@
-name: Go PR Validation
-run-name: GO PR Validator
+name: PR Validation
+run-name: just check (lint, test)
 on: pull_request
 
 jobs:
@@ -9,7 +9,6 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      # FIXME this looks recursive!
       changes: ${{ steps.filter.outputs.changes }}
     steps:
       - uses: actions/checkout@v3
@@ -20,7 +19,7 @@ jobs:
             changes:
               - '**/*.go'
 
-  check-all:
+  lint:
     needs: detect-changes
     runs-on: ubuntu-latest
     permissions:
@@ -30,6 +29,19 @@ jobs:
       - uses: extractions/setup-just@v1
       - uses: actions/setup-go@v4
         with:
-          go-version: '1.21'
-      - run: just check
+          go-version-file: go.work
+      - run: just lint
+
+  test:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v3
+      - uses: extractions/setup-just@v1
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.work
+      - run: just test
 
