@@ -27,7 +27,7 @@ fix target='all': _tools-linter
     @just _invokeMod "golangci-lint run --fix {}/..." "{{ target }}"
 
 _tools-linter:
-    #!/usr/bin/env sh
+    #!/usr/bin/env bash
     if command -v golangci-lint && golangci-lint --version | grep -q '{{ GO_LINT_VERSION }}'; then
       echo 'golangci-lint v{{ GO_LINT_VERSION }} already installed!'
     else
@@ -49,7 +49,7 @@ _tools-generate:
 
 # a the placeholder `{}` which is the path to the correct module.
 _invokeMod cmd target='all':
-    #!/usr/bin/env sh
+    #!/usr/bin/env bash
     if [ "{{ target }}" = "all" ]; then
       xargs -L1 -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
