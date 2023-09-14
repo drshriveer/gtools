@@ -19,6 +19,8 @@ import (
 	"github.com/drshriveer/gtools/genum/tmpl"
 )
 
+// Generate is the parser and writer of enums and their generated code.
+// It seems to double as its own 'options' holder.
 type Generate struct {
 	InFile        string
 	OutFile       string
@@ -28,14 +30,14 @@ type Generate struct {
 	GenText       bool
 	DisableTraits bool
 
-	// derived:
+	// derived, (exposed for template use):
 	Values  []Values
 	Traits  []TraitDescs
 	Imports ImportDescs
 	PkgName string
 }
 
-// Parses the input file and drives the attributes above.
+// Parse the input file and drives the attributes above.
 func (g *Generate) Parse() error {
 	fSet := token.NewFileSet()
 	fAST, err := parser.ParseFile(fSet, g.InFile, nil, parser.ParseComments)
@@ -59,8 +61,7 @@ func (g *Generate) Parse() error {
 	for i, enumType := range g.EnumTypeNames {
 		values := make(Values, 0)
 		for _, decl := range fAST.Decls {
-			switch d := decl.(type) {
-			case *ast.GenDecl:
+			if d, ok := decl.(*ast.GenDecl); ok {
 				for _, spec := range d.Specs {
 					vSpec, ok := spec.(*ast.ValueSpec)
 					if !ok || len(vSpec.Names) == 0 {
@@ -96,7 +97,7 @@ func (g *Generate) Parse() error {
 		if err != nil {
 			return err
 		} else if len(traits) == 0 {
-			traits = processDuplicates(values, traits, enumType)
+			processDuplicates(values, traits, enumType)
 			continue
 		}
 
@@ -117,12 +118,10 @@ func (g *Generate) Parse() error {
 			}
 		}
 
-		traits = processDuplicates(values, traits, enumType) // detect and warn duplicates
+		processDuplicates(values, traits, enumType) // detect and warn duplicates
 		sort.Sort(traits)
 		g.Traits[i] = traits
 	}
-
-	// XXX: Consider further import inspection and correction.
 
 	return nil
 }
@@ -143,7 +142,7 @@ func (g *Generate) calcInitialImports(importSpecs []*ast.ImportSpec, pkg *types.
 	return nil
 }
 
-// extractTraitDefs attempts to extract trait definitions, and does some (minor) validation in the process.
+// extractTraitDescs attempts to extract trait descriptions, and does some (minor) validation in the process.
 // TraitDescs come from the first type value of an enum. Generally this is 0, but on occasion it can be
 // a negative value...
 // Note: this expects values to have been sorted.
@@ -152,7 +151,7 @@ func (g *Generate) extractTraitDescs(tName string, pkgScope *types.Scope, values
 		return nil, nil
 	}
 	firstV := values[0]
-	traits := make(TraitDescs, 0, len(firstV.astLine.Values)-1)
+	traits := make(TraitDescs, 0, max(len(firstV.astLine.Values)-1, 0))
 	for j := 1; j < len(firstV.astLine.Values); j++ {
 		name := firstV.astLine.Names[j].Name
 		v, ok := pkgScope.Lookup(name).(*types.Const)
@@ -218,6 +217,7 @@ func (g *Generate) extractTraitDescs(tName string, pkgScope *types.Scope, values
 	return traits, nil
 }
 
+// Write writes out the enum config file as configured.
 func (g *Generate) Write() error {
 	if len(g.Values) == 0 {
 		return fmt.Errorf("no values to generate; was generate called?")
@@ -232,9 +232,9 @@ func (g *Generate) Write() error {
 }
 
 // processDuplicates prints duplicate warnings and selects the "primary" value(s) of traits.
-func processDuplicates(values Values, traits TraitDescs, enumTypeName string) TraitDescs {
+func processDuplicates(values Values, traits TraitDescs, enumTypeName string) {
 	if len(values) == 0 {
-		return traits
+		return
 	}
 
 	data := make(map[uint64]Values, len(values))
@@ -255,8 +255,8 @@ func processDuplicates(values Values, traits TraitDescs, enumTypeName string) Tr
 		}
 		// warn about potentially unsafe duplicates.
 		log.Printf("[WARN] - Definitions `%v` of `%s` share the same value `%d`. "+
-			"`%s` will be arbitarily chosen as the primary value when stringifying enums. "+
-			"If this is undesireable, please mark values other than the intented primary "+
+			"`%s` will be arbitrarily chosen as the primary value when stringifying enums. "+
+			"If this is undesirable, please mark values other than the intended primary "+
 			"as Deprecated.",
 			duplicates.stringList(), enumTypeName, primary.Value, primary.Name)
 
@@ -268,7 +268,7 @@ func processDuplicates(values Values, traits TraitDescs, enumTypeName string) Tr
 		}
 	}
 	sort.Sort(traits)
-	return traits
+	// return traits
 }
 
 func isDeprecated(fAST *ast.File, name string) bool {

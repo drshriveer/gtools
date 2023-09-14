@@ -2,13 +2,12 @@
 package internal
 
 import (
-	"encoding/json"
-	"fmt"
 	"slices"
+	"encoding/json"
+	"gopkg.in/yaml.v3"
 	"strconv"
 	stupidTime "time"
-
-	"gopkg.in/yaml.v3"
+	"fmt"
 )
 
 var _EnumerableWithTraitsValues = []EnumerableWithTraits{
@@ -32,6 +31,7 @@ func (e EnumerableWithTraits) Timeout() stupidTime.Duration {
 	return *new(stupidTime.Duration)
 }
 
+
 // Trait returns the enum's associated trait of the same name.
 // If no trait exists for the enumeration a default value will be returned.
 func (e EnumerableWithTraits) Trait() string {
@@ -47,6 +47,7 @@ func (e EnumerableWithTraits) Trait() string {
 	return *new(string)
 }
 
+
 // TypedStringTrait returns the enum's associated trait of the same name.
 // If no trait exists for the enumeration a default value will be returned.
 func (e EnumerableWithTraits) TypedStringTrait() OtherType {
@@ -61,6 +62,7 @@ func (e EnumerableWithTraits) TypedStringTrait() OtherType {
 
 	return *new(OtherType)
 }
+
 
 // IsValid returns true if the enum value is, in fact, valid.
 func (e EnumerableWithTraits) IsValid() bool {
@@ -207,6 +209,7 @@ func (e Creatures) IsCreatureMammal() bool {
 	return *new(bool)
 }
 
+
 // NumCreatureLegs returns the enum's associated trait of the same name.
 // If no trait exists for the enumeration a default value will be returned.
 func (e Creatures) NumCreatureLegs() int {
@@ -227,6 +230,7 @@ func (e Creatures) NumCreatureLegs() int {
 
 	return *new(int)
 }
+
 
 // IsValid returns true if the enum value is, in fact, valid.
 func (e Creatures) IsValid() bool {

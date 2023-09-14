@@ -1,5 +1,6 @@
 package gen
 
+// TraitDescs is a sortable slice of TraitDesc.
 type TraitDescs []TraitDesc
 
 func (s TraitDescs) Len() int {
@@ -14,12 +15,14 @@ func (s TraitDescs) Less(i, j int) bool {
 	return s[i].Name < s[j].Name
 }
 
+// TraitDesc define a trait-- this is exposed for template use.
 type TraitDesc struct {
 	Name    string
 	TypeRef string
 	Traits  TraitInstances
 }
 
+// TraitInstances are a sortable slice of `TraitInstance`s.
 type TraitInstances []TraitInstance
 
 func (s TraitInstances) Len() int {
@@ -36,6 +39,7 @@ func (s TraitInstances) Less(i, j int) bool {
 	return s[i].OwningValue.Less(s[j].OwningValue)
 }
 
+// TraitInstance is an instance of a trait.
 type TraitInstance struct {
 	OwningValue  Value
 	value        string

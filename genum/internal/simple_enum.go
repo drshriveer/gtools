@@ -1,3 +1,4 @@
+//nolint:revive // test only
 package internal
 
 //go:generate genum -types=MyEnum,MyEnum2,MyEnum3
@@ -17,7 +18,7 @@ const (
 	Enum1Value1
 	Enum1Value2
 
-	// Enum1Value7 is a special thing
+	// Enum1Value7 is a special thing.
 	Enum1Value7 MyEnum = 7
 
 	UnrelatedValue         = "my string!"
@@ -28,7 +29,7 @@ const (
 
 // These should just be treated as alternative definitions.
 const (
-	// Deprecated: old value, don't use
+	// Deprecated: old value, don't use.
 	Enum1Value0Complication1 MyEnum = iota
 	Enum1Value1Complication1 MyEnum = iota
 	Enum1Value2Complication1 MyEnum = iota

@@ -18,6 +18,8 @@ func (s Values) Less(i, j int) bool {
 	return s[i].Less(s[j])
 }
 
+// ValueDeduplicatedSet returns a de-deduplicated set of values.
+// exposed for use in templates.
 func (s Values) ValueDeduplicatedSet() Values {
 	if len(s) < 2 {
 		return s
@@ -70,6 +72,7 @@ func (s Values) stringList() []string {
 	return result
 }
 
+// Value is an enum value.
 type Value struct {
 	Name         string
 	Value        uint64
@@ -79,6 +82,7 @@ type Value struct {
 	astLine      *ast.ValueSpec
 }
 
+// Less is a Value sorting function.
 func (v Value) Less(vIn Value) bool {
 	if v.Signed || vIn.Signed {
 		v1, v2 := int64(v.Value), int64(vIn.Value)

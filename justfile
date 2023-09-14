@@ -1,5 +1,4 @@
-GO_LINT_VERSION := '1.53.3'
-GENUM_VERSION := 'latest'
+GO_LINT_VERSION := '1.54.1'
 PKG_ROOT := `pwd`
 MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
@@ -27,7 +26,7 @@ fix target='all': _tools-linter
     @just _invokeMod "golangci-lint run --fix {}/..." "{{ target }}"
 
 _tools-linter:
-    #!/usr/bin/env sh
+    #!/usr/bin/env bash
     if command -v golangci-lint && golangci-lint --version | grep -q '{{ GO_LINT_VERSION }}'; then
       echo 'golangci-lint v{{ GO_LINT_VERSION }} already installed!'
     else
@@ -42,14 +41,15 @@ _tools-linter:
 generate target='all': _tools-generate
     @just _invokeMod "go generate -C {} ./..." "{{ target }}"
 
+# always rebuild the genum executable in this package for testing.
+# other packages should use something like:
+# @go install github.com/drshriveer/gtools/genum/genum@{{ GENUM_VERSION }}
 _tools-generate:
-    @go install github.com/drshriveer/gtools/genum/genum@{{ GENUM_VERSION }}
-
-# invokeMod invokes a command on a module target or all the input command must include
+    go build -o bin/genum genum/genum/main.go
 
 # a the placeholder `{}` which is the path to the correct module.
 _invokeMod cmd target='all':
-    #!/usr/bin/env sh
+    #!/usr/bin/env bash
     if [ "{{ target }}" = "all" ]; then
       xargs -L1 -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else

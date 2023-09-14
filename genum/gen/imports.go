@@ -51,6 +51,7 @@ func (id ImportDescs) extractTypeRef(t types.Type) string {
 	return fmt.Sprintf("%s.%s", i.Alias, typeName)
 }
 
+// GetActive returns ordered, active imports.
 func (id ImportDescs) GetActive() []ImportDesc {
 	result := make([]ImportDesc, 0, len(id.imports))
 	for _, i := range id.imports {
