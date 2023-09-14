@@ -1,5 +1,5 @@
 name: PR Validation
-run-name: PR ${{ inputs.number }} ${{ inputs.pull_request.number }} ${{ inputs.pull_request.head.ref }} by @${{ github.actor }}
+run-name: PR ${{ github.event.number }} ${{ github.event.pull_request.number }} ${{ github.event.pull_request.head.ref }} by @${{ github.actor }}
 on: pull_request
 
 jobs:
