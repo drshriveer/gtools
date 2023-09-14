@@ -10,16 +10,13 @@ Each tool has its own readme.
  - [genum](genum/) - an advanced enum code generator
  - [gsync](gsync/) - sync utilities
  - [gtask](gtask/) - a set of task management utilities
- - [set](set/) - basic "set" implementation 
- - [math](math/) - basic math utilities
  - [log](log/) - bare-bone utilities written around zap.Logger for log handling 
+ - [set](set/) - basic "set" implementation 
 
 ## Contributing:
 
 Submit a PR!
 
 ## TODO:
-- Add github actions
 - complete gerrors
 - faster set impl + tests
-- logger test
