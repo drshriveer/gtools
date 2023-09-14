@@ -1,5 +1,4 @@
 name: PR Validation
-run-name: just check (lint, test)
 on: pull_request
 
 jobs:
