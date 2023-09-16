@@ -7,252 +7,249 @@ import (
 type stackType int
 
 const (
-	noStack      stackType = 0
-	sourceOnly   stackType = 1
+	noStack stackType = 0
+	// FIXME: sourceOnly could just be 1, but setting it higher means we have a few stack elements
+	// to search for a source external to this package.
+	// this is perhaps a terrible idea... .especially with generated code.
+	sourceOnly   stackType = 4
 	defaultStack stackType = 32
 )
 
-// G세늠 G세넘
+// Error exposes methods that can be used as an error type.
+type Error interface {
+	// Error implements the error interface; it returns a formatted message of the style
+	// "Name: <name>, DTag: <detailTag>, Src: <source>, Message: <message> \n <stack>
+	Error() string
 
-// FIXME: GAVIN!!
-//  - what other kinds of diagnostic info can I get?
-//        could I return the fileName? MethodName? PackageName?
-//  - what if a factory added metrics for all the times it was created?
-//  - what if a factory optimized itself to cache frequent Stack traces?
-//  - Consider: for the use of switch statements, maybe there does need to be
-//    a concept of wrapper-- but that really can be the "error" where the rest
-//    is the factory and we are essentially only comparing the factories
-//  - what if there was a _service_ Stack (appended to Stack upon passing instrumented layers)
-//    - cool? not really sure at this point what could be done with that data
-//    - maybe something clever with error graphs?
-//    - can grafana make a waterfall from
-//  - what if errors could indicate whether or not they're alarm worthy?
-//    - could be done by setting up a special namespace?
-//    - alarms.UnacceptableErrors.gshriver.<pkg_name|src_source>.method.name-detail
-//    - alarms.UnacceptableErrors.team.<pkg_name|src_source>.method.name-detail
-//    - even could include tags of people to identify... team, individual,
-//
-//  - what could we change if context was an input to factory methods)
+	// Is implements the required errors.Is interface.
+	Is(error) bool
+
+	// ExtMsgf returns a copy of the underlying error with diagnostic info and the
+	// message extended with additional context.
+	ExtMsgf(format string, elems ...any) Error
+
+	// DTagExtMsgf returns a copy of the underlying error with diagnostic info, a detail tag,
+	// and the message extended with additional context.
+	DTagExtMsgf(detailTag string, format string, elems ...any) Error
+
+	// WithDTag returns a copy of the underlying error with diagnostic info and a detail tag.
+	WithDTag(detailTag string) Error
+
+	// // Message is the unmodified message string of the error.
+	// Message() string
+	//
+	// // SourceInfo is the unmodified source string of the error.
+	// SourceInfo() string
+	//
+	// // SourceInfo is the unmodified name string of the error.
+	// Name() string
+
+	// SourceInfo is the unmodified DetailTag string of the error.
+	DTag() string
+
+	// FIXME: Maybe this
+	Unwrap() error // XXX: what would we unwrap to? a separate unknown source? a factory?
+}
 
 // The Factory interface exposes only methods that can be used for cloning an error.
 // But all errors implement this by default.
 // This allows for dynamic and mutable errors without modifying the base.
 type Factory interface {
-	error
-	// WithStack returns a copy of the underlying error with a Stack trace and diagnostic info.
-	WithStack() GError
-
-	// WithSource returns a copy of the underlying error with diagnostic info.
-	WithSource() GError
-
-	// Raw returns a copy of the underlying error without a Stack trace or diagnostic info.
-	Raw() GError
-
-	// Merge returns a copy of the underlying error with a Stack trace and diagnostic info.
-	// merges set properties into the result.
-	Merge(gError GError) GError
-
-	// FIXME: lint rules for formats! (govet)
-	// Include adds an additional error message.
-	Include(format string, elems ...any) GError
-
-	// DInclude (DetailInclude) returns a copy of the underlying error with a Stack trace,
-	// diagnostic info, an updated metric tag and a message
-	// FIXME: lint rules for formats! (govet)
-	DInclude(metricTag string, format string, elems ...any) GError
-
-	// MetricTag returns a copy of the underlying error with a Stack trace, diagnostic info,
-	// and a metric tag.
-	MetricTag(mTag string) GError
-
-	// Will try to convert an error into
-	Convert(err error) GError
-}
-
-// ErrorInterface is the basic advanced-error interface.
-type ErrorInterface interface {
-	// humm... how do I want to re-implement this to make it better
-	// than before?
-	// 1. equality checks are important
-	// 2. Stack traces and wrapping / dependency on pkgErrors?
-	// 		- ENSURE Stack (but don't add more!)
-	// 3. factory pattern?
-	// 4. global registration? (for permanent ids ?)
-	// 5. EXTENSABILITY!
-
-	// Maybe the Error interface is
-	error
-	// grpc.StatusError
-	ExtendTag(string)
-	Code()
-	MetricString() string
-	Message() string
-
-	// return the factory for comparison
-	SrcFactory() Factory
-
-	// Standard error package interfaces:
+	// Factory implements the error interface to permit switching.
 	Error() string
-	Is(error) bool
-	Unwrap() error // XXX: what would we unwrap to? a separate unknown source? a factory?
+
+	// Base returns a copy of the underlying error without modifications.
+	Base() Error
+
+	// WithStack returns a copy of the underlying error with a Stack trace and diagnostic info.
+	WithStack() Error
+
+	// WithSource returns a copy of the underlying error with SourceInfo populated if needed.
+	WithSource() Error
+
+	// ExtMsgf returns a copy of the underlying error with diagnostic info and the
+	// message extended with additional context.
+	ExtMsgf(format string, elems ...any) Error
+
+	// DTagExtMsgf returns a copy of the underlying error with diagnostic info, a detail tag,
+	// and the message extended with additional context.
+	DTagExtMsgf(detailTag string, format string, elems ...any) Error
+
+	// WithDTag returns a copy of the underlying error with diagnostic info and a detail tag.
+	WithDTag(detailTag string) Error
+
+	// Convert will attempt to convert the supplied error into a gError.Error of the
+	// Factory's type, including the source errors details in the result's error message.
+	// The original error can be retrieved via utility methods.
+	Convert(err error) Error
 }
 
-// GError is the error type which (currently) may represent an actual error or a factory.
+// GError is a base error type which may represent an actual error or a factory.
+// GError itself combines both GError and Factory implementations for two reasons
+// - to aid in extending errors
+// -
 type GError struct {
-	// The things that have to be equal:
-	Name    string
+	// The Name property is the literal name of the error as it will be represented in metrics.
+	// Generally, this should match the name of the error variable.
+	Name string
+
+	// Message is the base message of an error all errors will have.
+	// This message may be extended or modified through various functions.
+	// _Never_ programmatically modify this message.
 	Message string
 
-	// The things that don't have to be equal:
-	Source     string
-	ExtMessage string
-	MTag       string
+	// Source is an optional attribute that identifies where an error originated.
+	// If defined in a factory source is static.
+	// If not supplied source will be derived unless using a raw error.
+	// A derived source includes packageName, typeName (if applicable), and methodName.
+	Source string
 
-	// trace info:
-	Stack *Stack
+	// FIXME: VERY tempting. || RAW
+	UseFullSack bool
 
-	// consider using his as the true equality check for slices.
-	// e.g. switch gerrors.Unwrap(err) ...
-	//
-	SrcFactory *GError
+	// detailTag is a metric-safe 'tag' that can distinguish between different uses of the same error.
+	detailTag string
+
+	// stack is the stack trace info.
+	stack Stack
+
+	// srcFactory holds a reference back to the factory error that created this message.
+	// This unfortunate wrapping is required for switching.
+	srcFactory *GError
+
+	// srcError holds a reference back to the original error - this is only populated in
+	// case of a Convert() call.
+	srcError error
 }
 
 // Error implements the "error" interface.
 func (e GError) Error() string {
-	// FIXME:
-	//   - only include elements if they're present...
-	//   - source should not be so dumb?
-	return fmt.Sprintf("Name: %s, MTag: %s, Src: %s, Message: %s %s \n%s",
-		e.Name, e.MTag, e.Source, e.Message, e.ExtMessage, e.Stack)
+	const separator = ", "
+	result := ""
+	if len(e.Name) > 0 {
+		result += "Name: " + e.Name + separator
+	}
+	if len(e.detailTag) > 0 {
+		result += "DTag: " + e.detailTag + separator
+	}
+	if len(e.Source) > 0 {
+		result += "SourceInfo: " + e.Source + separator
+	}
+	result += "Message: " + e.Message
+
+	// FIXME: I think I need a check in here to know the difference between stack types.
+	// e.g. if there is only one element, I don't think i care about the rest.
+	if len(e.stack) > 0 {
+		result += "\n" + e.stack.String()
+	}
+
+	return result
 }
 
 // Is implements the required errors.Is interface.
+// FIXME: this is definitely broken.
 func (e GError) Is(err error) bool {
 	gerr, ok := err.(GError)
 	if !ok {
 		return false
 	}
+
 	// this is a possiblity
-	// return e.SrcFactory == err.SrcFactory
+	// return e.srcFactory == err.srcFactory
 	// or whatever criteria
 	return e.Message == gerr.Message && e.Name == gerr.Name
 }
 
 // WithStack is a factory method for cloning the base error with a full sack trace.
-func (e *GError) WithStack() GError {
+func (e *GError) WithStack() Error {
 	return e.clone(defaultStack)
 }
 
 // WithSource is a factory method for cloning the base error and adding source info only (a limited stack trace).
-func (e *GError) WithSource() GError {
+func (e *GError) WithSource() Error {
 	return e.clone(sourceOnly)
 }
 
-// Raw clones the base error but does not add any tracing info.
-func (e *GError) Raw() GError {
+// Base clones the base error but does not add any tracing info.
+func (e *GError) Base() Error {
 	return e.clone(noStack)
 }
 
-// Merge clones the base errors but overwrites fields passed in.
-func (e *GError) Merge(gError GError) GError {
-	clone := e.clone(noStack)
-	if len(gError.Name) > 0 {
-		clone.Name = gError.Name
-	}
-	if len(gError.Message) > 0 {
-		clone.Message = gError.Message
-	}
-	if len(gError.Source) > 0 {
-		clone.Source = gError.Source
-	}
-	if len(gError.ExtMessage) > 0 {
-		if e.ExtMessage != "" {
-			clone.ExtMessage = fmt.Sprintf("%s %s", e.ExtMessage, gError.ExtMessage)
-		} else {
-			clone.ExtMessage = gError.ExtMessage
-		}
-	}
-	if len(gError.MTag) > 0 {
-		e.MTag = gError.MTag
-	}
-	return clone
-}
-
-// Include clones the base error and adds an extended message.
-func (e *GError) Include(format string, elems ...any) GError {
+// ExtMsgf clones the base error and adds an extended message.
+func (e *GError) ExtMsgf(format string, elems ...any) Error {
 	clone := e.clone(defaultStack)
-	clone.ExtMessage = fmt.Sprintf(format, elems...)
+	clone.Message = fmt.Sprintf(clone.Message+" "+format, elems...)
 	return clone
 }
 
-// DInclude clones the base error and adds an extended message and metric tag.
-func (e *GError) DInclude(mTag string, format string, elems ...any) GError {
+// DTagExtMsgf clones the base error and adds an extended message and metric tag.
+func (e *GError) DTagExtMsgf(dTag string, format string, elems ...any) Error {
 	clone := e.clone(defaultStack)
-	clone.ExtMessage = fmt.Sprintf(format, elems...)
-	clone.MTag = mTag
+	clone.detailTag += "-" + dTag
+	clone.Message = fmt.Sprintf(clone.Message+" "+format, elems...)
 	return clone
 }
 
-// MetricTag clones the base error and adds a metric tag.
-func (e *GError) MetricTag(mTag string) GError {
+// DTag clones the base error and adds a metric tag.
+func (e *GError) WithDTag(mTag string) Error {
 	clone := e.clone(defaultStack)
-	clone.MTag = mTag
+	clone.detailTag = mTag
 	return clone
 }
 
-func (e *GError) clone(st stackType) GError {
-	clone := *e
-	clone.SrcFactory = e
-	clone.ExtMessage = ""
-	clone.MTag = ""
+func (e *GError) clone(st stackType) *GError {
+	clone := &GError{
+		Name:       e.Name,
+		Message:    e.Message,
+		Source:     e.Source,
+		detailTag:  e.detailTag,
+		srcFactory: e,
+		stack:      nil,
+		srcError:   nil,
+	}
+	if e.srcFactory != nil {
+		clone.srcFactory = e.srcFactory
+	}
 
-	if st == noStack || (st == sourceOnly && clone.Source != "") {
-		clone.Stack = nil
-	} else {
-		clone.Stack = makeStack(int(st), 4)
-		clone.Source = (*clone.Stack)[0].Metric()
-		if st == sourceOnly {
-			clone.Stack = nil
-		}
+	if st == noStack {
+		return clone
+	} else if st == sourceOnly && len(clone.Source) > 0 {
+		return clone
+	}
+
+	clone.stack = makeStack(int(st), 4)
+	// XXX: Fix this: try to generate first stack outside of package.
+	clone.Source = (clone.stack)[0].Metric()
+	if st == sourceOnly {
+		clone.stack = nil
 	}
 	return clone
 }
 
 // Convert attempts translates a non-gerror of an unknown kind into this base error.
-func (e *GError) Convert(err error) GError {
+func (e *GError) Convert(err error) Error {
 	switch v := err.(type) {
 	case GError:
-		return v
+		return &v
 	case *GError:
-		return *v
+		return v
 	}
 
 	clone := e.clone(defaultStack)
-	clone.ExtMessage = fmt.Sprintf("originalError: %+v", err)
+	clone.Message += fmt.Sprintf(" originalError: %+v", err)
+	e.srcError = e
 
 	return clone
 }
 
 // Unwrap is for unwrapping errors to get to the source.
 func (e *GError) Unwrap() error {
-	if e.SrcFactory != nil {
-		return e.SrcFactory
+	if e.srcFactory != nil {
+		return e.srcFactory
 	}
 	return e
 }
 
-// Unwrap finds the base error.
-func Unwrap(err error) error {
-	switch v := err.(type) {
-	case GError:
-		if v.SrcFactory != nil {
-			return v.SrcFactory
-		}
-	case *GError:
-		if v.SrcFactory != nil {
-			return v.SrcFactory
-		}
-	}
-	// dunno if any further unwrapping is required...
-	return err
+func (e *GError) DTag() string {
+	return e.detailTag
 }

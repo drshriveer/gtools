@@ -129,3 +129,4 @@ Usage of ./bin/genum:
 
 ### TODO: 
 - consider making traits explicitly defined in comments or as input value. 
+- uniqueness constraint and reverse mapping from traits

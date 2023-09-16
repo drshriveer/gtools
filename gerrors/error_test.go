@@ -1,14 +1,12 @@
-package gerrors_test
+package gerrors
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/drshriveer/gtools/gerrors"
 )
 
-var ErrMyError1 = gerrors.GError{
+var ErrMyError1 = GError{
 	Name:    "ErrMyError1",
 	Message: "this is error 1",
 }
@@ -20,40 +18,42 @@ func (a AType) ReturnsError() error {
 	return ErrMyError1.WithStack()
 }
 
+// FIXME! TEST INLINE FUNCTION
+
 func TestGError_WithStack(t *testing.T) {
-	err := ErrMyError1.WithStack()
+	err := ErrMyError1.WithStack().(*GError)
 	assert.NotSame(t, ErrMyError1, &err)
-	assert.Equal(t, "gerrors_test:TestGError_WithStack", err.Source)
-	assert.NotEmpty(t, err.Stack)
-	assert.Same(t, err.SrcFactory, &ErrMyError1)
+	assert.Equal(t, "gerrors:TestGError_WithStack", err.Source)
+	assert.NotEmpty(t, err.stack)
+	assert.Same(t, err.srcFactory, &ErrMyError1)
 	// ensure unchanged:
 	assert.Empty(t, ErrMyError1.Source)
-	assert.Empty(t, ErrMyError1.Stack)
+	assert.Empty(t, ErrMyError1.stack)
 
 	strukt := &AType{}
-	err = strukt.ReturnsError().(gerrors.GError)
+	err = strukt.ReturnsError().(*GError)
 	assert.NotSame(t, ErrMyError1, &err)
-	assert.Equal(t, "gerrors_test:AType:ReturnsError", err.Source)
-	assert.NotEmpty(t, err.Stack)
-	assert.Same(t, err.SrcFactory, &ErrMyError1)
+	assert.Equal(t, "gerrors:AType:ReturnsError", err.Source)
+	assert.NotEmpty(t, err.stack)
+	assert.Same(t, err.srcFactory, &ErrMyError1)
 	// ensure unchanged:
 	assert.Empty(t, ErrMyError1.Source)
-	assert.Empty(t, ErrMyError1.Stack)
+	assert.Empty(t, ErrMyError1.stack)
 }
 
-func TestGError_Include(t *testing.T) {
-	err := ErrMyError1.Include("T-Shirts $%d", 5)
+func TestGError_ExtMsgf(t *testing.T) {
+	err := ErrMyError1.ExtMsgf("T-Shirts $%d", 5).(*GError)
 	assert.NotSame(t, ErrMyError1, &err)
-	assert.Equal(t, "gerrors_test:TestGError_Include", err.Source)
-	assert.NotEmpty(t, err.Stack)
-	assert.Equal(t, "T-Shirts $5", err.ExtMessage)
-	assert.Same(t, err.SrcFactory, &ErrMyError1)
+	assert.Equal(t, "gerrors:TestGError_ExtMsgf", err.Source)
+	assert.NotEmpty(t, err.stack)
+	assert.Equal(t, ErrMyError1.Message+" T-Shirts $5", err.Message)
+	assert.Same(t, err.srcFactory, &ErrMyError1)
 	// ensure unchanged:
 	assert.Empty(t, ErrMyError1.Source)
-	assert.Empty(t, ErrMyError1.Stack)
-	assert.Empty(t, ErrMyError1.ExtMessage)
+	assert.Empty(t, ErrMyError1.stack)
+	assert.Equal(t, "this is error 1", ErrMyError1.Message)
 
-	switch gerrors.Unwrap(err) {
+	switch Unwrap(err) {
 	case &ErrMyError1:
 	default:
 		assert.Fail(t, "darn")
@@ -93,6 +93,6 @@ func BenchmarkGError_WithStack(b *testing.B) {
 // BenchmarkGError_Raw-10           	41166675	        28.91 ns/op <-- with pointer.
 func BenchmarkGError_Raw(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = ErrMyError1.Raw()
+		_ = ErrMyError1.Base()
 	}
 }
