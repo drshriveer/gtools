@@ -47,6 +47,7 @@ generate target='all': _tools-generate
 # @go install github.com/drshriveer/gtools/genum/genum@{{ GENUM_VERSION }}
 _tools-generate:
     go build -o bin/genum genum/genum/main.go
+    go build -o bin/gsort gsort/cmd/main.go
 
 # a the placeholder `{}` which is the path to the correct module.
 _invokeMod cmd target='all':

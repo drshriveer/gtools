@@ -1,6 +1,8 @@
 package internal
 
-//go:generate gensort -types=Sortable
+// Sortable is for testing.
+//
+//go:generate gensort -types Sortable=Sortables
 type Sortable struct {
 	Category     Category `gsort:"1,String()"`
 	Property1    string   `gsort:"2"`
@@ -8,23 +10,27 @@ type Sortable struct {
 	UnsortedProp string
 }
 
-// Category exists to test the stringify tag
+// Category exists to test the stringify tag.
 type Category int
 
+// These are just test enums.
 const (
-	unset Category = iota
-	aCategory
-	bCategory
+	Unset Category = iota
+	ACategory
+	BCategory
+	CCategory
 )
 
 func (c Category) String() string {
 	switch c {
-	case unset:
-		return "unset"
-	case aCategory:
-		return "aCategory"
-	case bCategory:
-		return "bCategory"
+	case Unset:
+		return "Unset"
+	case ACategory:
+		return "ACategory"
+	case BCategory:
+		return "BCategory"
+	case CCategory:
+		return "CCategory"
 	}
 	return "failed"
 }

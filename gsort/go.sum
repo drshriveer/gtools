@@ -1,5 +1,7 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/drshriveer/gtools/set v0.0.0-20230915011350-8d283eb04d19 h1:tWFabBbrJG+Ssbc+3ZVxl8FzG8hJS5HFqjIvDJ8p3g0=
+github.com/drshriveer/gtools/set v0.0.0-20230915011350-8d283eb04d19/go.mod h1:1rPgBBRn568yebYEEXdbC9vgfK8h/z0c5Sqenlqyq3g=
 github.com/fatih/structtag v1.2.0 h1:/OdNE99OxoI/PqaW/SuSK9uxxT3f/tcSZgon/ssNSx4=
 github.com/fatih/structtag v1.2.0/go.mod h1:mBJUNpUnHmRKrKlQQlmCrh5PuhftFbNv8Ys4/aAZl94=
 github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=

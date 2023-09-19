@@ -2,8 +2,9 @@ package main
 
 import (
 	"flag"
-	"github.com/itzg/go-flagsfiller"
 	"log"
+
+	"github.com/itzg/go-flagsfiller"
 
 	"github.com/drshriveer/gtools/gsort/gen"
 

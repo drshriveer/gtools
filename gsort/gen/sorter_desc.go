@@ -2,16 +2,21 @@ package gen
 
 import (
 	"errors"
-	"github.com/fatih/structtag"
 	"go/types"
 	"sort"
 	"strconv"
 
+	"github.com/fatih/structtag"
+
 	"github.com/drshriveer/gtools/set"
 )
 
+// SorterDesc is a description of a sorter.
 type SorterDesc struct {
+	// The underlying type name (that we're making sortable).
 	TypeName string
+
+	// The name of the sortable type.
 	SortType string
 	Fields   SortFieldDescs
 }
@@ -69,6 +74,7 @@ func createSorterDesc(obj types.Object, typeName, sortableTypeName string) (*Sor
 	}, nil
 }
 
+// SortFieldDescs - a sortable interface for fieldDescriptions.
 type SortFieldDescs []*SortFieldDesc
 
 func (s SortFieldDescs) Len() int {
@@ -81,6 +87,7 @@ func (s SortFieldDescs) Less(i, j int) bool {
 	return s[i].Priority < s[j].Priority
 }
 
+// Validate returns an error if anything is broken.
 func (s SortFieldDescs) Validate() error {
 	// TODO: could add more diagnostic info here, but too lazy for now.
 	known := set.Make[int]()
@@ -93,6 +100,7 @@ func (s SortFieldDescs) Validate() error {
 	return nil
 }
 
+// SortFieldDesc describes a single field used for sorting.
 type SortFieldDesc struct {
 	FieldName      string
 	CustomAccessor string
@@ -127,11 +135,15 @@ func sortFieldDescFromTag(fName, tagLine string) (*SortFieldDesc, error) {
 	return result, nil
 }
 
+// CompareLine is what's actually used by the template to generate if/else statements.
 type CompareLine struct {
+	// Accessor is how to access the field that sorts things.
 	Accessor string
-	Nest     *CompareLine
+	// Nest is another if/template call to be nested in an if statement.
+	Nest *CompareLine
 }
 
+// HasNest is a helper for templates.
 func (c CompareLine) HasNest() bool {
 	return c.Nest != nil
 }
