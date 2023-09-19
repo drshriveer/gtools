@@ -77,7 +77,7 @@ func getFromCache[T any](cfg *Config, key string) (T, error) {
 	})
 
 	if err != nil {
-		return r, gerrors.Include(err, "key="+key)
+		return r, gerrors.ExtMsgf(err, "key="+key)
 	}
 
 	return v.(T), nil
@@ -90,12 +90,12 @@ func extractAndConvert[T any](m map[string]any, key string) (T, error) {
 	result := *new(T)
 	v, ok := extract(m, paths)
 	if !ok {
-		return result, ErrConfigFailure.Include("key `%s` not found", key)
+		return result, ErrConfigFailure.ExtMsgf("key `%s` not found", key)
 	}
 
 	bytes, err := yaml.Marshal(v)
 	if err != nil {
-		return result, ErrConfigFailure.Include("key `%s` failed conversion back to yaml %+v", key, err)
+		return result, ErrConfigFailure.ExtMsgf("key `%s` failed conversion back to yaml %+v", key, err)
 	}
 
 	err = yaml.Unmarshal(bytes, &result)

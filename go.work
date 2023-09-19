@@ -4,6 +4,7 @@ use (
 	./gconfig
 	./genum
 	./gerrors
+	./gsort
 	./gsync
 	./log
 	./rutils

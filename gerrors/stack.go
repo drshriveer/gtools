@@ -36,7 +36,7 @@ func (s Stack) NearestExternal() StackElem {
 func getCurrentPackage() (string, bool) {
 	pc, _, _, _ := runtime.Caller(1)
 	splitName := strings.Split(pcToStackElem(pc).Name, ".")
-	if len(splitName[:]) == 0 { // should literally be impossible?
+	if len(splitName) == 0 { // should literally be impossible?
 		return "", false
 	}
 	return strings.Join(splitName[:len(splitName)-1], "."), true
@@ -98,7 +98,7 @@ func makeStack(depth, skip int) Stack {
 }
 
 func pcToStackElem(pc uintptr) StackElem {
-	pc = pc - 1
+	pc--
 	fu := runtime.FuncForPC(pc)
 	if fu == nil {
 		return StackElem{Name: "unknown", File: "unknown"}

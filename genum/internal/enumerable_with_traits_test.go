@@ -59,7 +59,7 @@ func TestEnumerableWithTraitsGeneration(t *testing.T) {
 			generator := gen.Generate{
 				InFile:        "./enumerable_with_traits.go",
 				OutFile:       "./enumerable_with_traits.genum.go",
-				EnumTypeNames: []string{test.enumName},
+				Types:         []string{test.enumName},
 				GenJSON:       true,
 				GenYAML:       true,
 				GenText:       true,

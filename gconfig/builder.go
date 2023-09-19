@@ -53,7 +53,7 @@ func (d *dimension) initFlag() error {
 	eType := reflect.TypeOf(d.defaultVal)
 	ptrVal, ok := reflect.New(eType).Interface().(encoding.TextUnmarshaler)
 	if !ok {
-		return ErrFailedParsing.Include(
+		return ErrFailedParsing.ExtMsgf(
 			"genum %T does not implement encoding.TextUnmarshaler as required",
 			d.defaultVal)
 	}
@@ -146,7 +146,7 @@ func (b *Builder) FromBytes(bytes []byte) (*Config, error) {
 	}
 	result, ok := d.(map[string]any)
 	if !ok {
-		return nil, ErrFailedParsing.Include("unexpected non-map result")
+		return nil, ErrFailedParsing.ExtMsgf("unexpected non-map result")
 	}
 
 	dims := make(map[reflect.Type]genum.Enum, len(b.dimensions))
@@ -233,7 +233,7 @@ func reduce(in map[string]any, dimensions []dimension, dIndex int) (any, error) 
 	// 2. These keys are meant to be part of a map... i.e. intentionally missing properties.
 	// ...going with #1.
 	keys, _ = keySet(in)
-	return nil, ErrFailedParsing.Include(
+	return nil, ErrFailedParsing.ExtMsgf(
 		"broken dimension key! %T dimensions identified around keys %s, but no `default` or `%s` value found.",
 		dimension.defaultVal, keys.Slice(), dimension.parsed)
 }

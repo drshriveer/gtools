@@ -97,7 +97,7 @@ func (wg *SelectableWaitGroup3) WaitTimeout(timeout time.Duration) error {
 	defer timer.Stop()
 	select {
 	case <-timer.C:
-		return gsync.ErrWGTimeout.Raw()
+		return gsync.ErrWGTimeout.Base()
 	case <-wg.Wait():
 		return nil
 	}

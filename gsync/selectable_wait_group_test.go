@@ -2,6 +2,7 @@ package gsync_test
 
 import (
 	"context"
+	"errors"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -9,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/drshriveer/gtools/gerrors"
 	"github.com/drshriveer/gtools/gsync"
 )
 
@@ -17,12 +17,12 @@ func TestSelectableWaitGroup_Wait(t *testing.T) {
 	wg := gsync.NewSelectableWaitGroup()
 	wg.Add(1)
 	err := wg.WaitTimeout(100 * time.Millisecond)
-	assert.Equal(t, gsync.ErrWGTimeout, gerrors.Unwrap(err))
+	assert.Equal(t, gsync.ErrWGTimeout, errors.Unwrap(err))
 
 	ctx, done := context.WithTimeout(context.TODO(), 100*time.Millisecond)
 	defer done()
 	err = wg.WaitCTX(ctx)
-	assert.Equal(t, context.DeadlineExceeded, gerrors.Unwrap(err))
+	assert.Equal(t, context.DeadlineExceeded, errors.Unwrap(err))
 
 	ready := make(chan struct{})
 	wg2 := gsync.NewSelectableWaitGroup()

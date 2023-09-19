@@ -1,5 +1,11 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/drshriveer/gtools/genum v0.0.0-20230915011350-8d283eb04d19 h1:JGGmmrNTWrn+jGelri2MpvyY6ZA8CElfY7PyJQQ1hy0=
+github.com/drshriveer/gtools/genum v0.0.0-20230915011350-8d283eb04d19/go.mod h1:+wMrTaOyxPaPqnjQqY1Rm9PEsL5n/EG6knLQusIEVG4=
+github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
+github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
+github.com/itzg/go-flagsfiller v1.12.0 h1:LSwSUGxzZqueprm0D8FBCAG0JMgwAkkh2UjtwreNgAg=
+github.com/itzg/go-flagsfiller v1.12.0/go.mod h1:47WeO9fl+QyS48AdRHfarhF3rKBh0enbe90tTko03gg=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=

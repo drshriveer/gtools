@@ -2,9 +2,10 @@ package gerrors_test
 
 import (
 	"errors"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 
 	"github.com/drshriveer/gtools/gerrors"
 )
@@ -21,11 +22,17 @@ import (
 // 1. how to clone the parent error. A FactoryOf-type pattern should work for this, when the result is an Error type.
 // 2. filed tags can be used to do the actual cloning as well.
 
+// clone:
+//
+//go:generate gerror types=ExtendedError
 type ExtendedError struct {
 	gerrors.GError
-	GRPCStatus  Status `gerror:"clone,print"`
-	SomeMessage string `gerror:"clone,print"`
-	DoNotPrint  string `gerror:"clone"`
+	// FXIME FACTORY!
+	GRPCStatus  Status `gerror:"print,factory"`
+	SomeMessage string `gerror:"print"`
+
+	// Do not print, or create a factory for
+	DoNotPrint string
 }
 
 var ErrExtendedExample = gerrors.FactoryOf(&ExtendedError{

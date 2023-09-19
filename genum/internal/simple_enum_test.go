@@ -19,12 +19,12 @@ import (
 
 func TestSimpleEnumGeneration(t *testing.T) {
 	generator := gen.Generate{
-		InFile:        "./simple_enum.go",
-		OutFile:       "./simple_enum.genum.go",
-		EnumTypeNames: []string{"MyEnum", "MyEnum2", "MyEnum3"},
-		GenJSON:       true,
-		GenYAML:       true,
-		GenText:       true,
+		InFile:  "./simple_enum.go",
+		OutFile: "./simple_enum.genum.go",
+		Types:   []string{"MyEnum", "MyEnum2", "MyEnum3"},
+		GenJSON: true,
+		GenYAML: true,
+		GenText: true,
 	}
 
 	require.NoError(t, generator.Parse())

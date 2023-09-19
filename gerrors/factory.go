@@ -45,6 +45,7 @@ type Factory interface {
 	Is(error) bool
 }
 
+//nolint:errname
 type factoryImpl struct {
 	ref         Error // for equality
 	embedded    *GError

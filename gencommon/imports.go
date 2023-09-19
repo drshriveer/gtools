@@ -1,7 +1,8 @@
-package gen
+package gencommon
 
 import (
 	"fmt"
+	"go/ast"
 	"go/types"
 	"sort"
 	"strings"
@@ -20,7 +21,27 @@ type ImportDescs struct {
 	imports        map[string]*ImportDesc
 }
 
-func (id ImportDescs) extractTypeRef(t types.Type) string {
+// CalcImports the imports relevant to a specific package and ImportSpec.
+func CalcImports(importSpecs []*ast.ImportSpec, pkg *types.Package) ImportDescs {
+	result := ImportDescs{
+		currentPackage: pkg,
+		imports:        make(map[string]*ImportDesc, len(importSpecs)),
+	}
+
+	for _, iSpec := range importSpecs {
+		pkgPath := strings.Trim(iSpec.Path.Value, `"`)
+		result.imports[pkgPath] = &ImportDesc{
+			Alias:   iSpec.Name.Name,
+			PkgPath: pkgPath,
+			inUse:   false,
+		}
+	}
+
+	return result
+}
+
+// ExtractTypeRef returns the way the type should be referenced in code.
+func (id ImportDescs) ExtractTypeRef(t types.Type) string {
 	// "named" means it is a type which may require importing.
 	named, ok := t.(*types.Named)
 	if !ok {
@@ -64,4 +85,9 @@ func (id ImportDescs) GetActive() []ImportDesc {
 		return result[i].PkgPath < result[j].PkgPath
 	})
 	return result
+}
+
+// HasActiveImports returns true if there are any active imports.
+func (id ImportDescs) HasActiveImports() bool {
+	return len(id.GetActive()) > 0
 }
