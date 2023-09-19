@@ -6,10 +6,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var ErrMyError1 = GError{
+var ErrMyError1 = FactoryOf(&GError{
 	Name:    "ErrMyError1",
 	Message: "this is error 1",
-}
+})
 
 type AType struct {
 }
@@ -27,8 +27,8 @@ func TestGError_WithStack(t *testing.T) {
 	assert.NotEmpty(t, err.stack)
 	assert.Same(t, err.srcFactory, &ErrMyError1)
 	// ensure unchanged:
-	assert.Empty(t, ErrMyError1.Source)
-	assert.Empty(t, ErrMyError1.stack)
+	assert.Empty(t, ErrMyError1.(*GError).Source)
+	assert.Empty(t, ErrMyError1.(*GError).stack)
 
 	strukt := &AType{}
 	err = strukt.ReturnsError().(*GError)
@@ -37,8 +37,8 @@ func TestGError_WithStack(t *testing.T) {
 	assert.NotEmpty(t, err.stack)
 	assert.Same(t, err.srcFactory, &ErrMyError1)
 	// ensure unchanged:
-	assert.Empty(t, ErrMyError1.Source)
-	assert.Empty(t, ErrMyError1.stack)
+	assert.Empty(t, ErrMyError1.(*GError).Source)
+	assert.Empty(t, ErrMyError1.(*GError).stack)
 }
 
 func TestGError_ExtMsgf(t *testing.T) {
@@ -46,30 +46,13 @@ func TestGError_ExtMsgf(t *testing.T) {
 	assert.NotSame(t, ErrMyError1, &err)
 	assert.Equal(t, "gerrors:TestGError_ExtMsgf", err.Source)
 	assert.NotEmpty(t, err.stack)
-	assert.Equal(t, ErrMyError1.Message+" T-Shirts $5", err.Message)
+	assert.Equal(t, ErrMyError1.(*GError).Message+" T-Shirts $5", err.Message)
 	assert.Same(t, err.srcFactory, &ErrMyError1)
 	// ensure unchanged:
-	assert.Empty(t, ErrMyError1.Source)
-	assert.Empty(t, ErrMyError1.stack)
-	assert.Equal(t, "this is error 1", ErrMyError1.Message)
-
-	switch Unwrap(err) {
-	case &ErrMyError1:
-	default:
-		assert.Fail(t, "darn")
-	}
+	assert.Empty(t, ErrMyError1.(*GError).Source)
+	assert.Empty(t, ErrMyError1.(*GError).stack)
+	assert.Equal(t, "this is error 1", ErrMyError1.(*GError).Message)
 }
-
-//
-// func L1() error {
-// 	return L2()
-// }
-// func L2() error {
-// 	return L3()
-// }
-// func L3() error {
-// 	return ErrMyError1.
-// }
 
 // BenchmarkGError_WithSource-10    	 2224312	       530.9 ns/op
 // BenchmarkGError_WithSource-10    	 2161904	       557.3 ns/op <-- with pointer

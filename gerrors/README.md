@@ -80,6 +80,9 @@ var ErrInvalidArgument = GErrorFactory{
 - Run the `go generate` command.
 - Code will be generated and written to file `<filanme>.genum.go` in the same package.
 
+### Limitations: 
+- Does not print extended gerror fields that have been mutated. i.e. mutations after an error is created via factory are limited to message and detail tag.
+- cloned fields _must be immutable_.
 
 ### TODO:
 - Consider factory Config:

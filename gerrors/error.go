@@ -10,9 +10,16 @@ const (
 	noStack stackType = 0
 	// FIXME: sourceOnly could just be 1, but setting it higher means we have a few stack elements
 	// to search for a source external to this package.
-	// this is perhaps a terrible idea... .especially with generated code.
+	// this is perhaps a terrible idea.
 	sourceOnly   stackType = 4
 	defaultStack stackType = 32
+)
+
+const (
+	// gerrSkip is the number of lines to skip for a base GError
+	gerrSkip = 4
+	// factorySkip is the number of stack elements to skip for an err factory.
+	factorySkip = 5
 )
 
 // Error exposes methods that can be used as an error type.
@@ -24,70 +31,36 @@ type Error interface {
 	// Is implements the required errors.Is interface.
 	Is(error) bool
 
-	// ExtMsgf returns a copy of the underlying error with diagnostic info and the
+	// ExtMsgf returns a copy of the embedded error with diagnostic info and the
 	// message extended with additional context.
 	ExtMsgf(format string, elems ...any) Error
 
-	// DTagExtMsgf returns a copy of the underlying error with diagnostic info, a detail tag,
+	// DTagExtMsgf returns a copy of the embedded error with diagnostic info, a detail tag,
 	// and the message extended with additional context.
 	DTagExtMsgf(detailTag string, format string, elems ...any) Error
 
-	// WithDTag returns a copy of the underlying error with diagnostic info and a detail tag.
+	// WithDTag returns a copy of the embedded error with diagnostic info and a detail tag.
 	WithDTag(detailTag string) Error
 
-	// // Message is the unmodified message string of the error.
-	// Message() string
-	//
-	// // SourceInfo is the unmodified source string of the error.
-	// SourceInfo() string
-	//
-	// // SourceInfo is the unmodified name string of the error.
-	// Name() string
+	// ErrMessage returns the error's message.
+	ErrMessage() string
 
-	// SourceInfo is the unmodified DetailTag string of the error.
+	// ErrSource returns the source of the error.
+	ErrSource() string
+
+	// ErrName returns the name of the error.
+	ErrName() string
+
+	// DTag returns the error detail tag.
 	DTag() string
 
 	// FIXME: Maybe this
 	Unwrap() error // XXX: what would we unwrap to? a separate unknown source? a factory?
+
+	_embededGError() *GError
 }
 
-// The Factory interface exposes only methods that can be used for cloning an error.
-// But all errors implement this by default.
-// This allows for dynamic and mutable errors without modifying the base.
-type Factory interface {
-	// Factory implements the error interface to permit switching.
-	Error() string
-
-	// Base returns a copy of the underlying error without modifications.
-	Base() Error
-
-	// WithStack returns a copy of the underlying error with a Stack trace and diagnostic info.
-	WithStack() Error
-
-	// WithSource returns a copy of the underlying error with SourceInfo populated if needed.
-	WithSource() Error
-
-	// ExtMsgf returns a copy of the underlying error with diagnostic info and the
-	// message extended with additional context.
-	ExtMsgf(format string, elems ...any) Error
-
-	// DTagExtMsgf returns a copy of the underlying error with diagnostic info, a detail tag,
-	// and the message extended with additional context.
-	DTagExtMsgf(detailTag string, format string, elems ...any) Error
-
-	// WithDTag returns a copy of the underlying error with diagnostic info and a detail tag.
-	WithDTag(detailTag string) Error
-
-	// Convert will attempt to convert the supplied error into a gError.Error of the
-	// Factory's type, including the source errors details in the result's error message.
-	// The original error can be retrieved via utility methods.
-	Convert(err error) Error
-}
-
-// GError is a base error type which may represent an actual error or a factory.
-// GError itself combines both GError and Factory implementations for two reasons
-// - to aid in extending errors
-// -
+// GError is a base error type that can be extended and turned into a factory.
 type GError struct {
 	// The Name property is the literal name of the error as it will be represented in metrics.
 	// Generally, this should match the name of the error variable.
@@ -104,9 +77,6 @@ type GError struct {
 	// A derived source includes packageName, typeName (if applicable), and methodName.
 	Source string
 
-	// FIXME: VERY tempting. || RAW
-	UseFullSack bool
-
 	// detailTag is a metric-safe 'tag' that can distinguish between different uses of the same error.
 	detailTag string
 
@@ -115,15 +85,26 @@ type GError struct {
 
 	// srcFactory holds a reference back to the factory error that created this message.
 	// This unfortunate wrapping is required for switching.
-	srcFactory *GError
+	srcFactory Error
 
 	// srcError holds a reference back to the original error - this is only populated in
 	// case of a Convert() call.
 	srcError error
+
+	// extensionString is a Key: Value string that is added to the Error() print out.
+	// This string is constructed via the FactoryOf method if there is a struct tag that
+	// indicates it should be included.
+	extensionString string
+
+	skipLines int
+}
+
+func (e *GError) _embededGError() *GError {
+	return e
 }
 
 // Error implements the "error" interface.
-func (e GError) Error() string {
+func (e *GError) Error() string {
 	const separator = ", "
 	result := ""
 	if len(e.Name) > 0 {
@@ -134,6 +115,9 @@ func (e GError) Error() string {
 	}
 	if len(e.Source) > 0 {
 		result += "SourceInfo: " + e.Source + separator
+	}
+	if len(e.extensionString) > 0 {
+		result += e.extensionString
 	}
 	result += "Message: " + e.Message
 
@@ -147,17 +131,23 @@ func (e GError) Error() string {
 }
 
 // Is implements the required errors.Is interface.
-// FIXME: this is definitely broken.
-func (e GError) Is(err error) bool {
-	gerr, ok := err.(GError)
-	if !ok {
-		return false
+func (e *GError) Is(err error) bool {
+	if e.srcFactory != nil {
+		return e.srcFactory.Is(err)
+	}
+	if e == err ||
+		e.srcFactory != nil && e.srcError == err ||
+		e.srcError != nil && e.srcError == err {
+		return true
+	}
+	switch v := err.(type) {
+	case Error:
+		return e.Is(v.Unwrap())
+	case Factory:
+		return v.Is(e)
 	}
 
-	// this is a possiblity
-	// return e.srcFactory == err.srcFactory
-	// or whatever criteria
-	return e.Message == gerr.Message && e.Name == gerr.Name
+	return false
 }
 
 // WithStack is a factory method for cloning the base error with a full sack trace.
@@ -197,6 +187,18 @@ func (e *GError) WithDTag(mTag string) Error {
 	return clone
 }
 
+func (e *GError) ErrMessage() string {
+	return e.Message
+}
+
+func (e *GError) ErrSource() string {
+	return e.Source
+}
+
+func (e *GError) ErrName() string {
+	return e.Name
+}
+
 func (e *GError) clone(st stackType) *GError {
 	clone := &GError{
 		Name:       e.Name,
@@ -217,7 +219,12 @@ func (e *GError) clone(st stackType) *GError {
 		return clone
 	}
 
-	clone.stack = makeStack(int(st), 4)
+	if e.skipLines == 0 {
+		clone.stack = makeStack(int(st), gerrSkip)
+	} else {
+		clone.stack = makeStack(int(st), e.skipLines)
+	}
+
 	// XXX: Fix this: try to generate first stack outside of package.
 	clone.Source = (clone.stack)[0].Metric()
 	if st == sourceOnly {
@@ -229,8 +236,8 @@ func (e *GError) clone(st stackType) *GError {
 // Convert attempts translates a non-gerror of an unknown kind into this base error.
 func (e *GError) Convert(err error) Error {
 	switch v := err.(type) {
-	case GError:
-		return &v
+	// case GError:
+	// 	return &v
 	case *GError:
 		return v
 	}
@@ -242,14 +249,14 @@ func (e *GError) Convert(err error) Error {
 	return clone
 }
 
+func (e *GError) DTag() string {
+	return e.detailTag
+}
+
 // Unwrap is for unwrapping errors to get to the source.
 func (e *GError) Unwrap() error {
 	if e.srcFactory != nil {
 		return e.srcFactory
 	}
 	return e
-}
-
-func (e *GError) DTag() string {
-	return e.detailTag
 }
