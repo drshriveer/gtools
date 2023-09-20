@@ -49,7 +49,6 @@ func Write(tmpl *template.Template, templateData any, destination string) error 
 	if err != nil {
 		log.Printf("[WARN] - formatting of source file failed with error: %+v", err)
 		result = buf.Bytes()
-		err = nil
 	}
 
 	f, err := os.OpenFile(destination, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)

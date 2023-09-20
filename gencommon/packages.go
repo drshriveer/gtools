@@ -5,11 +5,13 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"golang.org/x/tools/go/packages"
 	"path"
 	"path/filepath"
+
+	"golang.org/x/tools/go/packages"
 )
 
+// LoadPackages is a utility for parsing packages etc of a given file.
 func LoadPackages(inFile string) (*token.FileSet, *packages.Package, *ast.Package, error) {
 	cfg := &packages.Config{
 		Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles |
@@ -39,10 +41,11 @@ func LoadPackages(inFile string) (*token.FileSet, *packages.Package, *ast.Packag
 }
 
 func dir(p *packages.Package) string {
-	files := append(p.GoFiles, p.OtherFiles...)
-	if len(files) < 1 {
-		return p.PkgPath
+	if len(p.GoFiles) > 0 {
+		return filepath.Dir(p.GoFiles[0])
 	}
-
-	return filepath.Dir(files[0])
+	if len(p.OtherFiles) > 0 {
+		return filepath.Dir(p.OtherFiles[0])
+	}
+	return p.PkgPath
 }

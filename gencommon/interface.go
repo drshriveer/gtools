@@ -2,6 +2,7 @@ package gencommon
 
 import (
 	"go/ast"
+
 	"golang.org/x/tools/go/packages"
 )
 

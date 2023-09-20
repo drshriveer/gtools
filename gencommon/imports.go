@@ -3,9 +3,10 @@ package gencommon
 import (
 	"fmt"
 	"go/types"
-	"golang.org/x/tools/go/packages"
 	"sort"
 	"strings"
+
+	"golang.org/x/tools/go/packages"
 
 	"github.com/drshriveer/gtools/set"
 )
