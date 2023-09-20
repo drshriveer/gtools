@@ -13,8 +13,8 @@ require (
 )
 
 replace (
-	github.com/drshriveer/gtools/genum v0.0.0 => ../genum
 	github.com/drshriveer/gtools/genncommon v0.0.0 => ../gencommon // indirect
+	github.com/drshriveer/gtools/genum v0.0.0 => ../genum
 	github.com/drshriveer/gtools/gerrors v0.0.0 => ../gerrors
 	github.com/drshriveer/gtools/rutils v0.0.0 => ../rutils
 	github.com/drshriveer/gtools/set v0.0.0 => ../set

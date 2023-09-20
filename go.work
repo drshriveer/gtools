@@ -2,6 +2,7 @@ go 1.21.1
 
 use (
 	./gconfig
+	./gencommon
 	./genum
 	./gerrors
 	./gsort
@@ -9,5 +10,4 @@ use (
 	./log
 	./rutils
 	./set
-	./gencommon
 )
