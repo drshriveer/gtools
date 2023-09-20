@@ -10,9 +10,6 @@ import (
 type ErrorDesc struct {
 	TypeName string `gsort:"1"`
 	Fields   Fields
-
-	// Comments are related to methods.
-	Comments map[string]string
 }
 
 // FieldsToPrint returns fields that need to be included in Error() messages.

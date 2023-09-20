@@ -2,8 +2,9 @@ package internal_test
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/stretchr/testify/require"
 
@@ -42,8 +43,12 @@ func TestExtendedError_Equality(t *testing.T) {
 	convertedErr := internal.ErrExtendedExample.Convert(errToConvert)
 	assert.True(t, errors.Is(convertedErr, internal.ErrExtendedExample))
 	assert.True(t, errors.Is(convertedErr, errToConvert))
-	assert.True(t, errors.Is(convertedErr, errToConvert))
+	// XXX: not really sure i like this.
+	assert.False(t, errors.Is(errToConvert, convertedErr))
 
+	// Switches _still_ fucking fail.
+	// FFF Gavin!!
+	// should we just accept error wrapping?
 	switch errors.Unwrap(err2) {
 	case internal.ErrExtendedExample:
 	default:

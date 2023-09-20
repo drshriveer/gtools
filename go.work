@@ -9,4 +9,5 @@ use (
 	./log
 	./rutils
 	./set
+	./gencommon
 )

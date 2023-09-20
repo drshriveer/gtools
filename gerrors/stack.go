@@ -6,6 +6,32 @@ import (
 	"strings"
 )
 
+// StackType identifies the depth of a stack desired.
+// Generating stacks requires significant computation, smaller stacks use less.
+type StackType int
+
+const (
+	// NoStack means do not generate a stack.
+	NoStack StackType = 0
+	// SourceStack retrieves the minimum sack possible to populate "source".
+	// Note; this is a noop for errors with a defined source.
+	SourceStack StackType = 1
+	// ShortStack gets a max stack of 16 elements.
+	ShortStack StackType = 16
+	// DefaultStack gets a max stack of 32 elements.
+	DefaultStack StackType = 32
+)
+
+// StackSkip indicates how many stack layers to skip to get the correct start point.
+type StackSkip int
+
+const (
+	// defaultSkip is 4 because that is how many layers the stack processor itself consumes.
+	defaultSkip = 4
+	// FactorySkip is 5 because it adds a layer to skip.
+	FactorySkip = 5
+)
+
 // A Stack represents each line of a Stack trace.
 type Stack []StackElem
 
@@ -85,9 +111,9 @@ func (e StackElem) Metric() string {
 	return convertToMetricNode(pkg, tName, fName)
 }
 
-func makeStack(depth, skip int) Stack {
+func makeStack(depth StackType, skip StackSkip) Stack {
 	pcs := make([]uintptr, depth)
-	n := runtime.Callers(skip, pcs)
+	n := runtime.Callers(int(skip), pcs)
 	pcs = pcs[0:n] // drop unwritten elements.
 	stack := make(Stack, n)
 	for i := range stack {

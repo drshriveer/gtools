@@ -98,3 +98,12 @@ var ErrInvalidArgument = GErrorFactory{
   - for metric-safe detail tags
   - error name must match variable name
 - TEST EXTENSIONS
+- Later revisit / converge on:
+  - ExtMessage as a first class citizen or not.
+  - How an error string is presented
+    - Ordering of wrapped details
+    - 
+  - How to combine wrapped message extensions
+  - How to combine DetailTags
+- Consider when and weather to deep clone.
+- Lint use of err1 == err2 vs errors.Is

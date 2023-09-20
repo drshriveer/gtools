@@ -19,6 +19,7 @@ type GRPCError struct {
 	DoNotPrint string
 }
 
+// ErrExtendedExample is an example error.
 var ErrExtendedExample = gerrors.FactoryOf(&GRPCError{
 	GError: gerrors.GError{
 		Name:    "ErrExtendedExample",
@@ -29,12 +30,17 @@ var ErrExtendedExample = gerrors.FactoryOf(&GRPCError{
 	DoNotPrint:      "this is for internal issue only",
 })
 
+// L1 is layer one for testing stack traces.
 func L1() error {
 	return L2()
 }
+
+// L2 is layer one for testing stack traces.
 func L2() error {
 	return L3()
 }
+
+// L3 is layer one for testing stack traces.
 func L3() error {
 	return ErrExtendedExample.Stack()
 }

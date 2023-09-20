@@ -25,8 +25,7 @@ func (e *GRPCError) Error() string {
 
 	result += "Message: " + e.Message
 
-	// FIXME: I think I need a check in here to know the difference between stack types.
-	// e.g. if there is only one element, I don't think i care about the rest.
+	// Note: right now if we have a "source stack", we actually remove the stack after calculations.
 	if stack := e.GError.ErrStack(); len(stack) > 0 {
 		result += "\n" + stack.String()
 	}
@@ -36,66 +35,82 @@ func (e *GRPCError) Error() string {
 
 // Base returns a copy of the embedded error without modifications.
 func (e *GRPCError) Base() gerrors.Error {
-	gerr := e.GError.Base()
-	return e.cloneUnderlyingWith(gerr)
-}
-
-// Stack returns a copy of the embedded error with a Stack trace and diagnostic info.
-func (e *GRPCError) Stack() gerrors.Error {
-	gerr := e.GError.Stack()
-	return e.cloneUnderlyingWith(gerr)
-}
-
-// Src returns a copy of the embedded error with Source populated if needed.
-// Source is a limited stack.
-func (e *GRPCError) Src() gerrors.Error {
-	gerr := e.GError.Src()
-	return e.cloneUnderlyingWith(gerr)
-}
-
-// ExtMsgf returns a copy of the embedded error with diagnostic info and the
-// message extended with additional context.
-func (e *GRPCError) ExtMsgf(format string, elems ...any) gerrors.Error {
-	gerr := e.GError.ExtMsgf(format, elems...)
-	return e.cloneUnderlyingWith(gerr)
-}
-
-// DExtMsgf returns a copy of the embedded error with diagnostic info, a detail tag,
-// and the message extended with additional context.
-func (e *GRPCError) DExtMsgf(detailTag string, format string, elems ...any) gerrors.Error {
-	gerr := e.GError.DExtMsgf(detailTag, format, elems...)
-	return e.cloneUnderlyingWith(gerr)
-}
-
-// DTag returns a copy of the embedded error with diagnostic info and a detail tag.
-func (e *GRPCError) DTag(detailTag string) gerrors.Error {
-	gerr := e.GError.DTag(detailTag)
-	return e.cloneUnderlyingWith(gerr)
+	clone := gerrors.CloneBase(e, gerrors.NoStack, gerrors.FactorySkip, "", "", nil)
+	return e.toPrimaryType(clone)
 }
 
 // Convert will attempt to convert the supplied error into a gError.Error of the
 // Factory's type, including the source errors details in the result's error message.
 // The original error can be retrieved via utility methods.
 func (e *GRPCError) Convert(err error) gerrors.Error {
-	gerr := e.GError.Convert(err)
-	return e.cloneUnderlyingWith(gerr)
-}
-
-func (e *GRPCError) Is(err error) bool {
-	if err == e {
-		return true
+	if gerr, ok := err.(gerrors.Error); ok {
+		return gerr
 	}
-	else if e.Unwrap()
-	if e.GError
+	clone := gerrors.CloneBase(e,
+		gerrors.DefaultStack,
+		gerrors.FactorySkip,
+		"",
+		fmt.Sprintf("originalError: %+v", err),
+		err,
+	)
+	return e.toPrimaryType(clone)
 }
 
-func (e *GRPCError) cloneUnderlyingWith(gerr gerrors.Error) gerrors.Error {
+// DTag returns a copy of the embedded error with diagnostic info and a detail tag.
+func (e *GRPCError) DTag(detailTag string) gerrors.Error {
+	clone := gerrors.CloneBase(e,
+		gerrors.DefaultStack,
+		gerrors.FactorySkip,
+		detailTag,
+		"",
+		nil,
+	)
 
-	// FIX THIS GAVIN . This is the problem where are we setting the correct source srcFactory?!
-	// we are only getting the _gerror_
-	gr := gerr.(*gerrors.GError)
+	return e.toPrimaryType(clone)
+}
+
+// DExtMsgf returns a copy of the embedded error with diagnostic info, a detail tag,
+// and the message extended with additional context.
+func (e *GRPCError) DExtMsgf(detailTag string, format string, elems ...any) gerrors.Error {
+	clone := gerrors.CloneBase(e,
+		gerrors.DefaultStack,
+		gerrors.FactorySkip,
+		detailTag,
+		fmt.Sprintf(format, elems...),
+		nil,
+	)
+	return e.toPrimaryType(clone)
+}
+
+// ExtMsgf returns a copy of the embedded error with diagnostic info and the
+// message extended with additional context.
+func (e *GRPCError) ExtMsgf(format string, elems ...any) gerrors.Error {
+	clone := gerrors.CloneBase(e,
+		gerrors.DefaultStack,
+		gerrors.FactorySkip,
+		"",
+		fmt.Sprintf(format, elems...),
+		nil,
+	)
+	return e.toPrimaryType(clone)
+}
+
+// Src returns a copy of the embedded error with Source populated if needed.
+// Source is a limited stack.
+func (e *GRPCError) Src() gerrors.Error {
+	clone := gerrors.CloneBase(e, gerrors.SourceStack, gerrors.FactorySkip, "", "", nil)
+	return e.toPrimaryType(clone)
+}
+
+// Stack returns a copy of the embedded error with a Stack trace and diagnostic info.
+func (e *GRPCError) Stack() gerrors.Error {
+	clone := gerrors.CloneBase(e, gerrors.DefaultStack, gerrors.FactorySkip, "", "", nil)
+	return e.toPrimaryType(clone)
+}
+
+func (e *GRPCError) toPrimaryType(gerr *gerrors.GError) gerrors.Error {
 	result := &GRPCError{
-		GError:     *gr,
+		GError:     *gerr,
 		GRPCStatus: e.GRPCStatus,
 		Timeout:    e.Timeout,
 	}

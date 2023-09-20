@@ -15,10 +15,10 @@ import (
 
 // ErrConfigFailure is returned when there is a failure to read a configuration value
 // for any reason.
-var ErrConfigFailure gerrors.Factory = &gerrors.GError{
+var ErrConfigFailure = gerrors.FactoryOf(&gerrors.GError{
 	Name:    "ErrConfigFailure",
 	Message: "failed to read value",
-}
+})
 
 // Config is the base configuration object that should be supplied to the generic GetX functions.
 type Config struct {

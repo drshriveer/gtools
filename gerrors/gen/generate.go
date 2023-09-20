@@ -29,9 +29,10 @@ type Generate struct {
 	Types   []string `usage:"[required] names of types to generate gerrors for"`
 
 	// derived, (exposed for template use):
-	Imports    gencommon.ImportHandler
-	PkgName    string
-	ErrorDescs ErrorDescs
+	FactoryComments map[string]string
+	Imports         gencommon.ImportHandler // note: not really necessary for this atm, but leaving it in.
+	PkgName         string
+	ErrorDescs      ErrorDescs
 }
 
 // Parse the input file and drives the attributes above.
@@ -43,9 +44,9 @@ func (g *Generate) Parse() error {
 
 	iFact := gencommon.FindInterface(pkg.Imports["github.com/drshriveer/gtools/gerrors"], "Factory")
 	methods := iFact.Methods.List
-	comments := make(map[string]string, len(methods))
+	g.FactoryComments = make(map[string]string, len(methods))
 	for _, m := range methods {
-		comments[m.Names[0].Name] = gencommon.CommentGroupRaw(m.Doc)
+		g.FactoryComments[m.Names[0].Name] = gencommon.CommentGroupRaw(m.Doc)
 	}
 
 	pkg.Types.Scope()
@@ -57,7 +58,6 @@ func (g *Generate) Parse() error {
 	for i, errType := range g.Types {
 		obj := pkgScope.Lookup(errType)
 		g.ErrorDescs[i], err = g.createErrorDesc(obj, errType)
-		g.ErrorDescs[i].Comments = comments
 		if err != nil {
 			return err
 		}
@@ -85,7 +85,7 @@ func (g *Generate) createErrorDesc(obj types.Object, typeName string) (*ErrorDes
 	embedsGError := false
 	for i := 0; i < strukt.NumFields(); i++ {
 		ff := strukt.Field(i)
-		field, err := g.createField(ff, strukt.Tag(i))
+		field, err := createField(ff, strukt.Tag(i))
 		if err != nil {
 			return nil, err
 		} else if field != nil {
@@ -108,7 +108,7 @@ func (g *Generate) createErrorDesc(obj types.Object, typeName string) (*ErrorDes
 	}, nil
 }
 
-func (g *Generate) createField(field *types.Var, tagLine string) (*Field, error) {
+func createField(field *types.Var, tagLine string) (*Field, error) {
 	tags, err := structtag.Parse(tagLine)
 	if err != nil { // error returned when not found
 		return nil, nil
@@ -127,7 +127,6 @@ func (g *Generate) createField(field *types.Var, tagLine string) (*Field, error)
 	if gerrTags.Name == "_" {
 		gerrTags.Name = field.Name()
 	}
-	_ = g.Imports.ExtractTypeRef(field.Type()) // just register the use of an imported type.
 	return &Field{
 		Name:    field.Name(),
 		PrintAs: gerrTags.Name,

@@ -31,8 +31,7 @@ func (e *{{$desc.TypeName}}) Error() string {
 
 	result += "Message: " + e.Message
 
-	// FIXME: I think I need a check in here to know the difference between stack types.
-	// e.g. if there is only one element, I don't think i care about the rest.
+	// Note: right now if we have a "source stack", we actually remove the stack after calculations.
 	if stack := e.GError.ErrStack(); len(stack) > 0 {
 		result += "\n" + stack.String()
 	}
@@ -40,58 +39,85 @@ func (e *{{$desc.TypeName}}) Error() string {
 	return result
 }
 
-{{index $desc.Comments "Base"}}
+{{index $.FactoryComments "Base"}}
 func (e *{{$desc.TypeName}}) Base() gerrors.Error {
-	gerr := e.GError.Base()
-	return e.cloneUnderlyingWith(gerr)
+	clone := gerrors.CloneBase(e, gerrors.NoStack, gerrors.FactorySkip, "", "", nil)
+	return e.toPrimaryType(clone)
 }
 
-{{index $desc.Comments "Stack"}}
-func (e *{{$desc.TypeName}}) Stack() gerrors.Error {
-	gerr := e.GError.Stack()
-	return e.cloneUnderlyingWith(gerr)
-}
-
-{{index $desc.Comments "Src"}}
-func (e *{{$desc.TypeName}}) Src() gerrors.Error {
-	gerr := e.GError.Src()
-	return e.cloneUnderlyingWith(gerr)
-}
-
-{{index $desc.Comments "ExtMsgf"}}
-func (e *{{$desc.TypeName}}) ExtMsgf(format string, elems ...any) gerrors.Error {
-	gerr := e.GError.ExtMsgf(format, elems...)
-	return e.cloneUnderlyingWith(gerr)
-}
-
-{{index $desc.Comments "DExtMsgf"}}
-func (e *{{$desc.TypeName}}) DExtMsgf(detailTag string, format string, elems ...any) gerrors.Error {
-	gerr := e.GError.DExtMsgf(detailTag, format, elems...)
-	return e.cloneUnderlyingWith(gerr)
-}
-
-{{index $desc.Comments "DTag"}}
-func (e *{{$desc.TypeName}}) DTag(detailTag string) gerrors.Error {
-	gerr := e.GError.DTag(detailTag)
-	return e.cloneUnderlyingWith(gerr)
-}
-
-{{index $desc.Comments "Convert"}}
+{{index $.FactoryComments "Convert"}}
 func (e *{{$desc.TypeName}}) Convert(err error) gerrors.Error {
-	gerr := e.GError.Convert(err)
-	return e.cloneUnderlyingWith(gerr)
+	if gerr, ok := err.(gerrors.Error); ok {
+		return gerr
+	}
+	clone := gerrors.CloneBase(e,
+		gerrors.DefaultStack,
+		gerrors.FactorySkip,
+		"",
+		fmt.Sprintf("originalError: %+v", err),
+		err,
+	)
+	return e.toPrimaryType(clone)
 }
 
-func (e *{{$desc.TypeName}}) cloneUnderlyingWith(gerr gerrors.Error) gerrors.Error {
-	gr := gerr.(*gerrors.GError)
+{{index $.FactoryComments "DTag"}}
+func (e *{{$desc.TypeName}}) DTag(detailTag string) gerrors.Error {
+	clone := gerrors.CloneBase(e,
+		gerrors.DefaultStack,
+		gerrors.FactorySkip,
+		detailTag,
+		"",
+		nil,
+	)
+
+	return e.toPrimaryType(clone)
+}
+
+{{index $.FactoryComments "DExtMsgf"}}
+func (e *{{$desc.TypeName}}) DExtMsgf(detailTag string, format string, elems ...any) gerrors.Error {
+	clone := gerrors.CloneBase(e,
+		gerrors.DefaultStack,
+		gerrors.FactorySkip,
+		detailTag,
+		fmt.Sprintf(format, elems...),
+		nil,
+	)
+	return e.toPrimaryType(clone)
+}
+
+{{index $.FactoryComments "ExtMsgf"}}
+func (e *{{$desc.TypeName}}) ExtMsgf(format string, elems ...any) gerrors.Error {
+	clone := gerrors.CloneBase(e,
+		gerrors.DefaultStack,
+		gerrors.FactorySkip,
+		"",
+		fmt.Sprintf(format, elems...),
+		nil,
+	)
+	return e.toPrimaryType(clone)
+}
+
+{{index $.FactoryComments "Src"}}
+func (e *{{$desc.TypeName}}) Src() gerrors.Error {
+	clone := gerrors.CloneBase(e, gerrors.SourceStack, gerrors.FactorySkip, "", "", nil)
+	return e.toPrimaryType(clone)
+}
+
+{{index $.FactoryComments "Stack"}}
+func (e *{{$desc.TypeName}}) Stack() gerrors.Error {
+	clone := gerrors.CloneBase(e, gerrors.DefaultStack, gerrors.FactorySkip, "", "", nil)
+	return e.toPrimaryType(clone)
+}
+
+// toPrimaryType accepts a base gerror and will populate clone fields.
+func (e *{{$desc.TypeName}}) toPrimaryType(gerr *gerrors.GError) gerrors.Error {
 	result := &{{$desc.TypeName}}{
-		GError: *gr,
+		GError: *gerr,
 	{{- range $field := $desc.FieldsToClone }}
 		{{$field.Name}}: e.{{$field.Name}},
 	{{- end}}
 	}
 	return result
 }
-
 
 {{- end}}

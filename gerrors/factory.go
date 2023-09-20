@@ -48,3 +48,65 @@ func FactoryOf[T factoryOf](err T) Factory {
 	err._embededGError().isFactory = true
 	return err
 }
+
+// CloneBase is used by factory methods.
+func CloneBase[T factoryOf](
+	err T,
+	stackType StackType,
+	stackSkip StackSkip,
+	dTag string,
+	extMsg string, // PRE FORMATED!
+	srcError error, // Be careful with this...
+) *GError {
+	base := err._embededGError()
+	clone := &GError{
+		Name:       base.Name,
+		Message:    base.Message,
+		Source:     base.Source,
+		detailTag:  base.detailTag,
+		factoryRef: base.factoryRef,
+		stack:      base.stack,
+		srcError:   base.srcError,
+	}
+
+	// handle detail tags:
+	if len(dTag) > 0 {
+		if len(clone.detailTag) == 0 {
+			clone.detailTag = dTag
+		} else {
+			clone.detailTag += "-" + dTag
+		}
+	}
+
+	// handle message extension:
+	if len(extMsg) > 0 {
+		clone.Message += " " + extMsg
+	}
+
+	// handle error inheritance:
+	if clone.factoryRef == nil && base.isFactory {
+		clone.factoryRef = base
+	}
+
+	if clone.srcError == nil && srcError != nil {
+		clone.srcError = srcError
+	}
+
+	// If we already have a stack, don't want one, or want a source and already have it
+	// skip stacks.
+	if len(clone.stack) > 0 ||
+		stackType == NoStack ||
+		stackType == SourceStack && len(clone.Source) > 0 {
+		return clone
+	}
+
+	clone.stack = makeStack(stackType, stackSkip)
+	if len(clone.Source) == 0 {
+		clone.Source = clone.stack.NearestExternal().Metric()
+		if stackType == SourceStack {
+			clone.stack = nil
+		}
+	}
+
+	return clone
+}

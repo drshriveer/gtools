@@ -44,6 +44,12 @@ type Generate struct {
 // Parse the input file and drives the attributes above.
 func (g *Generate) Parse() error {
 	fSet, xpkg, _, err := gencommon.LoadPackages(g.InFile)
+	if err != nil {
+		return err
+	}
+
+	// FIXME! GAVIN get rid of the ParseFile
+	// for xpkg.Syntax
 
 	fAST, err := parser.ParseFile(fSet, g.InFile, nil, parser.ParseComments)
 	if err != nil {

@@ -1,15 +1,17 @@
-package gerrors
+package gerrors_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/drshriveer/gtools/gerrors"
 )
 
-var ErrMyError1 Factory = &GError{
+var ErrMyError1 = gerrors.FactoryOf(&gerrors.GError{
 	Name:    "ErrMyError1",
 	Message: "this is error 1",
-}
+})
 
 type AType struct {
 }
@@ -21,37 +23,37 @@ func (a AType) ReturnsError() error {
 // FIXME! TEST INLINE FUNCTION
 
 func TestGError_WithStack(t *testing.T) {
-	err := ErrMyError1.Stack().(*GError)
+	err := ErrMyError1.Stack().(*gerrors.GError)
 	assert.NotSame(t, ErrMyError1, &err)
 	assert.Equal(t, "gerrors:TestGError_WithStack", err.Source)
-	assert.NotEmpty(t, err.stack)
-	assert.Same(t, err.srcFactory, &ErrMyError1)
+	assert.NotEmpty(t, err.ErrStack())
+	assert.Same(t, gerrors.ExtractFactoryReference(err), &ErrMyError1)
 	// ensure unchanged:
-	assert.Empty(t, ErrMyError1.(*GError).Source)
-	assert.Empty(t, ErrMyError1.(*GError).stack)
+	assert.Empty(t, ErrMyError1.(*gerrors.GError).Source)
+	assert.Empty(t, ErrMyError1.(*gerrors.GError).ErrStack())
 
 	strukt := &AType{}
-	err = strukt.ReturnsError().(*GError)
+	err = strukt.ReturnsError().(*gerrors.GError)
 	assert.NotSame(t, ErrMyError1, &err)
 	assert.Equal(t, "gerrors:AType:ReturnsError", err.Source)
-	assert.NotEmpty(t, err.stack)
-	assert.Same(t, err.srcFactory, &ErrMyError1)
+	assert.NotEmpty(t, err.ErrStack())
+	assert.Same(t, gerrors.ExtractFactoryReference(err), &ErrMyError1)
 	// ensure unchanged:
-	assert.Empty(t, ErrMyError1.(*GError).Source)
-	assert.Empty(t, ErrMyError1.(*GError).stack)
+	assert.Empty(t, ErrMyError1.(*gerrors.GError).Source)
+	assert.Empty(t, ErrMyError1.(*gerrors.GError).ErrStack())
 }
 
 func TestGError_ExtMsgf(t *testing.T) {
-	err := ErrMyError1.ExtMsgf("T-Shirts $%d", 5).(*GError)
+	err := ErrMyError1.ExtMsgf("T-Shirts $%d", 5).(*gerrors.GError)
 	assert.NotSame(t, ErrMyError1, &err)
 	assert.Equal(t, "gerrors:TestGError_ExtMsgf", err.Source)
-	assert.NotEmpty(t, err.stack)
-	assert.Equal(t, ErrMyError1.(*GError).Message+" T-Shirts $5", err.Message)
-	assert.Same(t, err.srcFactory, &ErrMyError1)
+	assert.NotEmpty(t, err.ErrStack())
+	assert.Equal(t, ErrMyError1.(*gerrors.GError).Message+" T-Shirts $5", err.Message)
+	assert.Same(t, gerrors.ExtractFactoryReference(err), &ErrMyError1)
 	// ensure unchanged:
-	assert.Empty(t, ErrMyError1.(*GError).Source)
-	assert.Empty(t, ErrMyError1.(*GError).stack)
-	assert.Equal(t, "this is error 1", ErrMyError1.(*GError).Message)
+	assert.Empty(t, ErrMyError1.(*gerrors.GError).Source)
+	assert.Empty(t, ErrMyError1.(*gerrors.GError).ErrStack())
+	assert.Equal(t, "this is error 1", ErrMyError1.(*gerrors.GError).Message)
 }
 
 // BenchmarkGError_WithSource-10    	 2224312	       530.9 ns/op
