@@ -77,7 +77,7 @@ func (d *dimension) initFlag() error {
 		}
 		d.parsed, ok = rutils.Unptr(ptrVal).(genum.Enum)
 		if !ok {
-			return ErrFailedParsing.WithStack()
+			return ErrFailedParsing.Stack()
 		}
 		return nil
 	})

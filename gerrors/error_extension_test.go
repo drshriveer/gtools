@@ -1,12 +1,6 @@
 package gerrors_test
 
 import (
-	"errors"
-	"testing"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/drshriveer/gtools/gerrors"
 )
 
@@ -35,67 +29,67 @@ type ExtendedError struct {
 	DoNotPrint string
 }
 
-var ErrExtendedExample = gerrors.FactoryOf(&ExtendedError{
-	GError: gerrors.GError{
-		Name:    "ErrExtendedExample",
-		Message: "extended error example",
-	},
-	GRPCStatus:  InvalidArgument,
-	SomeMessage: "Print this message",
-	DoNotPrint:  "this is for internal issue only",
-})
-
-func TestExtendedError_Equality(t *testing.T) {
-	err1 := L1()
-	err2 := L1()
-	assert.True(t, errors.Is(ErrExtendedExample, ErrExtendedExample))
-
-	_, ok := err1.(interface{ Is(error) bool })
-	require.True(t, ok)
-
-	assert.True(t, err1.(gerrors.Error).Is(err2))
-	assert.True(t, err2.(gerrors.Error).Is(err1))
-	assert.True(t, errors.Is(err1, err2))
-	assert.True(t, errors.Is(err2, err1))
-	assert.True(t, errors.Is(err1, ErrExtendedExample))
-	assert.True(t, errors.Is(ErrExtendedExample, err1))
-
-	errToConvert := errors.New("random error")
-	convertedErr := ErrExtendedExample.Convert(errToConvert)
-	assert.True(t, errors.Is(convertedErr, ErrExtendedExample))
-	assert.True(t, errors.Is(convertedErr, errToConvert))
-	assert.True(t, errors.Is(convertedErr, errToConvert))
-
-	switch errors.Unwrap(err2) {
-	case ErrExtendedExample:
-	default:
-		assert.Fail(t, "was supposed to reach case above")
-	}
-
-}
-
-func TestExtendedError_CorrectlyLogged(t *testing.T) {
-	err, ok := L1().(gerrors.Error)
-	require.Truef(t, ok, "error must implement the gerror.Error interface")
-	assert.Contains(t, err.Error(), "GRPCStatus: InvalidArgument, ")
-	assert.Contains(t, err.Error(), "SomeMessage: Print this message, ")
-	assert.NotContains(t, err.Error(), "DoNotPrint")
-	assert.NotContains(t, err.Error(), "this is for internal issue only")
-	assert.Equal(t, "ErrExtendedExample", err.ErrName())
-	assert.Equal(t, "extended error example", err.ErrMessage())
-	assert.Equal(t, "gerrors_test:L3", err.ErrSource())
-	assert.Equal(t, "", err.DTag())
-}
-
-func L1() error {
-	return L2()
-}
-func L2() error {
-	return L3()
-}
-func L3() error {
-	return ErrExtendedExample.WithStack()
-}
+// var ErrExtendedExample = gerrors.FactoryOf(&ExtendedError{
+// 	GError: gerrors.GError{
+// 		Name:    "ErrExtendedExample",
+// 		Message: "extended error example",
+// 	},
+// 	GRPCStatus:  InvalidArgument,
+// 	SomeMessage: "Print this message",
+// 	DoNotPrint:  "this is for internal issue only",
+// })
+//
+// func TestExtendedError_Equality(t *testing.T) {
+// 	err1 := L1()
+// 	err2 := L1()
+// 	assert.True(t, errors.Is(ErrExtendedExample, ErrExtendedExample))
+//
+// 	_, ok := err1.(interface{ Is(error) bool })
+// 	require.True(t, ok)
+//
+// 	assert.True(t, err1.(gerrors.Error).Is(err2))
+// 	assert.True(t, err2.(gerrors.Error).Is(err1))
+// 	assert.True(t, errors.Is(err1, err2))
+// 	assert.True(t, errors.Is(err2, err1))
+// 	assert.True(t, errors.Is(err1, ErrExtendedExample))
+// 	assert.True(t, errors.Is(ErrExtendedExample, err1))
+//
+// 	errToConvert := errors.New("random error")
+// 	convertedErr := ErrExtendedExample.Convert(errToConvert)
+// 	assert.True(t, errors.Is(convertedErr, ErrExtendedExample))
+// 	assert.True(t, errors.Is(convertedErr, errToConvert))
+// 	assert.True(t, errors.Is(convertedErr, errToConvert))
+//
+// 	switch errors.Unwrap(err2) {
+// 	case ErrExtendedExample:
+// 	default:
+// 		assert.Fail(t, "was supposed to reach case above")
+// 	}
+//
+// }
+//
+// func TestExtendedError_CorrectlyLogged(t *testing.T) {
+// 	err, ok := L1().(gerrors.Error)
+// 	require.Truef(t, ok, "error must implement the gerror.Error interface")
+// 	assert.Contains(t, err.Error(), "GRPCStatus: InvalidArgument, ")
+// 	assert.Contains(t, err.Error(), "SomeMessage: Print this message, ")
+// 	assert.NotContains(t, err.Error(), "DoNotPrint")
+// 	assert.NotContains(t, err.Error(), "this is for internal issue only")
+// 	assert.Equal(t, "ErrExtendedExample", err.ErrName())
+// 	assert.Equal(t, "extended error example", err.ErrMessage())
+// 	assert.Equal(t, "gerrors_test:L3", err.ErrSource())
+// 	assert.Equal(t, "", err.DTag())
+// }
+//
+// func L1() error {
+// 	return L2()
+// }
+// func L2() error {
+// 	return L3()
+// }
+// func L3() error {
+// 	return ErrExtendedExample.Stack()
+// }
 
 // Status is just a sample for testing.
 type Status int

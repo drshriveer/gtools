@@ -6,22 +6,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var ErrMyError1 = FactoryOf(&GError{
+var ErrMyError1 Factory = &GError{
 	Name:    "ErrMyError1",
 	Message: "this is error 1",
-})
+}
 
 type AType struct {
 }
 
 func (a AType) ReturnsError() error {
-	return ErrMyError1.WithStack()
+	return ErrMyError1.Stack()
 }
 
 // FIXME! TEST INLINE FUNCTION
 
 func TestGError_WithStack(t *testing.T) {
-	err := ErrMyError1.WithStack().(*GError)
+	err := ErrMyError1.Stack().(*GError)
 	assert.NotSame(t, ErrMyError1, &err)
 	assert.Equal(t, "gerrors:TestGError_WithStack", err.Source)
 	assert.NotEmpty(t, err.stack)
@@ -59,7 +59,7 @@ func TestGError_ExtMsgf(t *testing.T) {
 
 func BenchmarkGError_WithSource(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = ErrMyError1.WithSource()
+		_ = ErrMyError1.Src()
 	}
 }
 
@@ -68,7 +68,7 @@ func BenchmarkGError_WithSource(b *testing.B) {
 
 func BenchmarkGError_WithStack(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = ErrMyError1.WithStack()
+		_ = ErrMyError1.Stack()
 	}
 }
 

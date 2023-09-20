@@ -1,10 +1,17 @@
 package gerrors
 
+// ErrUnknown converts any non-gError into a gerror.
+var ErrUnknown = FactoryOf(&GError{
+	Name:    "ErrUnknown",
+	Message: "tried to operate on non gerror.Error",
+})
+
 // ExtMsgf attempts to extend an error's message.
 func ExtMsgf(err error, format string, args ...any) error {
-	if gerr, ok := err.(Error); ok {
-		return gerr.ExtMsgf(format, args...)
+	gerr, ok := err.(Factory)
+	if !ok {
+		return ErrUnknown.Convert(err)
 	}
-	// TODO: consider trying to call a Convert to a base "internal" error
-	return err // failed
+
+	return gerr.ExtMsgf(format, args...)
 }

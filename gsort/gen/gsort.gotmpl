@@ -21,7 +21,7 @@ return s[i].{{.Accessor}} < s[j].{{.Accessor}}
 
 {{- range $desc := .SorterDescs}}
 // {{$desc.SortType}} implements the sort.Sort interface for {{$desc.TypeName}}.
-type {{$desc.SortType}} []{{$desc.TypeName}}
+type {{$desc.SortType}} []{{- if $.UsePointer -}}*{{- end -}}{{$desc.TypeName}}
 
 func (s {{$desc.SortType}}) Len() int {
 	return len(s)

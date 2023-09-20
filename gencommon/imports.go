@@ -2,46 +2,38 @@ package gencommon
 
 import (
 	"fmt"
-	"go/ast"
 	"go/types"
+	"golang.org/x/tools/go/packages"
 	"sort"
 	"strings"
+
+	"github.com/drshriveer/gtools/set"
 )
 
 // ImportDesc is a description of an import.
 type ImportDesc struct {
 	Alias   string
 	PkgPath string
-	inUse   bool
 }
 
-// ImportDescs a collection of import descriptions indexed by package path.
-type ImportDescs struct {
-	currentPackage *types.Package
-	imports        map[string]*ImportDesc
+// ImportHandler a collection of import descriptions indexed by package path.
+type ImportHandler struct {
+	PInfo        *packages.Package
+	importsInUse set.Set[string]
 }
 
 // CalcImports the imports relevant to a specific package and ImportSpec.
-func CalcImports(importSpecs []*ast.ImportSpec, pkg *types.Package) ImportDescs {
-	result := ImportDescs{
-		currentPackage: pkg,
-		imports:        make(map[string]*ImportDesc, len(importSpecs)),
-	}
-
-	for _, iSpec := range importSpecs {
-		pkgPath := strings.Trim(iSpec.Path.Value, `"`)
-		result.imports[pkgPath] = &ImportDesc{
-			Alias:   iSpec.Name.Name,
-			PkgPath: pkgPath,
-			inUse:   false,
-		}
+func CalcImports(pkg *packages.Package) ImportHandler {
+	result := ImportHandler{
+		PInfo:        pkg,
+		importsInUse: make(set.Set[string]),
 	}
 
 	return result
 }
 
 // ExtractTypeRef returns the way the type should be referenced in code.
-func (id ImportDescs) ExtractTypeRef(t types.Type) string {
+func (id ImportHandler) ExtractTypeRef(t types.Type) string {
 	// "named" means it is a type which may require importing.
 	named, ok := t.(*types.Named)
 	if !ok {
@@ -52,33 +44,25 @@ func (id ImportDescs) ExtractTypeRef(t types.Type) string {
 
 	pkg := named.Obj().Pkg()
 	typeName := named.Obj().Name()
-	if pkg == id.currentPackage {
+	if pkg.Path() == id.PInfo.PkgPath {
 		return typeName
 	}
 
-	// first check if we have a mapping for the package:
-	i, ok := id.imports[pkg.Path()]
-	if ok {
-		i.inUse = true
-	} else {
-		i = &ImportDesc{
-			Alias:   pkg.Name(),
-			PkgPath: pkg.Path(),
-			inUse:   true,
-		}
-		id.imports[i.PkgPath] = i
-	}
-
-	return fmt.Sprintf("%s.%s", i.Alias, typeName)
+	id.importsInUse.Add(pkg.Path())
+	importInfo := id.PInfo.Imports[pkg.Path()]
+	return fmt.Sprintf("%s.%s", importInfo.Name, typeName)
 }
 
 // GetActive returns ordered, active imports.
 // Used by templates.
-func (id ImportDescs) GetActive() []ImportDesc {
-	result := make([]ImportDesc, 0, len(id.imports))
-	for _, i := range id.imports {
-		if i.inUse {
-			result = append(result, *i)
+func (id ImportHandler) GetActive() []ImportDesc {
+	result := make([]ImportDesc, 0, len(id.PInfo.Imports))
+	for pkgPath, pkg := range id.PInfo.Imports {
+		if id.importsInUse.Has(pkgPath) {
+			result = append(result, ImportDesc{
+				Alias:   pkg.Name,
+				PkgPath: pkgPath,
+			})
 		}
 	}
 	sort.Slice(result, func(i, j int) bool {
@@ -88,6 +72,6 @@ func (id ImportDescs) GetActive() []ImportDesc {
 }
 
 // HasActiveImports returns true if there are any active imports.
-func (id ImportDescs) HasActiveImports() bool {
+func (id ImportHandler) HasActiveImports() bool {
 	return len(id.GetActive()) > 0
 }

@@ -1,6 +1,6 @@
 module github.com/drshriveer/gtools/gconfig
 
-go 1.21.0
+go 1.21.1
 
 require (
 	github.com/drshriveer/gtools/genum v0.0.0

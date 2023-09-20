@@ -4,6 +4,21 @@ import (
 	"fmt"
 )
 
+type stackType int
+
+const (
+	noStack      stackType = 0
+	sourceOnly   stackType = 1
+	defaultStack stackType = 32
+)
+
+const (
+	// gerrSkip is the number of lines to skip for a base GError.
+	gerrSkip = 4
+	// factorySkip is the number of Stack elements to skip for an err factory.
+	factorySkip = 5
+)
+
 // GError is a base error type that can be extended and turned into a factory.
 type GError struct {
 	// The Name property is the literal name of the error as it will be represented in metrics.
@@ -29,19 +44,13 @@ type GError struct {
 
 	// srcFactory holds a reference back to the factory error that created this message.
 	// This unfortunate wrapping is required for switching.
-	// FIXME: this should probably just be a literal "factory"
-	srcFactory Error
+	srcFactory Factory
 
 	// srcError holds a reference back to the original error - this is only populated in
 	// case of a Convert() call.
 	srcError error
 
-	// extensionString is a Key: Value string that is added to the Error() print out.
-	// This string is constructed via the FactoryOf method if there is a struct tag that
-	// indicates it should be included.
-	extensionString string
-
-	skipLines int
+	isFactory bool
 }
 
 func (e *GError) _embededGError() *GError {
@@ -59,10 +68,7 @@ func (e *GError) Error() string {
 		result += "DTag: " + e.detailTag + separator
 	}
 	if len(e.Source) > 0 {
-		result += "SourceInfo: " + e.Source + separator
-	}
-	if len(e.extensionString) > 0 {
-		result += e.extensionString
+		result += "Source: " + e.Source + separator
 	}
 	result += "Message: " + e.Message
 
@@ -95,13 +101,13 @@ func (e *GError) Is(err error) bool {
 	return false
 }
 
-// WithStack is a factory method for cloning the base error with a full sack trace.
-func (e *GError) WithStack() Error {
+// Stack is a factory method for cloning the base error with a full sack trace.
+func (e *GError) Stack() Error {
 	return e.clone(defaultStack)
 }
 
-// WithSource is a factory method for cloning the base error and adding source info only (a limited stack trace).
-func (e *GError) WithSource() Error {
+// Src returns a copy of the embedded error with Source populated if needed.
+func (e *GError) Src() Error {
 	return e.clone(sourceOnly)
 }
 
@@ -117,16 +123,16 @@ func (e *GError) ExtMsgf(format string, elems ...any) Error {
 	return clone
 }
 
-// DTagExtMsgf clones the base error and adds an extended message and metric tag.
-func (e *GError) DTagExtMsgf(dTag string, format string, elems ...any) Error {
+// DExtMsgf clones the base error and adds an extended message and metric tag.
+func (e *GError) DExtMsgf(dTag string, format string, elems ...any) Error {
 	clone := e.clone(defaultStack)
 	clone.detailTag += "-" + dTag
 	clone.Message = fmt.Sprintf(clone.Message+" "+format, elems...)
 	return clone
 }
 
-// WithDTag clones the base error and adds a metric tag.
-func (e *GError) WithDTag(mTag string) Error {
+// DTag clones the base error and adds or extends a metric tag.
+func (e *GError) DTag(mTag string) Error {
 	clone := e.clone(defaultStack)
 	clone.detailTag = mTag
 	return clone
@@ -153,12 +159,12 @@ func (e *GError) clone(st stackType) *GError {
 		Message:    e.Message,
 		Source:     e.Source,
 		detailTag:  e.detailTag,
-		srcFactory: e,
+		srcFactory: e.srcFactory,
 		stack:      nil,
 		srcError:   nil,
 	}
-	if e.srcFactory != nil {
-		clone.srcFactory = e.srcFactory
+	if e.isFactory {
+		e.srcFactory = e
 	}
 
 	if st == noStack {
@@ -167,10 +173,10 @@ func (e *GError) clone(st stackType) *GError {
 		return clone
 	}
 
-	if e.skipLines == 0 {
-		clone.stack = makeStack(int(st), gerrSkip)
+	if e.isFactory {
+		clone.stack = makeStack(int(st), factorySkip)
 	} else {
-		clone.stack = makeStack(int(st), e.skipLines)
+		clone.stack = makeStack(int(st), gerrSkip)
 	}
 
 	// XXX: Fix this: try to generate first stack outside of package.
@@ -195,8 +201,13 @@ func (e *GError) Convert(err error) Error {
 }
 
 // DTag returns the metric-safe detail-tag of the error.
-func (e *GError) DTag() string {
+func (e *GError) ErrDetailTag() string {
 	return e.detailTag
+}
+
+// ErrStack returns an error stack (if available).
+func (e *GError) ErrStack() Stack {
+	return e.stack
 }
 
 // Unwrap is for unwrapping errors to get to the source.

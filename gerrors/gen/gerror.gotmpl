@@ -2,6 +2,9 @@
 package {{.PkgName}}
 
 import (
+	"fmt"
+
+	"github.com/drshriveer/gtools/gerrors"
 	{{- range $import := $.Imports.GetActive}}
 	{{$import.Alias}} "{{$import.PkgPath}}"
 	{{- end}}
@@ -13,26 +16,80 @@ import (
 func (e *{{$desc.TypeName}}) Error() string {
 	const separator = ", "
 	result := ""
-	if len(e.Name) > 0 {
-		result += "Name: " + e.Name + separator
+	if name := e.GError.Name; len(name) > 0 {
+		result += "Name: " + name + separator
 	}
-	if len(e.detailTag) > 0 {
-		result += "DTag: " + e.detailTag + separator
+	if dTag := e.GError.ErrDetailTag(); len(dTag) > 0 {
+		result += "DTag: " + dTag + separator
 	}
-	if len(e.Source) > 0 {
-		result += "SourceInfo: " + e.Source + separator
+	if src := e.GError.Source; len(src) > 0 {
+		result += "Source: " + src + separator
 	}
-	if len(e.extensionString) > 0 {
-		result += e.extensionString
-	}
+	{{- range $field := $desc.FieldsToPrint }}
+	result += fmt.Sprintf("{{$field.PrintAs}}: %v", e.{{$field.Name}}) + separator
+	{{- end}}
+
 	result += "Message: " + e.Message
 
 	// FIXME: I think I need a check in here to know the difference between stack types.
 	// e.g. if there is only one element, I don't think i care about the rest.
-	if len(e.stack) > 0 {
-		result += "\n" + e.stack.String()
+	if stack := e.GError.ErrStack(); len(stack) > 0 {
+		result += "\n" + stack.String()
 	}
 
+	return result
+}
+
+{{index $desc.Comments "Base"}}
+func (e *{{$desc.TypeName}}) Base() gerrors.Error {
+	gerr := e.GError.Base()
+	return e.cloneUnderlyingWith(gerr)
+}
+
+{{index $desc.Comments "Stack"}}
+func (e *{{$desc.TypeName}}) Stack() gerrors.Error {
+	gerr := e.GError.Stack()
+	return e.cloneUnderlyingWith(gerr)
+}
+
+{{index $desc.Comments "Src"}}
+func (e *{{$desc.TypeName}}) Src() gerrors.Error {
+	gerr := e.GError.Src()
+	return e.cloneUnderlyingWith(gerr)
+}
+
+{{index $desc.Comments "ExtMsgf"}}
+func (e *{{$desc.TypeName}}) ExtMsgf(format string, elems ...any) gerrors.Error {
+	gerr := e.GError.ExtMsgf(format, elems...)
+	return e.cloneUnderlyingWith(gerr)
+}
+
+{{index $desc.Comments "DExtMsgf"}}
+func (e *{{$desc.TypeName}}) DExtMsgf(detailTag string, format string, elems ...any) gerrors.Error {
+	gerr := e.GError.DExtMsgf(detailTag, format, elems...)
+	return e.cloneUnderlyingWith(gerr)
+}
+
+{{index $desc.Comments "DTag"}}
+func (e *{{$desc.TypeName}}) DTag(detailTag string) gerrors.Error {
+	gerr := e.GError.DTag(detailTag)
+	return e.cloneUnderlyingWith(gerr)
+}
+
+{{index $desc.Comments "Convert"}}
+func (e *{{$desc.TypeName}}) Convert(err error) gerrors.Error {
+	gerr := e.GError.Convert(err)
+	return e.cloneUnderlyingWith(gerr)
+}
+
+func (e *{{$desc.TypeName}}) cloneUnderlyingWith(gerr gerrors.Error) gerrors.Error {
+	gr := gerr.(*gerrors.GError)
+	result := &{{$desc.TypeName}}{
+		GError: *gr,
+	{{- range $field := $desc.FieldsToClone }}
+		{{$field.Name}}: e.{{$field.Name}},
+	{{- end}}
+	}
 	return result
 }
 

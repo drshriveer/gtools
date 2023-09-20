@@ -1,23 +1,27 @@
 package gen
 
 import (
+	_ "embed"
 	"fmt"
 	"go/ast"
 	"go/constant"
-	"go/importer"
 	"go/parser"
-	"go/token"
 	"go/types"
 	"log"
 	"slices"
 	"sort"
 	"strings"
+	"text/template"
 
 	"github.com/drshriveer/gtools/gencommon"
 	"github.com/drshriveer/gtools/set"
-
-	"github.com/drshriveer/gtools/genum/tmpl"
 )
+
+//go:embed enumTemplate.gotmpl
+var tmpl string
+
+// enumTemplate is the base template for an enum.
+var enumTemplate = template.Must(template.New("genum").Parse(tmpl))
 
 // Generate is the parser and writer of enums and their generated code.
 // It seems to double as its own 'options' holder.
@@ -33,29 +37,23 @@ type Generate struct {
 	// derived, (exposed for template use):
 	Values  []Values
 	Traits  []TraitDescs
-	Imports gencommon.ImportDescs
+	Imports gencommon.ImportHandler
 	PkgName string
 }
 
 // Parse the input file and drives the attributes above.
 func (g *Generate) Parse() error {
-	fSet := token.NewFileSet()
+	fSet, xpkg, _, err := gencommon.LoadPackages(g.InFile)
+
 	fAST, err := parser.ParseFile(fSet, g.InFile, nil, parser.ParseComments)
 	if err != nil {
 		return err
 	}
-	conf := types.Config{Importer: importer.Default()}
-	pkg, err := conf.Check("", fSet, []*ast.File{fAST}, nil)
-	if err != nil {
-		return err
-	}
+	g.Imports = gencommon.CalcImports(xpkg)
 
-	g.Imports = gencommon.CalcImports(fAST.Imports, pkg)
-
-	g.PkgName = pkg.Name()
+	pkgScope := xpkg.Types.Scope()
 	g.Values = make([]Values, len(g.Types))
 	g.Traits = make([]TraitDescs, len(g.Types))
-	pkgScope := pkg.Scope()
 	for i, enumType := range g.Types {
 		values := make(Values, 0)
 		for _, decl := range fAST.Decls {
@@ -205,7 +203,7 @@ func (g *Generate) Write() error {
 		return fmt.Errorf("no values to generate; was generate called?")
 	}
 
-	return gencommon.Write(tmpl.EnumTemplate, g, g.OutFile)
+	return gencommon.Write(enumTemplate, g, g.OutFile)
 }
 
 // processDuplicates prints duplicate warnings and selects the "primary" value(s) of traits.

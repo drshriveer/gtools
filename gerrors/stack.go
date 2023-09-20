@@ -20,7 +20,7 @@ func (s Stack) String() string {
 }
 
 // NearestExternal finds the firs caller outside this package.
-// The effectiveness of this method is limited to the depth of the stack fetched.
+// The effectiveness of this method is limited to the depth of the Stack fetched.
 func (s Stack) NearestExternal() StackElem {
 	// attempt to find the first element not in this package:
 	if pkgName, ok := getCurrentPackage(); ok {
@@ -51,7 +51,7 @@ type StackElem struct {
 	// File is the full path of the file.
 	File string
 
-	// LineNumber of the stack element.
+	// LineNumber of the Stack element.
 	LineNumber int
 }
 

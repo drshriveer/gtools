@@ -24,7 +24,7 @@ func main() {
 	g.OutFile = gencommon.SanitizeOutFile(g.OutFile, g.InFile, generator)
 
 	if len(g.Types) == 0 {
-		log.Fatal("type is required")
+		log.Fatal("type(s) are required")
 	}
 	log.Printf("%s: %s::%s => %s", generator, g.InFile, g.Types, g.OutFile)
 

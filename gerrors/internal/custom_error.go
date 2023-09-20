@@ -1,19 +1,42 @@
 package internal
 
 import (
+	"time"
+
 	"github.com/drshriveer/gtools/gerrors"
 )
 
+//go:generate gerror --types=GRPCError
+
 // GRPCError is just a test.
-//
-//go:generate gerror types=GRPCError
 type GRPCError struct {
 	gerrors.GError
-	GRPCStatus      Status `gerror:"print,factory"`
-	CustomerMessage string `gerror:"print"`
+	GRPCStatus      Status        `gerror:"_,print,clone"`
+	CustomerMessage string        `gerror:"_,print"`
+	Timeout         time.Duration `gerror:"_,clone"`
 
 	// Do not print, or create a factory for
 	DoNotPrint string
+}
+
+var ErrExtendedExample = gerrors.FactoryOf(&GRPCError{
+	GError: gerrors.GError{
+		Name:    "ErrExtendedExample",
+		Message: "extended error example",
+	},
+	GRPCStatus:      InvalidArgument,
+	CustomerMessage: "Print this message",
+	DoNotPrint:      "this is for internal issue only",
+})
+
+func L1() error {
+	return L2()
+}
+func L2() error {
+	return L3()
+}
+func L3() error {
+	return ErrExtendedExample.Stack()
 }
 
 // Status is just a sample for testing.

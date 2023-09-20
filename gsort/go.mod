@@ -1,8 +1,6 @@
 module github.com/drshriveer/gtools/gsort
 
-go 1.21.0
-
-toolchain go1.21.1
+go 1.21.1
 
 require (
 	github.com/drshriveer/gtools/gencommon v0.0.0

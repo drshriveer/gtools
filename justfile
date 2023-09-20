@@ -48,6 +48,7 @@ generate target='all': _tools-generate
 _tools-generate:
     go build -o bin/genum genum/genum/main.go
     go build -o bin/gsort gsort/cmd/main.go
+    go build -o bin/gerror gerrors/cmd/main.go
 
 # a the placeholder `{}` which is the path to the correct module.
 _invokeMod cmd target='all':
