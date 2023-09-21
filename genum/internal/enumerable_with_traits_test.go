@@ -34,7 +34,7 @@ func TestEnumerableWithTraitsGeneration(t *testing.T) {
 		expectError   bool
 	}{
 		{
-			description: "EnumerableWithTraits parses successfully",
+			description: "EnumerableWithTraits parses successfullyz",
 			enumName:    "EnumerableWithTraits",
 			expectError: false,
 		},
