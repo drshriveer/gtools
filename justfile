@@ -3,6 +3,7 @@ PKG_ROOT := `pwd`
 MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
 export GOBIN := PKG_ROOT + "/bin"
+PARTIAL_PATH := invocation_directory()
 
 # Runs `go mod tidy` all modules or a single specified target, then sync go workspaces.
 tidy target='all':
@@ -51,10 +52,23 @@ _tools-generate:
     go build -o bin/gerror gerror/cmd/main.go
 
 # a the placeholder `{}` which is the path to the correct module.
+[macos]
+[unix]
+[windows]
 _invokeMod cmd target='all':
     #!/usr/bin/env bash
     if [ "{{ target }}" = "all" ]; then
-      xargs -L1 -P 2 -t -I {} {{ cmd }} <<< "{{ MODS }}"
+      xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ MODS }}"
+     else
+      xargs -L1 -t -I {} {{ cmd }} <<< "{{ target }}"
+    fi
+
+# a the placeholder `{}` which is the path to the correct module.
+[linux]
+_invokeMod cmd target='all':
+    #!/usr/bin/env bash
+    if [ "{{ target }}" = "all" ]; then
+      xargs -L1 -P 4 -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
       xargs -L1 -t -I {} {{ cmd }} <<< "{{ target }}"
     fi
