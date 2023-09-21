@@ -1,4 +1,4 @@
-package gerro
+package gerror
 
 import (
 	"runtime"
