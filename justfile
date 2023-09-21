@@ -3,27 +3,28 @@ PKG_ROOT := `pwd`
 MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
 export GOBIN := PKG_ROOT + "/bin"
+CURRENT_DIR := invocation_directory_native()
 
 # Runs `go mod tidy` all modules or a single specified target, then sync go workspaces.
-tidy target='all':
-    @just _invokeMod "go mod tidy -C {}" "{{ target }}"
+tidy:
+    @just _invokeMod "go mod tidy -C {}" "{{ CURRENT_DIR }}"
     go work sync
 
 # Runs `go test --race ` all modules or a single specified target.
-test target='all':
-    @just _invokeMod "go test --race {}/..." "{{ target }}"
+test:
+    @just _invokeMod "go test --race {}/..." "{{ CURRENT_DIR }}"
 
 # Runs lint and test on all modules.
 check: lint test
 
 # Runs lint and format checkers all modules or a single specified target.
-lint target='all': _tools-linter
-    @just _invokeMod "golangci-lint run {}/..." "{{ target }}"
+lint: _tools-linter
+    @just _invokeMod "golangci-lint run {}/..." "{{ CURRENT_DIR }}"
 
 # Fixes all auto-fixable format and lint errors on all modules or a single specified target.
-fix target='all': _tools-linter
+fix: _tools-linter
     just --fmt --unstable
-    @just _invokeMod "golangci-lint run --fix {}/..." "{{ target }}"
+    @just _invokeMod "golangci-lint run --fix {}/..." "{{ CURRENT_DIR }}"
 
 _tools-linter:
     #!/usr/bin/env bash
@@ -38,8 +39,8 @@ _tools-linter:
     fi
 
 # Runs `go generate` on all go modules or a single specified target.
-generate target='all': _tools-generate
-    @just _invokeMod "go generate -C {} ./..." "{{ target }}"
+generate: _tools-generate
+    @just _invokeMod "go generate -C {} ./..." "{{ CURRENT_DIR }}"
 
 # always rebuild the genum executable in this package for testing.
 # other packages should use something like:
@@ -56,18 +57,19 @@ _tools-generate:
 [windows]
 _invokeMod cmd target='all':
     #!/usr/bin/env bash
-    if [ "{{ target }}" = "all" ]; then
+    if [ "{{ target }}" = "{{ PKG_ROOT }}" ]; then
       xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
       xargs -L1 -t -I {} {{ cmd }} <<< "{{ target }}"
     fi
 
 # a the placeholder `{}` which is the path to the correct module.
+
 # The linux has a reduced parallelism as his seems to cause issues with git actions.
 [linux]
 _invokeMod cmd target='all':
     #!/usr/bin/env bash
-    if [ "{{ target }}" = "all" ]; then
+    if [ "{{ target }}" = "{{ PKG_ROOT }}" ]; then
       xargs -L1 -P 2 -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
       xargs -L1 -t -I {} {{ cmd }} <<< "{{ target }}"
