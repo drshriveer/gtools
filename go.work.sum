@@ -1,3 +1,6 @@
+github.com/drshriveer/gtools/gencommon v0.0.0-20230921080944-8f1b8f9e43fd/go.mod h1:ER4mobl8fvlqt9fpQSph/LpbiPyNfmR+4QszQrJgcZg=
+github.com/drshriveer/gtools/rutils v0.0.0-20230921080944-8f1b8f9e43fd/go.mod h1:ixRN41tPraNiLhfegjbhtt9zFLW8XXhZxUlmSaGGU3w=
+github.com/drshriveer/gtools/set v0.0.0-20230921080944-8f1b8f9e43fd/go.mod h1:oKjRVsjkkR+xeL/D3IqO/QrSSibcoXYuDapbc46LQyA=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
 github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=
 github.com/stretchr/objx v0.5.0 h1:1zr/of2m5FGMsad5YfcqgdqdWrIhu+EBEJRhR1U7z/c=
