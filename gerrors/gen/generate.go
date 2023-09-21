@@ -24,33 +24,32 @@ var (
 // Generate is the parser and writer of gerrors
 // It seems to double as its own 'options' holder.
 type Generate struct {
-	InFile  string   `alias:"in" env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
+	InFile  string   `env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
 	OutFile string   `alias:"out" usage:"name of output file (defaults to go:generate context filename.gerror.go)"`
 	Types   []string `usage:"[required] names of types to generate gerrors for"`
 
 	// derived, (exposed for template use):
-	FactoryComments map[string]string
-	Imports         gencommon.ImportHandler // note: not really necessary for this atm, but leaving it in.
-	PkgName         string
-	ErrorDescs      ErrorDescs
+	FactoryComments map[string]string        `flag:""` // ignore these fields
+	Imports         *gencommon.ImportHandler `flag:""` // ignore these fields
+	PkgName         string                   `flag:""` // ignore these fields
+	ErrorDescs      ErrorDescs               `flag:""` // ignore these fields
 }
 
 // Parse the input file and drives the attributes above.
 func (g *Generate) Parse() error {
-	_, pkg, _, err := gencommon.LoadPackages(g.InFile)
+	pkg, _, imports, err := gencommon.LoadPackages(g.InFile)
 	if err != nil {
 		return err
 	}
+	g.Imports = imports
 
 	iFact := gencommon.FindInterface(pkg.Imports["github.com/drshriveer/gtools/gerrors"], "Factory")
-	methods := iFact.Methods.List
-	g.FactoryComments = make(map[string]string, len(methods))
-	for _, m := range methods {
+	g.FactoryComments = make(map[string]string, len(iFact.Methods.List))
+	for _, m := range iFact.Methods.List {
 		g.FactoryComments[m.Names[0].Name] = gencommon.CommentGroupRaw(m.Doc)
 	}
 
 	pkg.Types.Scope()
-	g.Imports = gencommon.CalcImports(pkg)
 	g.PkgName = pkg.Name
 	pkgScope := pkg.Types.Scope()
 

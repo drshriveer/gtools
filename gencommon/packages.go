@@ -3,49 +3,55 @@ package gencommon
 import (
 	"errors"
 	"go/ast"
-	"go/parser"
-	"go/token"
 	"path"
-	"path/filepath"
+	"strings"
 
 	"golang.org/x/tools/go/packages"
 )
 
 // LoadPackages is a utility for parsing packages etc of a given file.
-func LoadPackages(inFile string) (*token.FileSet, *packages.Package, *ast.Package, error) {
+func LoadPackages(fileName string) (*packages.Package, *ast.File, *ImportHandler, error) {
 	cfg := &packages.Config{
 		Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles |
 			packages.NeedImports | packages.NeedDeps | packages.NeedTypesInfo | packages.NeedTypes |
 			packages.NeedEmbedPatterns | packages.NeedSyntax,
 	}
-	pkgs, err := packages.Load(cfg, path.Dir(inFile))
+
+	pkgs, err := packages.Load(cfg, path.Dir(fileName))
 	if err != nil {
 		return nil, nil, nil, err
 	}
+
 	if len(pkgs) < 1 {
-		return nil, nil, nil, errors.New("package " + inFile + " NOT FOUND")
+		return nil, nil, nil, errors.New("package for file " + fileName + " NOT FOUND")
 	}
 
-	fs := token.NewFileSet()
-	dir := dir(pkgs[0])
-	astPkgs, err := parser.ParseDir(fs, dir, nil, parser.DeclarationErrors|parser.ParseComments)
+	// XXX: this might be wrong; I don't like the idea of picking the first package randomly.
+	// might need to search through to find one with the target file instead.
+	fAST, err := FindFAST(pkgs[0], fileName)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	if ap, ok := astPkgs[pkgs[0].Name]; ok {
-		return fs, pkgs[0], ap, nil
-	}
-
-	return fs, pkgs[0], &ast.Package{Name: pkgs[0].Name}, nil
+	return pkgs[0], fAST, calcImports(pkgs[0], fAST), nil
 }
 
-func dir(p *packages.Package) string {
-	if len(p.GoFiles) > 0 {
-		return filepath.Dir(p.GoFiles[0])
+// FindFAST finds a * in a package.
+func FindFAST(p *packages.Package, fileName string) (*ast.File, error) {
+	fileIndex := -1
+	cleanFName := path.Clean(fileName)
+	for i, fName := range p.GoFiles {
+		// Depending on the run context we might have absolute or relative paths...
+		// Thus we do matching both ways...
+		// Simultaneously overkill and still dangerous, but whatever.
+		if fName == fileName || strings.HasSuffix(fName, cleanFName) {
+			fileIndex = i
+			break
+		}
 	}
-	if len(p.OtherFiles) > 0 {
-		return filepath.Dir(p.OtherFiles[0])
+	if fileIndex == -1 {
+		return nil, errors.New("Not found")
 	}
-	return p.PkgPath
+
+	return p.Syntax[fileIndex], nil
 }

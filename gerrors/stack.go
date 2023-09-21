@@ -28,8 +28,6 @@ type StackSkip int
 const (
 	// defaultSkip is 4 because that is how many layers the stack processor itself consumes.
 	defaultSkip = 4
-	// FactorySkip is 5 because it adds a layer to skip.
-	FactorySkip = 5
 )
 
 // A Stack represents each line of a Stack trace.

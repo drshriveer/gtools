@@ -41,7 +41,7 @@ func (e *{{$desc.TypeName}}) Error() string {
 
 {{index $.FactoryComments "Base"}}
 func (e *{{$desc.TypeName}}) Base() gerrors.Error {
-	clone := gerrors.CloneBase(e, gerrors.NoStack, gerrors.FactorySkip, "", "", nil)
+	clone := gerrors.CloneBase(e, gerrors.NoStack, "", "", nil)
 	return e.toPrimaryType(clone)
 }
 
@@ -52,7 +52,6 @@ func (e *{{$desc.TypeName}}) Convert(err error) gerrors.Error {
 	}
 	clone := gerrors.CloneBase(e,
 		gerrors.DefaultStack,
-		gerrors.FactorySkip,
 		"",
 		fmt.Sprintf("originalError: %+v", err),
 		err,
@@ -64,7 +63,6 @@ func (e *{{$desc.TypeName}}) Convert(err error) gerrors.Error {
 func (e *{{$desc.TypeName}}) DTag(detailTag string) gerrors.Error {
 	clone := gerrors.CloneBase(e,
 		gerrors.DefaultStack,
-		gerrors.FactorySkip,
 		detailTag,
 		"",
 		nil,
@@ -77,7 +75,6 @@ func (e *{{$desc.TypeName}}) DTag(detailTag string) gerrors.Error {
 func (e *{{$desc.TypeName}}) DExtMsgf(detailTag string, format string, elems ...any) gerrors.Error {
 	clone := gerrors.CloneBase(e,
 		gerrors.DefaultStack,
-		gerrors.FactorySkip,
 		detailTag,
 		fmt.Sprintf(format, elems...),
 		nil,
@@ -89,7 +86,6 @@ func (e *{{$desc.TypeName}}) DExtMsgf(detailTag string, format string, elems ...
 func (e *{{$desc.TypeName}}) ExtMsgf(format string, elems ...any) gerrors.Error {
 	clone := gerrors.CloneBase(e,
 		gerrors.DefaultStack,
-		gerrors.FactorySkip,
 		"",
 		fmt.Sprintf(format, elems...),
 		nil,
@@ -99,13 +95,13 @@ func (e *{{$desc.TypeName}}) ExtMsgf(format string, elems ...any) gerrors.Error 
 
 {{index $.FactoryComments "Src"}}
 func (e *{{$desc.TypeName}}) Src() gerrors.Error {
-	clone := gerrors.CloneBase(e, gerrors.SourceStack, gerrors.FactorySkip, "", "", nil)
+	clone := gerrors.CloneBase(e, gerrors.SourceStack, "", "", nil)
 	return e.toPrimaryType(clone)
 }
 
 {{index $.FactoryComments "Stack"}}
 func (e *{{$desc.TypeName}}) Stack() gerrors.Error {
-	clone := gerrors.CloneBase(e, gerrors.DefaultStack, gerrors.FactorySkip, "", "", nil)
+	clone := gerrors.CloneBase(e, gerrors.DefaultStack, "", "", nil)
 	return e.toPrimaryType(clone)
 }
 

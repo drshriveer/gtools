@@ -25,7 +25,7 @@ func (a AType) ReturnsError() error {
 func TestGError_WithStack(t *testing.T) {
 	err := ErrMyError1.Stack().(*gerrors.GError)
 	assert.NotSame(t, ErrMyError1, &err)
-	assert.Equal(t, "gerrors:TestGError_WithStack", err.Source)
+	assert.Equal(t, "gerrors_test:TestGError_WithStack", err.Source)
 	assert.NotEmpty(t, err.ErrStack())
 	assert.Same(t, gerrors.ExtractFactoryReference(err), &ErrMyError1)
 	// ensure unchanged:
@@ -35,7 +35,7 @@ func TestGError_WithStack(t *testing.T) {
 	strukt := &AType{}
 	err = strukt.ReturnsError().(*gerrors.GError)
 	assert.NotSame(t, ErrMyError1, &err)
-	assert.Equal(t, "gerrors:AType:ReturnsError", err.Source)
+	assert.Equal(t, "gerrors_test:AType:ReturnsError", err.Source)
 	assert.NotEmpty(t, err.ErrStack())
 	assert.Same(t, gerrors.ExtractFactoryReference(err), &ErrMyError1)
 	// ensure unchanged:
@@ -46,7 +46,7 @@ func TestGError_WithStack(t *testing.T) {
 func TestGError_ExtMsgf(t *testing.T) {
 	err := ErrMyError1.ExtMsgf("T-Shirts $%d", 5).(*gerrors.GError)
 	assert.NotSame(t, ErrMyError1, &err)
-	assert.Equal(t, "gerrors:TestGError_ExtMsgf", err.Source)
+	assert.Equal(t, "gerrors_test:TestGError_ExtMsgf", err.Source)
 	assert.NotEmpty(t, err.ErrStack())
 	assert.Equal(t, ErrMyError1.(*gerrors.GError).Message+" T-Shirts $5", err.Message)
 	assert.Same(t, gerrors.ExtractFactoryReference(err), &ErrMyError1)

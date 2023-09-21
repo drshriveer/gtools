@@ -35,7 +35,7 @@ func (e *GRPCError) Error() string {
 
 // Base returns a copy of the embedded error without modifications.
 func (e *GRPCError) Base() gerrors.Error {
-	clone := gerrors.CloneBase(e, gerrors.NoStack, gerrors.FactorySkip, "", "", nil)
+	clone := gerrors.CloneBase(e, gerrors.NoStack, "", "", nil)
 	return e.toPrimaryType(clone)
 }
 
@@ -48,7 +48,6 @@ func (e *GRPCError) Convert(err error) gerrors.Error {
 	}
 	clone := gerrors.CloneBase(e,
 		gerrors.DefaultStack,
-		gerrors.FactorySkip,
 		"",
 		fmt.Sprintf("originalError: %+v", err),
 		err,
@@ -60,7 +59,6 @@ func (e *GRPCError) Convert(err error) gerrors.Error {
 func (e *GRPCError) DTag(detailTag string) gerrors.Error {
 	clone := gerrors.CloneBase(e,
 		gerrors.DefaultStack,
-		gerrors.FactorySkip,
 		detailTag,
 		"",
 		nil,
@@ -74,7 +72,6 @@ func (e *GRPCError) DTag(detailTag string) gerrors.Error {
 func (e *GRPCError) DExtMsgf(detailTag string, format string, elems ...any) gerrors.Error {
 	clone := gerrors.CloneBase(e,
 		gerrors.DefaultStack,
-		gerrors.FactorySkip,
 		detailTag,
 		fmt.Sprintf(format, elems...),
 		nil,
@@ -87,7 +84,6 @@ func (e *GRPCError) DExtMsgf(detailTag string, format string, elems ...any) gerr
 func (e *GRPCError) ExtMsgf(format string, elems ...any) gerrors.Error {
 	clone := gerrors.CloneBase(e,
 		gerrors.DefaultStack,
-		gerrors.FactorySkip,
 		"",
 		fmt.Sprintf(format, elems...),
 		nil,
@@ -98,16 +94,17 @@ func (e *GRPCError) ExtMsgf(format string, elems ...any) gerrors.Error {
 // Src returns a copy of the embedded error with Source populated if needed.
 // Source is a limited stack.
 func (e *GRPCError) Src() gerrors.Error {
-	clone := gerrors.CloneBase(e, gerrors.SourceStack, gerrors.FactorySkip, "", "", nil)
+	clone := gerrors.CloneBase(e, gerrors.SourceStack, "", "", nil)
 	return e.toPrimaryType(clone)
 }
 
 // Stack returns a copy of the embedded error with a Stack trace and diagnostic info.
 func (e *GRPCError) Stack() gerrors.Error {
-	clone := gerrors.CloneBase(e, gerrors.DefaultStack, gerrors.FactorySkip, "", "", nil)
+	clone := gerrors.CloneBase(e, gerrors.DefaultStack, "", "", nil)
 	return e.toPrimaryType(clone)
 }
 
+// toPrimaryType accepts a base gerror and will populate clone fields.
 func (e *GRPCError) toPrimaryType(gerr *gerrors.GError) gerrors.Error {
 	result := &GRPCError{
 		GError:     *gerr,

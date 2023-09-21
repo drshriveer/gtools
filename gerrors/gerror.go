@@ -65,7 +65,7 @@ func (e *GError) ErrStack() Stack {
 
 // Base clones the base error but does not add any tracing info.
 func (e *GError) Base() Error {
-	return CloneBase(e, NoStack, defaultSkip, "", "", nil)
+	return CloneBase(e, NoStack, "", "", nil)
 }
 
 // Convert attempts translates a non-gerror of an unknown kind into this base error.
@@ -73,33 +73,33 @@ func (e *GError) Convert(err error) Error {
 	if gerr, ok := err.(Error); ok {
 		return gerr
 	}
-	clone := CloneBase(e, DefaultStack, defaultSkip, "", fmt.Sprintf("originalError: %+v", err), err)
+	clone := CloneBase(e, DefaultStack, "", fmt.Sprintf("originalError: %+v", err), err)
 	return clone
 }
 
 // DTag clones the base error and adds or extends a metric tag.
 func (e *GError) DTag(dTag string) Error {
-	return CloneBase(e, DefaultStack, defaultSkip, dTag, "", nil)
+	return CloneBase(e, DefaultStack, dTag, "", nil)
 }
 
 // ExtMsgf clones the base error and adds an extended message.
 func (e *GError) ExtMsgf(format string, elems ...any) Error {
-	return CloneBase(e, DefaultStack, defaultSkip, "", fmt.Sprintf(format, elems...), nil)
+	return CloneBase(e, DefaultStack, "", fmt.Sprintf(format, elems...), nil)
 }
 
 // DExtMsgf clones the base error and adds an extended message and metric tag.
 func (e *GError) DExtMsgf(dTag string, format string, elems ...any) Error {
-	return CloneBase(e, DefaultStack, defaultSkip, dTag, fmt.Sprintf(format, elems...), nil)
+	return CloneBase(e, DefaultStack, dTag, fmt.Sprintf(format, elems...), nil)
 }
 
 // Src returns a copy of the embedded error with Source populated if needed.
 func (e *GError) Src() Error {
-	return CloneBase(e, SourceStack, defaultSkip, "", "", nil)
+	return CloneBase(e, SourceStack, "", "", nil)
 }
 
 // Stack is a factory method for cloning the base error with a full sack trace.
 func (e *GError) Stack() Error {
-	return CloneBase(e, DefaultStack, defaultSkip, "", "", nil)
+	return CloneBase(e, DefaultStack, "", "", nil)
 }
 
 // Error implements the "error" interface.

@@ -20,20 +20,22 @@ type Generate struct {
 	OutFile    string            `alias:"out" usage:"name of output file (defaults to go:generate context filename.gerror.go)"`
 	Types      map[string]string `usage:"[required] mapping of type names to generate sorters for to name to use for the generated type"`
 	UsePointer bool              `default:"true" usage:"use pointer to value in slice"`
+
 	// derived, (exposed for template use):
-	Imports     gencommon.ImportHandler
-	SorterDescs []*SorterDesc
-	PkgName     string
+	Imports     *gencommon.ImportHandler `flag:""` // ignore these fields
+	SorterDescs []*SorterDesc            `flag:""` // ignore these fields
+	PkgName     string                   `flag:""` // ignore these fields
 }
 
 // Parse the input file and drives the attributes above.
 func (g *Generate) Parse() error {
-	_, pkg, _, err := gencommon.LoadPackages(g.InFile)
+	println("infil!", g.InFile)
+	pkg, _, imports, err := gencommon.LoadPackages(g.InFile)
 	if err != nil {
 		return err
 	}
 
-	g.Imports = gencommon.CalcImports(pkg)
+	g.Imports = imports
 	g.PkgName = pkg.Name
 	pkgScope := pkg.Types.Scope()
 

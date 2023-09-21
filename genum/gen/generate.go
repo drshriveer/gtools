@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/constant"
-	"go/parser"
 	"go/types"
 	"log"
 	"slices"
@@ -28,36 +27,29 @@ var enumTemplate = template.Must(template.New("genum").Parse(tmpl))
 type Generate struct {
 	InFile        string   `alias:"in" env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
 	OutFile       string   `alias:"out" usage:"name of output file (defaults to go:generate context filename.enum.go)"`
-	Types         []string `usage:"[required] comma-separated names of types to generate enum code for"`
+	Types         []string `alias:"types" usage:"[required] comma-separated names of types to generate enum code for"`
 	GenJSON       bool     `alias:"json" default:"true" usage:"generate json marshal methods"`
 	GenYAML       bool     `alias:"yaml" default:"true" usage:"generate yaml marshal methods"`
 	GenText       bool     `alias:"text" default:"true" usage:"generate text marshal methods"`
 	DisableTraits bool     `alias:"disableTraits" default:"false" usage:"disable trait syntax inspection"`
 
 	// derived, (exposed for template use):
-	Values  []Values
-	Traits  []TraitDescs
-	Imports gencommon.ImportHandler
-	PkgName string
+	Values  []Values                 `flag:""` // ignore these fields
+	Traits  []TraitDescs             `flag:""` // ignore these fields
+	Imports *gencommon.ImportHandler `flag:""` // ignore these fields
+	PkgName string                   `flag:""` // ignore these fields
 }
 
 // Parse the input file and drives the attributes above.
 func (g *Generate) Parse() error {
-	fSet, xpkg, _, err := gencommon.LoadPackages(g.InFile)
+	pkg, fAST, importInfo, err := gencommon.LoadPackages(g.InFile)
 	if err != nil {
 		return err
 	}
 
-	// FIXME! GAVIN get rid of the ParseFile
-	// for xpkg.Syntax
-
-	fAST, err := parser.ParseFile(fSet, g.InFile, nil, parser.ParseComments)
-	if err != nil {
-		return err
-	}
-	g.Imports = gencommon.CalcImports(xpkg)
-
-	pkgScope := xpkg.Types.Scope()
+	g.Imports = importInfo
+	g.PkgName = pkg.Name
+	pkgScope := pkg.Types.Scope()
 	g.Values = make([]Values, len(g.Types))
 	g.Traits = make([]TraitDescs, len(g.Types))
 	for i, enumType := range g.Types {
@@ -71,7 +63,7 @@ func (g *Generate) Parse() error {
 					}
 					vName := vSpec.Names[0].Name
 					v, ok := pkgScope.Lookup(vName).(*types.Const)
-					if !ok || v.Type().String() != enumType {
+					if !ok || (v.Type().String() != enumType && !strings.HasSuffix(v.Type().String(), "."+enumType)) {
 						continue
 					}
 					value, isUint := constant.Uint64Val(v.Val())
@@ -80,7 +72,7 @@ func (g *Generate) Parse() error {
 						Value:        value,
 						Signed:       !isUint,
 						IsDeprecated: isDeprecated(fAST, vName),
-						Line:         fSet.Position(v.Pos()).Line,
+						Line:         pkg.Fset.Position(v.Pos()).Line,
 						astLine:      vSpec,
 					}
 					values = append(values, enumValue)

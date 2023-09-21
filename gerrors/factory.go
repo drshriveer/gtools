@@ -53,7 +53,6 @@ func FactoryOf[T factoryOf](err T) Factory {
 func CloneBase[T factoryOf](
 	err T,
 	stackType StackType,
-	stackSkip StackSkip,
 	dTag string,
 	extMsg string, // PRE FORMATED!
 	srcError error, // Be careful with this...
@@ -100,7 +99,7 @@ func CloneBase[T factoryOf](
 		return clone
 	}
 
-	clone.stack = makeStack(stackType, stackSkip)
+	clone.stack = makeStack(stackType, defaultSkip)
 	if len(clone.Source) == 0 {
 		clone.Source = clone.stack.NearestExternal().Metric()
 		if stackType == SourceStack {

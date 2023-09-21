@@ -66,6 +66,6 @@ func TestExtendedError_CorrectlyLogged(t *testing.T) {
 	assert.NotContains(t, err.Error(), "this is for internal issue only")
 	assert.Equal(t, "ErrExtendedExample", err.ErrName())
 	assert.Equal(t, "extended error example", err.ErrMessage())
-	assert.Equal(t, "gerrors_test:L3", err.ErrSource())
+	assert.Equal(t, "internal:L3", err.ErrSource())
 	assert.Equal(t, "", err.ErrDetailTag())
 }
