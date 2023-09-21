@@ -1,4 +1,4 @@
-GO_LINT_VERSION := '1.54.1'
+GO_LINT_VERSION := '1.54.2'
 PKG_ROOT := `pwd`
 MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'

@@ -128,7 +128,7 @@ func (g *Generate) extractTraitDescs(tName string, pkgScope *types.Scope, values
 	if len(values) == 0 {
 		return nil, nil
 	}
-	firstV := values[0]
+	firstV := values[0] //nolint:gosec // just wrong!
 	traits := make(TraitDescs, 0, max(len(firstV.astLine.Values)-1, 0))
 	for j := 1; j < len(firstV.astLine.Values); j++ {
 		name := firstV.astLine.Names[j].Name
