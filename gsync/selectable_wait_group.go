@@ -4,12 +4,10 @@ import (
 	"context"
 	"sync/atomic"
 	"time"
-
-	"github.com/drshriveer/gtools/gerrors"
 )
 
 // ErrWGTimeout indicates a wait group timeout.
-var ErrWGTimeout gerrors.Factory = &gerrors.GError{
+var ErrWGTimeout gerror.Factory = &gerror.GError{
 	Name:    "ErrWGTimeout",
 	Message: "timed out waiting for SelectableWaitGroup",
 }

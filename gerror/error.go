@@ -1,4 +1,4 @@
-package gerrors
+package gerror
 
 // Error exposes methods that can be used as an error type.
 type Error interface {

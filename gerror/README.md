@@ -1,15 +1,15 @@
-# gErrors
+# gError
 
-gErrors is a rich, opinionated error model for Go that takes a metric-first standpoint on errors.
+gError is an opinionated error model for Go that takes a metric-first standpoint on errors.
 
-[Docs](https://pkg.go.dev/github.com/drshriveer/gtools/gerrors)
+[Docs](https://pkg.go.dev/github.com/drshriveer/gtool/gerror)
 
 ### Getting started
 
 Install with:
 
 ```bash
-go install github.com/drshriveer/gtools/gerrors@latest
+go install github.com/drshriveer/gtool/gerror@latest
 ```
 
 ### Features
@@ -17,30 +17,30 @@ go install github.com/drshriveer/gtools/gerrors@latest
 - **Named Errors** - Errors have names that can be emitted in metrics. 
 - **Source Identity** - Errors can have a static source or can dynamically determine their source when returned.
   - TODO: certain types of binary builds may limit the introspection capabilities; document this here.
-- **Stack traces** - gErrors support stack traces if desired no need to depend on something like [pkg/errors](https://pkg.go.dev/github.com/pkg/errors). Errors ensure they have stacks but do duplicate stacks.
+- **Stack traces** - gError support stack traces if desired no need to depend on something like [pkg/errors](https://pkg.go.dev/github.com/pkg/errors). Errors ensure they have stacks but do duplicate stacks.
 - **Detail Tags** - Errors support metric-safe detail tags  
 - **ErrorFactory** - Factories aid in all of the above. 
 
 ### Tenants 
 
 Below are the tenants that lead to this library's development.
-Keeping them in mind will better aid in understanding how to use this gErrors effectively.
+Keeping them in mind will better aid in understanding how to use this gError effectively.
 
-- **All errors in an application should be consistently gErrors**
+- **All errors in an application should be consistently gError**
   - This goes along with "Errors should treat metrics as a first-class citizen".
-  - _Convert_ errors from external libraries into gErrors using a factory's `Convert` method.
+  - _Convert_ errors from external libraries into gError using a factory's `Convert` method.
   - Implement client interceptors to automatically convert errors into the correct type.
     - TODO: provide example.
 - **Returned errors should be tested**
   - Raw string matching and error wrapping make testing errors brittle. Verify the error returned is the error you intended.
 - **Errors must treat metrics as a first-class citizen**
   - That means errors need to be _Named_ and have a concept of their _Source_.
-  - Consider pairing gErrors with something like [gowrap](https://github.com/hexdigest/gowrap) to generate instrumented interfaces that emit metrics when an error is encountered.
+  - Consider pairing gError with something like [gowrap](https://github.com/hexdigest/gowrap) to generate instrumented interfaces that emit metrics when an error is encountered.
     - TODO: provide example.
 - **Errors should be handleable in switch statements**
   - Specific errors may require special handling. Inspecting on individual attributes of an error (status code, error string, error contains string, ec), leads to brittle and even dangerous code, so switching should be made as easy as possible. Thus support switch statements! 
 - **Errors should be extensible**
-  - Errors sometimes need extra information (e.g. GRPC status codes, HTTP status codes, customer-facing error messages vs internal error messages, etc) that is not included in a base error. For that reason gErrors are extensible in a case-by-case basis. 
+  - Errors sometimes need extra information (e.g. GRPC status codes, HTTP status codes, customer-facing error messages vs internal error messages, etc) that is not included in a base error. For that reason gError are extensible in a case-by-case basis. 
 - **Errors should be reusable**
   - It should not be necessary to re-define an error for every use case e.g. ErrInvalidParameter should be valid whether a field is malformed, or a required parameter is missing. However, it should be possible to _distinguish_ between the reason an error was returned from the same path. DetailsTags help with this.
 - **Errors should be predefined**

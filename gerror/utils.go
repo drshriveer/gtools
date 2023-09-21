@@ -1,4 +1,4 @@
-package gerrors
+package gerror
 
 // ErrUnknown converts any non-gError into a gerror.
 var ErrUnknown = FactoryOf(&GError{

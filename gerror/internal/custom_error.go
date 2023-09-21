@@ -3,16 +3,16 @@ package internal
 import (
 	"time"
 
-	"github.com/drshriveer/gtools/gerrors"
+	"github.com/drshriveer/gtools/gerror"
 )
 
 //go:generate gerror --types=GRPCError
 
 // GRPCError is just a test.
 type GRPCError struct {
-	gerrors.GError
+	gerror.GError
 	GRPCStatus      Status        `gerror:"_,print,clone"`
-	CustomerMessage string        `gerror:"_,print"`
+	CustomerMessage string        `gerror:"_,print,clone"`
 	Timeout         time.Duration `gerror:"_,clone"`
 
 	// Do not print, or create a factory for
@@ -20,8 +20,8 @@ type GRPCError struct {
 }
 
 // ErrExtendedExample is an example error.
-var ErrExtendedExample = gerrors.FactoryOf(&GRPCError{
-	GError: gerrors.GError{
+var ErrExtendedExample = gerror.FactoryOf(&GRPCError{
+	GError: gerror.GError{
 		Name:    "ErrExtendedExample",
 		Message: "extended error example",
 	},

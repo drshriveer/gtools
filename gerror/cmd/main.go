@@ -4,10 +4,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/itzg/go-flagsfiller"
-
 	"github.com/drshriveer/gtools/gencommon"
-	"github.com/drshriveer/gtools/gerrors/gen"
+	"github.com/drshriveer/gtools/gerror/gen"
 )
 
 const generator = "gerror"

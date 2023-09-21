@@ -1,4 +1,4 @@
-package gerrors
+package gerro
 
 import (
 	"runtime"
@@ -69,7 +69,7 @@ func getCurrentPackage() (string, bool) {
 // StackElem represents a single line in a Stack trace.
 type StackElem struct {
 	// Name is the fully qualified package function path.
-	// e.g. github.com/drshriveer/gtools/gerrors.TestGError_WithStack
+	// e.g. github.com/drshriveer/gtools/gerror.TestGError_WithStack
 	Name string
 
 	// File is the full path of the file.

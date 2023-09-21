@@ -1,4 +1,4 @@
-package gerrors
+package gerror
 
 // The Factory interface exposes only methods that can be used for cloning an error.
 // But all errors implement this by default.

@@ -4,7 +4,7 @@ use (
 	./gconfig
 	./gencommon
 	./genum
-	./gerrors
+	./gerror
 	./gsort
 	./gsync
 	./log

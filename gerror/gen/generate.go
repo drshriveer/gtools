@@ -21,12 +21,12 @@ var (
 	sortTemplate      = template.Must(template.New("gerror").Parse(rawGerrorTemplate))
 )
 
-// Generate is the parser and writer of gerrors
+// Generate is the parser and writer of gerror.
 // It seems to double as its own 'options' holder.
 type Generate struct {
 	InFile  string   `env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
 	OutFile string   `alias:"out" usage:"name of output file (defaults to go:generate context filename.gerror.go)"`
-	Types   []string `usage:"[required] names of types to generate gerrors for"`
+	Types   []string `usage:"[required] names of types to generate gerror for"`
 
 	// derived, (exposed for template use):
 	FactoryComments map[string]string        `flag:""` // ignore these fields
@@ -43,7 +43,7 @@ func (g *Generate) Parse() error {
 	}
 	g.Imports = imports
 
-	iFact, err := gencommon.FindInterface(pkgs, "github.com/drshriveer/gtools/gerrors", "Factory")
+	iFact, err := gencommon.FindInterface(pkgs, "github.com/drshriveer/gtools/gerror", "Factory")
 	if err != nil {
 		return err
 	}

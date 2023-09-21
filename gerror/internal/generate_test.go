@@ -10,9 +10,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/drshriveer/gtools/gerrors"
-	"github.com/drshriveer/gtools/gerrors/gen"
-	"github.com/drshriveer/gtools/gerrors/internal"
+	"github.com/drshriveer/gtools/gerror"
+	"github.com/drshriveer/gtools/gerror/gen"
+	"github.com/drshriveer/gtools/gerror/internal"
 )
 
 func TestGenerator(t *testing.T) {
@@ -34,8 +34,8 @@ func TestExtendedError_Equality(t *testing.T) {
 	_, ok := err1.(interface{ Is(error) bool })
 	require.True(t, ok)
 
-	assert.True(t, err1.(gerrors.Error).Is(err2))
-	assert.True(t, err2.(gerrors.Error).Is(err1))
+	assert.True(t, err1.(gerror.Error).Is(err2))
+	assert.True(t, err2.(gerror.Error).Is(err1))
 	assert.True(t, errors.Is(err1, err2))
 	assert.True(t, errors.Is(err2, err1))
 	assert.True(t, errors.Is(err1, internal.ErrExtendedExample))
@@ -56,14 +56,13 @@ func TestExtendedError_Equality(t *testing.T) {
 	default:
 		assert.Fail(t, "was supposed to reach case above")
 	}
-
 }
 
 func TestExtendedError_CorrectlyLogged(t *testing.T) {
-	err, ok := internal.L1().(gerrors.Error)
+	err, ok := internal.L1().(gerror.Error)
 	require.Truef(t, ok, "error must implement the gerror.Error interface")
 	assert.Contains(t, err.Error(), "GRPCStatus: InvalidArgument, ")
-	assert.Contains(t, err.Error(), "SomeMessage: Print this message, ")
+	assert.Contains(t, err.Error(), "CustomerMessage: Print this message, ")
 	assert.NotContains(t, err.Error(), "DoNotPrint")
 	assert.NotContains(t, err.Error(), "this is for internal issue only")
 	assert.Equal(t, "ErrExtendedExample", err.ErrName())
