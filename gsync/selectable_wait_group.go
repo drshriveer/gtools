@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync/atomic"
 	"time"
+
+	"github.com/drshriveer/gtools/gerror"
 )
 
 // ErrWGTimeout indicates a wait group timeout.
