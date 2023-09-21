@@ -2,6 +2,8 @@ package internal_test
 
 import (
 	"errors"
+	"os"
+	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,8 +17,8 @@ import (
 
 func TestGenerator(t *testing.T) {
 	generator := gen.Generate{
-		InFile:  "./custom_error.go",
-		OutFile: "./custom_error.gerror.go",
+		InFile:  path.Join(os.Getenv("PWD"), "/custom_error.go"),
+		OutFile: path.Join(os.Getenv("PWD"), "/custom_error.gerror.go"),
 		Types:   []string{"GRPCError"},
 	}
 

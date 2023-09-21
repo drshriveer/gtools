@@ -2,7 +2,7 @@ package internal
 
 // Sortable is for testing.
 //
-//go:generate gensort -types Sortable=Sortables
+//go:generate gsort -types Sortable=Sortables
 type Sortable struct {
 	Category     Category `gsort:"1,String()"`
 	Property1    string   `gsort:"2"`

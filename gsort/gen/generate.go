@@ -30,7 +30,7 @@ type Generate struct {
 // Parse the input file and drives the attributes above.
 func (g *Generate) Parse() error {
 	println("infil!", g.InFile)
-	pkg, _, imports, err := gencommon.LoadPackages(g.InFile)
+	_, pkg, _, imports, err := gencommon.LoadPackages(g.InFile)
 	if err != nil {
 		return err
 	}

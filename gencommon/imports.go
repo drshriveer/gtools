@@ -45,30 +45,6 @@ func calcImports(pkg *packages.Package, fAST *ast.File) *ImportHandler {
 	return result
 }
 
-// // ExtractTypeRef returns the way the type should be referenced in code.
-// func (id ImportHandler) ExtractTypeRef(t types.Type) string {
-// 	// "named" means it is a type which may require importing.
-// 	named, ok := t.(*types.Named)
-// 	if !ok {
-// 		// "*types.Basic"s e.g. string come out as "untyped string"; we need to drop
-// 		//  that part... Not sure why this is how the type information is conveyed :-/.
-// 		return strings.TrimPrefix(t.String(), "untyped ")
-// 	}
-//
-// 	pkg := named.Obj().Pkg()
-// 	typeName := named.Obj().Name()
-// 	if pkg.Path() == id.PInfo.PkgPath {
-// 		return typeName
-// 	}
-//
-// 	id.importsInUse.Add(pkg.Path())
-// 	importInfo := id.PInfo.Imports[pkg.Path()]
-// 	ref := fmt.Sprintf("%s.%s", importInfo.Name, typeName)
-// 	println(ref)
-// 	_ = id.GetActive()
-// 	return ref
-// }
-
 // ExtractTypeRef returns the way the type should be referenced in code.
 func (id ImportHandler) ExtractTypeRef(t types.Type) string {
 	// "named" means it is a type which may require importing.

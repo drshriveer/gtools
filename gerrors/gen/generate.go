@@ -37,13 +37,16 @@ type Generate struct {
 
 // Parse the input file and drives the attributes above.
 func (g *Generate) Parse() error {
-	pkg, _, imports, err := gencommon.LoadPackages(g.InFile)
+	pkgs, pkg, _, imports, err := gencommon.LoadPackages(g.InFile, "../")
 	if err != nil {
 		return err
 	}
 	g.Imports = imports
 
-	iFact := gencommon.FindInterface(pkg.Imports["github.com/drshriveer/gtools/gerrors"], "Factory")
+	iFact, err := gencommon.FindInterface(pkgs, "github.com/drshriveer/gtools/gerrors", "Factory")
+	if err != nil {
+		return err
+	}
 	g.FactoryComments = make(map[string]string, len(iFact.Methods.List))
 	for _, m := range iFact.Methods.List {
 		g.FactoryComments[m.Names[0].Name] = gencommon.CommentGroupRaw(m.Doc)

@@ -7,7 +7,7 @@ Is a generator that generates sort interfaces with ordered fields.
 ```go
 type Category int
 
-//go:generate gensort -types=Sortable
+//go:generate gsort -types=Sortable
 type Sortable struct {
     Category     Category `gsort:"1,String()"`
     Property1    string   `gsort:"2"`

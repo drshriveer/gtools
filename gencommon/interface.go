@@ -1,14 +1,30 @@
 package gencommon
 
 import (
+	"fmt"
 	"go/ast"
 
 	"golang.org/x/tools/go/packages"
 )
 
 // FindInterface locates a given *ast.Interface in a package.
-func FindInterface(p *packages.Package, target string) *ast.InterfaceType {
-	for _, file := range p.Syntax {
+func FindInterface(pkgs []*packages.Package, pkgName, target string) (*ast.InterfaceType, error) {
+	for _, pkg := range pkgs {
+		if pkg.PkgPath == pkgName {
+			return findIfaceByNameInPackage(pkg, target)
+		}
+		for pkgPath, pkg := range pkg.Imports {
+			if pkgPath == pkgName {
+				return findIfaceByNameInPackage(pkg, target)
+			}
+		}
+
+	}
+	return nil, fmt.Errorf("target %s in package %s not found", target, pkgName)
+}
+
+func findIfaceByNameInPackage(pkg *packages.Package, target string) (*ast.InterfaceType, error) {
+	for _, file := range pkg.Syntax {
 		tt := file.Scope.Lookup(target)
 		if tt == nil {
 			continue
@@ -21,7 +37,8 @@ func FindInterface(p *packages.Package, target string) *ast.InterfaceType {
 		if !ok {
 			continue
 		}
-		return iface
+		return iface, nil
 	}
-	return nil
+
+	return nil, fmt.Errorf("target %s not found", target)
 }
