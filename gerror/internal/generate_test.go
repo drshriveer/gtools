@@ -54,6 +54,8 @@ func TestExtendedError_Equality(t *testing.T) {
 	default:
 		assert.Fail(t, "was supposed to reach case above")
 	}
+
+	assert.Equal(t, internal.ErrExtendedExample, errors.Unwrap(err2))
 }
 
 func TestExtendedError_CorrectlyLogged(t *testing.T) {

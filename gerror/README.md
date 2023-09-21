@@ -50,60 +50,78 @@ Keeping them in mind will better aid in understanding how to use this gError eff
 
 ### Usage
 
-###### General
+##### General
+
+**Define an error:**
+```go
+var InvalidArgument = gerror.FactoryOf(&gerror.GError{
+    Name:    "InvalidArgument",
+    Message: "this is error 1",
+})
+```
+
+**Return it with a factory method:**
+```go
+func FuncName(input InType) error {
+	if InType.Field1.Invalid() {
+		return InvalidArgument.DTag("Field1")
+    }
+  return nil
+}
+```
+##### Extend
+
+###### Example: GRPCError
+
+NOTE: example is incomplete ATM. 
 
 ```go
-// Define an error: 
-var ErrInvalidArgument = GErrorFactory{
-    Name:    "ErrMyError1",
-    Message: "this is error 1",
+// define the type and a generator:
+//go:generate gerror --types=GRPCError
+type GRPCError struct {
+	gerror.GError // embed 
+	GRPCStatus      codes.Code    `gerror:"_,print,clone"`
+}
+
+func (e *GRPCError) Code() codes.Code {
+	return e.codes
+} 
+
+func (e *GRPCError) Staus() grpcProtos.StatusError {
+	// TODO: write this func correctly
 }
 
 ```
-###### Extend
-
-**GRPC**
-
-**ClientError**
 
 ##### Client Interceptor Example
 
 // TODO
 
-### GoWrap Example
+#### GoWrap Example
 
 // TODO
 
+### Limitations:
 
-- Define the enum (`Creatures` above) in a file (e.g. `filename.go`)
-- Add the generate directive: `//go:generate genum -types=Creatures`.
-- Run the `go generate` command.
-- Code will be generated and written to file `<filanme>.genum.go` in the same package.
-
-### Limitations: 
-- Does not print extended gerror fields that have been mutated. i.e. mutations after an error is created via factory are limited to message and detail tag.
-- cloned fields _must be immutable_.
+- Still need `errors.Unwrap(err)` before equality check (without `errors.Is`) or switch statement.  
+- Internal code is bonkers.
+- ErrSource is derived off random(ish) rules. Need to better understand internals to improve. 
 
 ### TODO:
 - Consider factory Config:
   - global or otherwise 
   - Stack sampling  (golang.org/x/time/rate::Sometimes)
+    - global, factory, or type (via annotations) specific
   - ALARM ON / Severity
-  - stack configurations: always, never, source only
-  - 
 - converge on metric-safe "source" string (or a way to configure this)
-- consider metric-aware error factories (return count, ec)
 - possible to split library into specific versions for grpc / http / etc modules?
 - linter:
   - for metric-safe detail tags
   - error name must match variable name
-- TEST EXTENSIONS
-- Later revisit / converge on:
+- Revisit later:
   - ExtMessage as a first class citizen or not.
   - How an error string is presented
     - Ordering of wrapped details
-    - 
-  - How to combine wrapped message extensions
-  - How to combine DetailTags
-- Consider when and weather to deep clone.
-- Lint use of err1 == err2 vs errors.Is
+  - How to combine wrapped message extensions (with a ` `... or?)
+  - How to combine DetailTags (with a `-` or?)
+  - Consider when and weather to deep clone.
