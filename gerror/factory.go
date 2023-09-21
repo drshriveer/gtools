@@ -11,6 +11,9 @@ type Factory interface {
 	// Source is a limited stack.
 	Src() Error
 
+	// CustomSrc returns a copy of the embedded error with a custom source and without a stack.
+	CustomSrc(src string) Error
+
 	// Stack returns a copy of the embedded error with a Stack trace and diagnostic info.
 	Stack() Error
 
@@ -62,7 +65,7 @@ func CloneBase[T factoryOf](
 		Name:       base.Name,
 		Message:    base.Message,
 		Source:     base.Source,
-		detailTag:  base.detailTag,
+		DetailTag:  base.DetailTag,
 		factoryRef: base.factoryRef,
 		stack:      base.stack,
 		srcError:   base.srcError,
@@ -70,10 +73,10 @@ func CloneBase[T factoryOf](
 
 	// handle detail tags:
 	if len(dTag) > 0 {
-		if len(clone.detailTag) == 0 {
-			clone.detailTag = dTag
+		if len(clone.DetailTag) == 0 {
+			clone.DetailTag = dTag
 		} else {
-			clone.detailTag += "-" + dTag
+			clone.DetailTag += "-" + dTag
 		}
 	}
 

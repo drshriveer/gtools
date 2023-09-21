@@ -21,8 +21,8 @@ type GError struct {
 	// A derived source includes packageName, typeName (if applicable), and methodName.
 	Source string
 
-	// detailTag is a metric-safe 'tag' that can distinguish between different uses of the same error.
-	detailTag string
+	// DetailTag is a metric-safe 'tag' that can distinguish between different uses of the same error.
+	DetailTag string
 
 	// stack is the stack trace info.
 	stack Stack
@@ -55,7 +55,7 @@ func (e *GError) ErrName() string {
 
 // ErrDetailTag returns the metric-safe detail-tag of the error.
 func (e *GError) ErrDetailTag() string {
-	return e.detailTag
+	return e.DetailTag
 }
 
 // ErrStack returns an error stack (if available).
@@ -97,6 +97,13 @@ func (e *GError) Src() Error {
 	return CloneBase(e, SourceStack, "", "", nil)
 }
 
+// CustomSrc returns a copy of the embedded error with a custom source.
+func (e *GError) CustomSrc(src string) Error {
+	base := CloneBase(e, NoStack, "", "", nil)
+	base.Source = src
+	return base
+}
+
 // Stack is a factory method for cloning the base error with a full sack trace.
 func (e *GError) Stack() Error {
 	return CloneBase(e, DefaultStack, "", "", nil)
@@ -109,8 +116,8 @@ func (e *GError) Error() string {
 	if len(e.Name) > 0 {
 		result += "Name: " + e.Name + separator
 	}
-	if len(e.detailTag) > 0 {
-		result += "DTag: " + e.detailTag + separator
+	if len(e.DetailTag) > 0 {
+		result += "DTag: " + e.DetailTag + separator
 	}
 	if len(e.Source) > 0 {
 		result += "Source: " + e.Source + separator
