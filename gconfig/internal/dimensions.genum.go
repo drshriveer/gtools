@@ -2,11 +2,11 @@
 package internal
 
 import (
-	"slices"
 	"encoding/json"
-	"gopkg.in/yaml.v3"
-	"strconv"
 	"fmt"
+	"gopkg.in/yaml.v3"
+	"slices"
+	"strconv"
 )
 
 var _DimensionOneValues = []DimensionOne{

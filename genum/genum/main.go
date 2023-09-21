@@ -3,53 +3,28 @@ package main
 import (
 	"flag"
 	"log"
-	"os"
-	"path"
-	"strings"
 
+	"github.com/itzg/go-flagsfiller"
+
+	"github.com/drshriveer/gtools/gencommon"
 	"github.com/drshriveer/gtools/genum/gen"
 )
 
-var (
-	typeNames     = flag.String("types", "", "[Required] comma-separated names of types to generate enum code for")
-	inFileArg     = flag.String("in", "", "path to input file (defaults to go:generate context)")
-	outFileName   = flag.String("out", "", "name of output file (defaults to go:generate context filename.enum.go)")
-	genJSON       = flag.Bool("json", true, "generate json marshal methods (default true)")
-	genYAML       = flag.Bool("yaml", true, "generate yaml marshal methods (default true)")
-	genText       = flag.Bool("text", true, "generate text marshal methods (default true)")
-	disableTraits = flag.Bool("disableTraits", false, "disable trait syntax inspection (default false)")
-)
-
 func main() {
+	g := gen.Generate{}
+	filler := flagsfiller.New()
+	if err := filler.Fill(flag.CommandLine, &g); err != nil {
+		log.Fatal(err)
+	}
 	flag.Parse()
 
-	gofile := os.Getenv("GOFILE")
-	pwd := os.Getenv("PWD")
-	inFile := path.Join(pwd, gofile)
-	if len(gofile) == 0 && len(*inFileArg) == 0 {
-		log.Fatal("this command should be run in a go:generate context or with -in file set")
-	}
+	g.InFile = gencommon.SanitizeSourceFile(g.InFile)
+	g.OutFile = gencommon.SanitizeOutFile(g.OutFile, g.InFile, "genum")
 
-	outFile := path.Join(pwd, strings.TrimSuffix(gofile, ".go")+".genum.go")
-	if len(gofile) == 0 && len(*outFileName) == 0 {
-		log.Fatal("this command should be run in a go:generate context or with -out file set")
-	} else if len(gofile) == 0 {
-		outFile = path.Join(path.Dir(inFile), *outFileName)
-	}
-	if len(*typeNames) == 0 {
+	if len(g.Types) == 0 {
 		log.Fatal("type is required")
 	}
-	log.Printf("genum: %s::%s => %s", inFile, *typeNames, outFile)
-
-	g := gen.Generate{
-		InFile:        inFile,
-		OutFile:       outFile,
-		EnumTypeNames: strings.Split(*typeNames, ","),
-		GenJSON:       *genJSON,
-		GenYAML:       *genYAML,
-		GenText:       *genText,
-		DisableTraits: *disableTraits,
-	}
+	log.Printf("genum: %s::%s => %s", g.InFile, g.Types, g.OutFile)
 
 	if err := g.Parse(); err != nil {
 		log.Fatalf("parsing failed: %+v", err)

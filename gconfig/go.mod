@@ -1,10 +1,10 @@
 module github.com/drshriveer/gtools/gconfig
 
-go 1.21.0
+go 1.21.1
 
 require (
 	github.com/drshriveer/gtools/genum v0.0.0
-	github.com/drshriveer/gtools/gerrors v0.0.0
+	github.com/drshriveer/gtools/gerror v0.0.0
 	github.com/drshriveer/gtools/rutils v0.0.0
 	github.com/drshriveer/gtools/set v0.0.0
 	github.com/puzpuzpuz/xsync/v2 v2.5.0
@@ -13,8 +13,9 @@ require (
 )
 
 replace (
+	github.com/drshriveer/gtools/genncommon v0.0.0 => ../gencommon // indirect
 	github.com/drshriveer/gtools/genum v0.0.0 => ../genum
-	github.com/drshriveer/gtools/gerrors v0.0.0 => ../gerrors
+	github.com/drshriveer/gtools/gerror v0.0.0 => ../gerror
 	github.com/drshriveer/gtools/rutils v0.0.0 => ../rutils
 	github.com/drshriveer/gtools/set v0.0.0 => ../set
 )

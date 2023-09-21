@@ -5,11 +5,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/drshriveer/gtools/gerrors"
+	"github.com/drshriveer/gtools/gerror"
 )
 
 // ErrWGTimeout indicates a wait group timeout.
-var ErrWGTimeout gerrors.Factory = &gerrors.GError{
+var ErrWGTimeout gerror.Factory = &gerror.GError{
 	Name:    "ErrWGTimeout",
 	Message: "timed out waiting for SelectableWaitGroup",
 }
@@ -103,7 +103,7 @@ func (wg *SelectableWaitGroup) WaitTimeout(timeout time.Duration) error {
 	defer timer.Stop()
 	select {
 	case <-timer.C:
-		return ErrWGTimeout.Raw()
+		return ErrWGTimeout.Base()
 	case <-wg.Wait():
 		return nil
 	}

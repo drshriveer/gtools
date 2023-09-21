@@ -15,7 +15,7 @@ import (
 	{{- end}}
 	"fmt"
 )
-{{- range $i, $enumTypeName := .EnumTypeNames}}
+{{- range $i, $enumTypeName := .Types}}
 {{- $values := (index $.Values $i)}}
 
 var _{{$enumTypeName}}Values = []{{$enumTypeName}}{

@@ -1,4 +1,4 @@
-GO_LINT_VERSION := '1.54.1'
+GO_LINT_VERSION := '1.54.2'
 PKG_ROOT := `pwd`
 MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
@@ -47,12 +47,14 @@ generate target='all': _tools-generate
 # @go install github.com/drshriveer/gtools/genum/genum@{{ GENUM_VERSION }}
 _tools-generate:
     go build -o bin/genum genum/genum/main.go
+    go build -o bin/gsort gsort/cmd/main.go
+    go build -o bin/gerror gerror/cmd/main.go
 
 # a the placeholder `{}` which is the path to the correct module.
 _invokeMod cmd target='all':
     #!/usr/bin/env bash
     if [ "{{ target }}" = "all" ]; then
-      xargs -L1 -t -I {} {{ cmd }} <<< "{{ MODS }}"
+      xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
-      xargs -L1 -t -I {} {{ cmd }} <<< "{{ target }}"
+      xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ target }}"
     fi

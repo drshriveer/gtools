@@ -6,19 +6,18 @@ import (
 	"strings"
 
 	"github.com/puzpuzpuz/xsync/v2"
-
 	"gopkg.in/yaml.v3"
 
 	"github.com/drshriveer/gtools/genum"
-	"github.com/drshriveer/gtools/gerrors"
+	"github.com/drshriveer/gtools/gerror"
 )
 
 // ErrConfigFailure is returned when there is a failure to read a configuration value
 // for any reason.
-var ErrConfigFailure gerrors.Factory = &gerrors.GError{
+var ErrConfigFailure = gerror.FactoryOf(&gerror.GError{
 	Name:    "ErrConfigFailure",
 	Message: "failed to read value",
-}
+})
 
 // Config is the base configuration object that should be supplied to the generic GetX functions.
 type Config struct {
@@ -77,7 +76,7 @@ func getFromCache[T any](cfg *Config, key string) (T, error) {
 	})
 
 	if err != nil {
-		return r, gerrors.Include(err, "key="+key)
+		return r, gerror.ExtMsgf(err, "key="+key)
 	}
 
 	return v.(T), nil
@@ -90,12 +89,12 @@ func extractAndConvert[T any](m map[string]any, key string) (T, error) {
 	result := *new(T)
 	v, ok := extract(m, paths)
 	if !ok {
-		return result, ErrConfigFailure.Include("key `%s` not found", key)
+		return result, ErrConfigFailure.ExtMsgf("key `%s` not found", key)
 	}
 
 	bytes, err := yaml.Marshal(v)
 	if err != nil {
-		return result, ErrConfigFailure.Include("key `%s` failed conversion back to yaml %+v", key, err)
+		return result, ErrConfigFailure.ExtMsgf("key `%s` failed conversion back to yaml %+v", key, err)
 	}
 
 	err = yaml.Unmarshal(bytes, &result)

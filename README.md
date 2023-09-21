@@ -6,7 +6,7 @@ Each tool has its own readme.
 
 ## Tools: 
  - [gconfig](gcofig/) - a yaml-based static config file
- - [gerrors](gerrors/) - better errors in golang
+ - [gerror](gerror/) - better errors in golang
  - [genum](genum/) - an advanced enum code generator
  - [gsync](gsync/) - sync utilities
  - [gtask](gtask/) - a set of task management utilities
@@ -18,5 +18,5 @@ Each tool has its own readme.
 Submit a PR!
 
 ## TODO:
-- complete gerrors
+- complete gerror
 - faster set impl + tests

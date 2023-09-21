@@ -13,6 +13,19 @@ import (
 	"github.com/drshriveer/gtools/genum/internal"
 )
 
+func TestGenerate_EnumerableWithTraits(t *testing.T) {
+	generator := gen.Generate{
+		InFile:  "./enumerable_with_traits.go",
+		OutFile: "./enumerable_with_traits.genum.go",
+		Types:   []string{"EnumerableWithTraits"},
+		GenJSON: true,
+		GenYAML: true,
+		GenText: true,
+	}
+
+	require.NoError(t, generator.Parse())
+}
+
 func TestEnumerableWithTraitsGeneration(t *testing.T) {
 	tests := []struct {
 		description   string
@@ -59,7 +72,7 @@ func TestEnumerableWithTraitsGeneration(t *testing.T) {
 			generator := gen.Generate{
 				InFile:        "./enumerable_with_traits.go",
 				OutFile:       "./enumerable_with_traits.genum.go",
-				EnumTypeNames: []string{test.enumName},
+				Types:         []string{test.enumName},
 				GenJSON:       true,
 				GenYAML:       true,
 				GenText:       true,

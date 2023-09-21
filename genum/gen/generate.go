@@ -1,64 +1,58 @@
 package gen
 
 import (
+	_ "embed"
 	"fmt"
 	"go/ast"
 	"go/constant"
-	"go/importer"
-	"go/parser"
-	"go/token"
 	"go/types"
 	"log"
-	"os"
 	"slices"
 	"sort"
 	"strings"
+	"text/template"
 
+	"github.com/drshriveer/gtools/gencommon"
 	"github.com/drshriveer/gtools/set"
-
-	"github.com/drshriveer/gtools/genum/tmpl"
 )
+
+//go:embed enumTemplate.gotmpl
+var tmpl string
+
+// enumTemplate is the base template for an enum.
+var enumTemplate = template.Must(template.New("genum").Parse(tmpl))
 
 // Generate is the parser and writer of enums and their generated code.
 // It seems to double as its own 'options' holder.
 type Generate struct {
-	InFile        string
-	OutFile       string
-	EnumTypeNames []string
-	GenJSON       bool
-	GenYAML       bool
-	GenText       bool
-	DisableTraits bool
+	InFile        string   `alias:"in" env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
+	OutFile       string   `alias:"out" usage:"name of output file (defaults to go:generate context filename.enum.go)"`
+	Types         []string `alias:"types" usage:"[required] comma-separated names of types to generate enum code for"`
+	GenJSON       bool     `alias:"json" default:"true" usage:"generate json marshal methods"`
+	GenYAML       bool     `alias:"yaml" default:"true" usage:"generate yaml marshal methods"`
+	GenText       bool     `alias:"text" default:"true" usage:"generate text marshal methods"`
+	DisableTraits bool     `alias:"disableTraits" default:"false" usage:"disable trait syntax inspection"`
 
 	// derived, (exposed for template use):
-	Values  []Values
-	Traits  []TraitDescs
-	Imports ImportDescs
-	PkgName string
+	Values  []Values                 `flag:""` // ignore these fields
+	Traits  []TraitDescs             `flag:""` // ignore these fields
+	Imports *gencommon.ImportHandler `flag:""` // ignore these fields
+	PkgName string                   `flag:""` // ignore these fields
 }
 
 // Parse the input file and drives the attributes above.
 func (g *Generate) Parse() error {
-	fSet := token.NewFileSet()
-	fAST, err := parser.ParseFile(fSet, g.InFile, nil, parser.ParseComments)
-	if err != nil {
-		return err
-	}
-	conf := types.Config{Importer: importer.Default()}
-	pkg, err := conf.Check("", fSet, []*ast.File{fAST}, nil)
+	_, pkg, fAST, importInfo, err := gencommon.LoadPackages(g.InFile)
 	if err != nil {
 		return err
 	}
 
-	if err := g.calcInitialImports(fAST.Imports, pkg); err != nil {
-		return err
-	}
-
-	g.PkgName = pkg.Name()
-	g.Values = make([]Values, len(g.EnumTypeNames))
-	g.Traits = make([]TraitDescs, len(g.EnumTypeNames))
-	pkgScope := pkg.Scope()
-	for i, enumType := range g.EnumTypeNames {
+	g.Imports = importInfo
+	g.PkgName = pkg.Name
+	pkgScope := pkg.Types.Scope()
+	g.Values = make([]Values, len(g.Types))
+	g.Traits = make([]TraitDescs, len(g.Types))
+	for i, enumType := range g.Types {
 		values := make(Values, 0)
 		for _, decl := range fAST.Decls {
 			if d, ok := decl.(*ast.GenDecl); ok {
@@ -69,7 +63,7 @@ func (g *Generate) Parse() error {
 					}
 					vName := vSpec.Names[0].Name
 					v, ok := pkgScope.Lookup(vName).(*types.Const)
-					if !ok || v.Type().String() != enumType {
+					if !ok || (v.Type().String() != enumType && !strings.HasSuffix(v.Type().String(), "."+enumType)) {
 						continue
 					}
 					value, isUint := constant.Uint64Val(v.Val())
@@ -78,7 +72,7 @@ func (g *Generate) Parse() error {
 						Value:        value,
 						Signed:       !isUint,
 						IsDeprecated: isDeprecated(fAST, vName),
-						Line:         fSet.Position(v.Pos()).Line,
+						Line:         pkg.Fset.Position(v.Pos()).Line,
 						astLine:      vSpec,
 					}
 					values = append(values, enumValue)
@@ -126,22 +120,6 @@ func (g *Generate) Parse() error {
 	return nil
 }
 
-func (g *Generate) calcInitialImports(importSpecs []*ast.ImportSpec, pkg *types.Package) error {
-	g.Imports = ImportDescs{
-		currentPackage: pkg,
-		imports:        make(map[string]*ImportDesc, len(importSpecs)),
-	}
-	for _, iSpec := range importSpecs {
-		pkgPath := strings.Trim(iSpec.Path.Value, `"`)
-		g.Imports.imports[pkgPath] = &ImportDesc{
-			Alias:   iSpec.Name.Name,
-			PkgPath: pkgPath,
-			inUse:   false,
-		}
-	}
-	return nil
-}
-
 // extractTraitDescs attempts to extract trait descriptions, and does some (minor) validation in the process.
 // TraitDescs come from the first type value of an enum. Generally this is 0, but on occasion it can be
 // a negative value...
@@ -150,7 +128,7 @@ func (g *Generate) extractTraitDescs(tName string, pkgScope *types.Scope, values
 	if len(values) == 0 {
 		return nil, nil
 	}
-	firstV := values[0]
+	firstV := values[0] //nolint:gosec // just wrong!
 	traits := make(TraitDescs, 0, max(len(firstV.astLine.Values)-1, 0))
 	for j := 1; j < len(firstV.astLine.Values); j++ {
 		name := firstV.astLine.Names[j].Name
@@ -159,7 +137,7 @@ func (g *Generate) extractTraitDescs(tName string, pkgScope *types.Scope, values
 			continue // XXX: consider throwing here.. this is probably an invalid condition.
 		}
 
-		typeRef := g.Imports.extractTypeRef(v.Type())
+		typeRef := g.Imports.ExtractTypeRef(v.Type())
 		// Trait names can be constants or they can be prefixed with `_`
 		// which makes them private to the package.
 		traitName := strings.TrimPrefix(name, "_")
@@ -222,13 +200,8 @@ func (g *Generate) Write() error {
 	if len(g.Values) == 0 {
 		return fmt.Errorf("no values to generate; was generate called?")
 	}
-	f, err := os.OpenFile(g.OutFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
 
-	return tmpl.EnumTemplate.Execute(f, g)
+	return gencommon.Write(enumTemplate, g, g.OutFile)
 }
 
 // processDuplicates prints duplicate warnings and selects the "primary" value(s) of traits.
@@ -268,7 +241,6 @@ func processDuplicates(values Values, traits TraitDescs, enumTypeName string) {
 		}
 	}
 	sort.Sort(traits)
-	// return traits
 }
 
 func isDeprecated(fAST *ast.File, name string) bool {
