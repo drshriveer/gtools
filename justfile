@@ -52,25 +52,10 @@ _tools-generate:
     go build -o bin/gerror gerror/cmd/main.go
 
 # a the placeholder `{}` which is the path to the correct module.
-[macos]
-[unix]
-[windows]
 _invokeMod cmd target='all':
     #!/usr/bin/env bash
     if [ "{{ target }}" = "{{ PKG_ROOT }}" ]; then
       xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ MODS }}"
-     else
-      xargs -L1 -t -I {} {{ cmd }} <<< "{{ target }}"
-    fi
-
-# a the placeholder `{}` which is the path to the correct module.
-
-# The linux has a reduced parallelism as his seems to cause issues with git actions.
-[linux]
-_invokeMod cmd target='all':
-    #!/usr/bin/env bash
-    if [ "{{ target }}" = "{{ PKG_ROOT }}" ]; then
-      xargs -L1 -P 2 -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
       xargs -L1 -t -I {} {{ cmd }} <<< "{{ target }}"
     fi
