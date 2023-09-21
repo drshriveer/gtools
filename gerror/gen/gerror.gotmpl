@@ -99,6 +99,14 @@ func (e *{{$desc.TypeName}}) Src() gerror.Error {
 	return e.toPrimaryType(clone)
 }
 
+{{index $.FactoryComments "CustomSrc"}}
+func (e *{{$desc.TypeName}}) CustomSrc(src string) gerror.Error {
+	clone := gerror.CloneBase(e, gerror.NoStack, "", "", nil)
+	clone.Source = src
+	return e.toPrimaryType(clone)
+}
+
+
 {{index $.FactoryComments "Stack"}}
 func (e *{{$desc.TypeName}}) Stack() gerror.Error {
 	clone := gerror.CloneBase(e, gerror.DefaultStack, "", "", nil)

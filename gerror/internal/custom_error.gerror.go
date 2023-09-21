@@ -98,6 +98,13 @@ func (e *GRPCError) Src() gerror.Error {
 	return e.toPrimaryType(clone)
 }
 
+// CustomSrc returns a copy of the embedded error with a custom source and without a stack.
+func (e *GRPCError) CustomSrc(src string) gerror.Error {
+	clone := gerror.CloneBase(e, gerror.NoStack, "", "", nil)
+	clone.Source = src
+	return e.toPrimaryType(clone)
+}
+
 // Stack returns a copy of the embedded error with a Stack trace and diagnostic info.
 func (e *GRPCError) Stack() gerror.Error {
 	clone := gerror.CloneBase(e, gerror.DefaultStack, "", "", nil)

@@ -53,5 +53,4 @@ func (s GSortSortable) Less(i, j int) bool {
 ### TODO:
 
 -	arrive at a syntax that works to generate varients of sortable data.
--	improve documentation.
--
+-	improve documentation. -

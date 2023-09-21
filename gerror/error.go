@@ -3,7 +3,7 @@ package gerror
 // Error exposes methods that can be used as an error type.
 type Error interface {
 	// Error implements the error interface; it returns a formatted message of the style
-	// "Name: <name>, DTag: <detailTag>, Src: <source>, Message: <message> \n <stack>
+	// "Name: <name>, DTag: <DetailTag>, Src: <source>, Message: <message> \n <stack>
 	Error() string
 
 	// Is implements the errors.Is interface.
@@ -25,7 +25,7 @@ type Error interface {
 	// ErrName returns the name of the error.
 	ErrName() string
 
-	// ErrDetailTag returns the detailTag (if set).
+	// ErrDetailTag returns the DetailTag (if set).
 	ErrDetailTag() string
 
 	// ErrStack returns an error stack (if available).
