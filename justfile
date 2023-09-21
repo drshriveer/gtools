@@ -54,7 +54,7 @@ _tools-generate:
 _invokeMod cmd target='all':
     #!/usr/bin/env bash
     if [ "{{ target }}" = "all" ]; then
-      xargs -L1 -t -I {} {{ cmd }} <<< "{{ MODS }}"
+      xargs -L1 -P 2 -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
       xargs -L1 -t -I {} {{ cmd }} <<< "{{ target }}"
     fi
