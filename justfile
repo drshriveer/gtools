@@ -4,6 +4,7 @@ MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
 export GOBIN := PKG_ROOT + "/bin"
 CURRENT_DIR := invocation_directory_native()
+PARALLEL := if os() == "macos" { '8' } else { '1' }
 
 # Runs `go mod tidy` all modules or a single specified target, then sync go workspaces.
 tidy:
@@ -55,7 +56,7 @@ _tools-generate:
 _invokeMod cmd target='all':
     #!/usr/bin/env bash
     if [ "{{ target }}" = "{{ PKG_ROOT }}" ]; then
-      xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ MODS }}"
+      xargs -L1 -P {{PARALLEL}} -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
       xargs -L1 -t -I {} {{ cmd }} <<< "{{ target }}"
     fi
