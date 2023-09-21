@@ -3,7 +3,6 @@ PKG_ROOT := `pwd`
 MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
 export GOBIN := PKG_ROOT + "/bin"
-PARTIAL_PATH := invocation_directory()
 
 # Runs `go mod tidy` all modules or a single specified target, then sync go workspaces.
 tidy target='all':
@@ -64,11 +63,12 @@ _invokeMod cmd target='all':
     fi
 
 # a the placeholder `{}` which is the path to the correct module.
+# The linux has a reduced parallelism as his seems to cause issues with git actions.
 [linux]
 _invokeMod cmd target='all':
     #!/usr/bin/env bash
     if [ "{{ target }}" = "all" ]; then
-      xargs -L1 -P 4 -t -I {} {{ cmd }} <<< "{{ MODS }}"
+      xargs -L1 -P 2 -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
       xargs -L1 -t -I {} {{ cmd }} <<< "{{ target }}"
     fi
