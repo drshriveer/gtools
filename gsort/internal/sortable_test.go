@@ -14,9 +14,10 @@ import (
 
 func TestGenerate(t *testing.T) {
 	g := gen.Generate{
-		InFile:  "./sortable.go",
-		OutFile: "sortable.gsort.go",
-		Types:   map[string]string{"Sortable": "Sortables"},
+		InFile:     "./sortable.go",
+		OutFile:    "sortable.gsort.go",
+		Types:      map[string]string{"Sortable": "Sortables"},
+		UsePointer: true,
 	}
 	require.NoError(t, g.Parse())
 	require.NoError(t, g.Write())
