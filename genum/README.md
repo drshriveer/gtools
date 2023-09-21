@@ -1,6 +1,7 @@
-# gEnum
+gEnum
+=====
 
-gEnum is an enum code generator for golang inspired by projects like [enumer](https://github.com/dmarkham/enumer). 
+gEnum is an enum code generator for golang inspired by projects like [enumer](https://github.com/dmarkham/enumer).
 
 [Docs](https://pkg.go.dev/github.com/drshriveer/gtools/genum)
 
@@ -9,7 +10,7 @@ gEnum is an enum code generator for golang inspired by projects like [enumer](ht
 Install with:
 
 ```bash
-go install github.com/drshriveer/gtools/genum/genum@latest
+go install github.com/drshriveer/gtools/genum/cmd/genum@latest
 ```
 
 Add `go:generate` command directive to file with enum definition:
@@ -19,9 +20,10 @@ Add `go:generate` command directive to file with enum definition:
 ```
 
 ### Features
-- **Enum Interface** - All enums implement a common interface that can be referenced directly; useful when an enum type is required.
-- **Marshalers** - enums are generated with yaml/v3, json, and text unmarshalers.
-- [Traits](#traits) - Tie constant values to enums as first-class citizens!
+
+-	**Enum Interface** - All enums implement a common interface that can be referenced directly; useful when an enum type is required.
+-	**Marshalers** - enums are generated with yaml/v3, json, and text unmarshalers.
+-	[Traits](#traits) - Tie constant values to enums as first-class citizens!
 
 ##### Generated Methods
 
@@ -43,15 +45,16 @@ func (MyEnum) IsEnum() {}
 ```
 
 ### Usage
+
 ###### Basic
 
 ```go
 //go:generate genum -types=Creatures
-type Creatures int 
+type Creatures int
 
 const (
-    NotCreature Creatures = iota
-	Cat 
+	NotCreature Creatures = iota
+	Cat
 	Dog
 	Ant
 	Spider
@@ -59,30 +62,27 @@ const (
 )
 ```
 
-- Define the enum (`Creatures` above) in a file (e.g. `filename.go`)
-- Add the generate directive: `//go:generate genum -types=Creatures`.
-- Run the `go generate` command.
-- Code will be generated and written to file `<filanme>.genum.go` in the same package.
+-	Define the enum (`Creatures` above) in a file (e.g. `filename.go`\)
+-	Add the generate directive: `//go:generate genum -types=Creatures`.
+-	Run the `go generate` command.
+-	Code will be generated and written to file `<filanme>.genum.go` in the same package.
 
 ###### Traits
 
-Traits tie other constant values to an enum values. 
-Traits must be defined on the same line as an enum value.
-The generation code will generate a method for the trait of the TraitName.  
-TraitNames are derived from the trait constants of the lowest valued enum.
-They may be prefixed with `_` (e.g. `_NumLegs`) so that they are not exposed out of the package.
+Traits tie other constant values to an enum values. Traits must be defined on the same line as an enum value. The generation code will generate a method for the trait of the TraitName.  
+TraitNames are derived from the trait constants of the lowest valued enum. They may be prefixed with `_` (e.g. `_NumLegs`) so that they are not exposed out of the package.
 
 ```go
 //go:generate genum -types=Creatures
 type Creatures int
 
 const (
-    NotCreature, _NumLegs, _IsMammal = Creatures(iota), 0, false
-    Cat, _, _                        = Creatures(iota), 4, true
-    Dog, _, _                        = Creatures(iota), 4, true
-    Ant, _, _                        = Creatures(iota), 6, false
-    Spider, _, _                     = Creatures(iota), 8, false
-    Human, _, _                      = Creatures(iota), 2, true
+	NotCreature, _NumLegs, _IsMammal = Creatures(iota), 0, false
+	Cat, _, _                        = Creatures(iota), 4, true
+	Dog, _, _                        = Creatures(iota), 4, true
+	Ant, _, _                        = Creatures(iota), 6, false
+	Spider, _, _                     = Creatures(iota), 8, false
+	Human, _, _                      = Creatures(iota), 2, true
 )
 ```
 
@@ -95,10 +95,7 @@ func (c Creatures) IsMammal() bool { ... }
 
 ###### Duplicate Values
 
-Duplicated enum values present a small challenge to code; it is not always possible to distinguish between identical values.
-For example, when turning an enum into string form.
-In such cases the generator will consistently choose one value as the "primary" value.
-To force a primary value, mark all others as `Deprecated:`.
+Duplicated enum values present a small challenge to code; it is not always possible to distinguish between identical values. For example, when turning an enum into string form. In such cases the generator will consistently choose one value as the "primary" value. To force a primary value, mark all others as `Deprecated:`.
 
 ###### Options
 
@@ -123,10 +120,11 @@ Usage of ./bin/genum:
 
 ###### Limitations
 
-1. Enum definitions must be in a single file.
-2. Currently no string transformation support.
-3. [Duplicate Values](#duplicate-values) can cause some issues; prefer not to use them. 
+1.	Enum definitions must be in a single file.
+2.	Currently no string transformation support.
+3.	[Duplicate Values](#duplicate-values) can cause some issues; prefer not to use them.
 
-### TODO: 
-- consider making traits explicitly defined in comments or as input value. 
-- uniqueness constraint and reverse mapping from traits
+### TODO:
+
+-	consider making traits explicitly defined in comments or as input value.
+-	uniqueness constraint and reverse mapping from traits

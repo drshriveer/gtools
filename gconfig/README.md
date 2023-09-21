@@ -1,6 +1,7 @@
-# gConfig
+gConfig
+=======
 
-gConfig is a simple, light-weight static configuration library that leverages generics and yaml. 
+gConfig is a simple, light-weight static configuration library that leverages generics and yaml.
 
 [Docs](https://pkg.go.dev/github.com/drshriveer/gtools/gconfig)
 
@@ -12,15 +13,16 @@ go get -u github.com/drshriveer/gtools/gconfig
 
 #### Requirements:
 
-- golang 1.19+
-- [genum](github.com/drshriveer/gtools/genum) - for dimensions
+-	golang 1.19+
+-	[genum](github.com/drshriveer/gtools/genum) - for dimensions
 
 ### Features
-- __Generics:__ This library uses generics to fetch configuration values from a yaml file. This works with primitives, slices, maps<sup>†</sup>, and structs (supporting yaml). The same key can be resolved into multiple types. _<sup>†</sup> - note: maps with dimensional keys do not currently work_
-- __Internal Type Caching:__ After a setting has been parsed into a type it is cached along with that type information for future resolution.   
-- __Dimensions:__ A single configuration file may multiple "dimensions" that are resolved at runtime based on program flags to determine the variation of a setting to vend. Differentiating setting variables by environment/stage (e.g. Development, Beta, Prod) is a great example of how this can be leveraged.
-  - __Auto-flagging:__ The configuration library will automatically turn dimensions into flags! (unless otherwise specified)
-- __Environmental Overrides:__ (TODO) In some cases it is useful to override a single static configuration variable in a specific environment. This can be done though the use of environmental variables.
+
+-	**Generics:** This library uses generics to fetch configuration values from a yaml file. This works with primitives, slices, maps<sup>†</sup>, and structs (supporting yaml). The same key can be resolved into multiple types. *<sup>†</sup> - note: maps with dimensional keys do not currently work*
+-	**Internal Type Caching:** After a setting has been parsed into a type it is cached along with that type information for future resolution.  
+-	**Dimensions:** A single configuration file may multiple "dimensions" that are resolved at runtime based on program flags to determine the variation of a setting to vend. Differentiating setting variables by environment/stage (e.g. Development, Beta, Prod) is a great example of how this can be leveraged.
+	-	**Auto-flagging:** The configuration library will automatically turn dimensions into flags! (unless otherwise specified)
+-	**Environmental Overrides:** (TODO) In some cases it is useful to override a single static configuration variable in a specific environment. This can be done though the use of environmental variables.
 
 ### Usage
 
@@ -28,6 +30,7 @@ go get -u github.com/drshriveer/gtools/gconfig
 
 ```go
 package environment
+
 //go:generate genum -types=Stage
 
 type Stage int
@@ -38,7 +41,8 @@ const (
 	Prod
 )
 ```
-- don't forget to run the generate script ;).
+
+-	don't forget to run the generate script ;).
 
 **Define a yaml configuration file:**
 
@@ -98,18 +102,19 @@ func DoSomething(cfg *gconfig.Config) {
 	maxRoutines := gconfig.MustGet[uint64](cfg, "runtime.max-goroutines")
 	reqTimeout := gconfig.MustGet[time.Duration](cfg, "runtime.request-timeout")
 	redisAddress := gconfig.MustGet[string](cfg, "clients.redis.address")
-	
+
 	// Fetch entire structs:
-	type ClientSettings struct { 
+	type ClientSettings struct {
 		Address        string        `yaml:"address"`
 		RequestTimeout time.Duration `yaml:"requestTimeout"`
 		MaxTries       int           `yaml:"maxTries"`
-    }
+	}
 	redisCfg := gconfig.MustGet[ClientSettings](cfg, "clients.redis")
 	servieACfg := gconfig.MustGet[ClientSettings](cfg, "clients.serviceA")
 }
 ```
 
-### TODO / Missing: 
-- Environmental overrides. 
-- Support for Maps with keys of dimension types.
+### TODO / Missing:
+
+-	Environmental overrides.
+-	Support for Maps with keys of dimension types.
