@@ -2,7 +2,7 @@
 package internal
 
 // Sortables implements the sort.Sort interface for Sortable.
-type Sortables []Sortable
+type Sortables []*Sortable
 
 func (s Sortables) Len() int {
 	return len(s)
