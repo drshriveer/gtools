@@ -15,6 +15,7 @@ const (
 	NoStack StackType = 0
 	// SourceStack retrieves the minimum sack possible to populate "source".
 	// Note; this is a noop for errors with a defined source.
+	// CAUTION: this is dubious... We're adding multiple stack elements
 	SourceStack StackType = 1
 	// ShortStack gets a max stack of 16 elements.
 	ShortStack StackType = 16

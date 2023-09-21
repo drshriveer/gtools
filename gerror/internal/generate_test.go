@@ -45,12 +45,10 @@ func TestExtendedError_Equality(t *testing.T) {
 	convertedErr := internal.ErrExtendedExample.Convert(errToConvert)
 	assert.True(t, errors.Is(convertedErr, internal.ErrExtendedExample))
 	assert.True(t, errors.Is(convertedErr, errToConvert))
-	// XXX: not really sure i like this.
+
+	// XXX: not really sure if i like this.... we gonna do it anyway.
 	assert.False(t, errors.Is(errToConvert, convertedErr))
 
-	// Switches _still_ fucking fail.
-	// FFF Gavin!!
-	// should we just accept error wrapping?
 	switch errors.Unwrap(err2) {
 	case internal.ErrExtendedExample:
 	default:

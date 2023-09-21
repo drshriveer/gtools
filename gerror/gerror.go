@@ -29,7 +29,7 @@ type GError struct {
 
 	// factoryRef holds a reference back to the factory error that created this message.
 	// This unfortunate wrapping is required for switching.
-	factoryRef *GError
+	factoryRef factoryOf
 
 	// srcError holds a reference back to the original error - this is only populated in
 	// case of a Convert() call.
@@ -159,7 +159,7 @@ func (e *GError) _embededGError() *GError {
 }
 
 // ExtractFactoryReference pulls out a factory reference if one exists or returns nil.
-func ExtractFactoryReference(err error) *GError {
+func ExtractFactoryReference(err error) Factory {
 	gerr, ok := err.(Error)
 	if !ok {
 		return nil

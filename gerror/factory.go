@@ -84,7 +84,7 @@ func CloneBase[T factoryOf](
 
 	// handle error inheritance:
 	if clone.factoryRef == nil && base.isFactory {
-		clone.factoryRef = base
+		clone.factoryRef = err
 	}
 
 	if clone.srcError == nil && srcError != nil {
