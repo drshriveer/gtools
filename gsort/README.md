@@ -1,6 +1,15 @@
-# GSort
+GSort
+=====
 
 Is a generator that generates sort interfaces with ordered fields.
+
+### Getting started
+
+Install with:
+
+```bash
+go install github.com/drshriveer/gtool/gsort/cmd/gsort@latest
+```
 
 ##### Usage:
 
@@ -9,15 +18,15 @@ type Category int
 
 //go:generate gsort -types=Sortable
 type Sortable struct {
-    Category     Category `gsort:"1,String()"`
-    Property1    string   `gsort:"2"`
-    Property2    int      `gsort:"3"`
-    UnsortedProp string
+	Category     Category `gsort:"1,String()"`
+	Property1    string   `gsort:"2"`
+	Property2    int      `gsort:"3"`
+	UnsortedProp string
 }
 
 ```
 
-Generates: 
+Generates:
 
 ```go
 // GSortSortable implements the sort.Sort interface for Sortable.
@@ -41,7 +50,8 @@ func (s GSortSortable) Less(i, j int) bool {
 
 ```
 
-### TODO: 
-- arrive at a syntax that works to generate varients of sortable data.
-- improve documentation.
-- 
+### TODO:
+
+-	arrive at a syntax that works to generate varients of sortable data.
+-	improve documentation.
+-
