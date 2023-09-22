@@ -13,6 +13,9 @@ func (s Sortables) Swap(i, j int) {
 func (s Sortables) Less(i, j int) bool {
 	if s[i].Category.String() == s[j].Category.String() {
 		if s[i].Property1 == s[j].Property1 {
+			if s[i].Property2 == s[j].Property2 {
+				return s[i].property3 < s[j].property3
+			}
 			return s[i].Property2 < s[j].Property2
 		}
 		return s[i].Property1 < s[j].Property1

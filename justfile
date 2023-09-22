@@ -53,14 +53,23 @@ _tools-linter:
       curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v{{ GO_LINT_VERSION }}
     fi
 
-# always rebuild the genum executable in this package for testing.
-# other packages should use something like:
+# Always rebuild the genum, gsort, and gerror executibles from this package direclty for testing.
 
-# @go install github.com/drshriveer/gtools/genum/genum@{{ GENUM_VERSION }}
+# Other packages should use the _install-go-pkg script.
 _tools-generate:
     go build -o bin/genum genum/cmd/genum/main.go
     go build -o bin/gsort gsort/cmd/gsort/main.go
     go build -o bin/gerror gerror/cmd/gerror/main.go
+
+# installs a go package at the version indicaed in go.work / go.mod.
+# This may break if we're using inconsistent versions across projects, but I don't think it will.
+
+# If it does, we might consider picking the latest version, or maybe we just want it to break.
+_install-go-pkg package cmdpath:
+    #!/usr/bin/env bash
+    pkgVersion=`go list -f '{{{{.Version}}' -m {{ package }}`
+    echo "installing {{ package / cmdpath }}@$pkgVersion"
+    go install {{ package / cmdpath }}@$pkgVersion
 
 # a the placeholder `{}` which is the path to the correct module.
 _invokeMod cmd target='all':

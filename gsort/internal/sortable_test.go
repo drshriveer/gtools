@@ -13,17 +13,49 @@ import (
 )
 
 func TestGenerate(t *testing.T) {
-	g := gen.Generate{
-		InFile:     "./sortable.go",
-		OutFile:    "sortable.gsort.go",
-		Types:      map[string]string{"Sortable": "Sortables"},
-		UsePointer: true,
+	t.Parallel()
+	tests := []struct {
+		description string
+		typeName    string
+
+		// TODO: use proper errors for this... I didn't have them when I wrote it,
+		//  so not doing that now.
+		expectedError bool
+	}{
+		{
+			description: "sortable success",
+			typeName:    "Sortable",
+		},
+		{
+			description:   "fails because there are no properties to sort",
+			typeName:      "NotSortable",
+			expectedError: true,
+		},
+		// add more tests some day.
 	}
-	require.NoError(t, g.Parse())
-	require.NoError(t, g.Write())
+
+	for _, test := range tests {
+		t.Run(test.description, func(t *testing.T) {
+			t.Parallel()
+			g := gen.Generate{
+				InFile:     "./sortable.go",
+				OutFile:    "sortable.gsort.go",
+				Types:      map[string]string{test.typeName: test.typeName + "s"},
+				UsePointer: true,
+			}
+			err := g.Parse()
+			if test.expectedError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+			// require.NoError(t, g.Write())
+		})
+	}
 }
 
 func TestSortable_Sort(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		description string
 		input       internal.Sortables
@@ -101,6 +133,7 @@ func TestSortable_Sort(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.description, func(t *testing.T) {
+			t.Parallel()
 			sort.Sort(test.input)
 			for i, expected := range test.expected {
 				assert.Equal(t, expected, test.input[i])

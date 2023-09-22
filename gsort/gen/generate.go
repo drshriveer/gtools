@@ -2,6 +2,7 @@ package gen
 
 import (
 	_ "embed"
+	"sort"
 	"text/template"
 
 	"github.com/drshriveer/gtools/gencommon"
@@ -23,7 +24,7 @@ type Generate struct {
 
 	// derived, (exposed for template use):
 	Imports     *gencommon.ImportHandler `flag:""` // ignore these fields
-	SorterDescs []*SorterDesc            `flag:""` // ignore these fields
+	SorterDescs SorterDescs              `flag:""` // ignore these fields
 	PkgName     string                   `flag:""` // ignore these fields
 }
 
@@ -39,7 +40,7 @@ func (g *Generate) Parse() error {
 	g.PkgName = pkg.Name
 	pkgScope := pkg.Types.Scope()
 
-	g.SorterDescs = make([]*SorterDesc, 0)
+	g.SorterDescs = make(SorterDescs, 0)
 	for typeToSort, nameOfResultType := range g.Types {
 		obj := pkgScope.Lookup(typeToSort)
 		sortDesc, err := createSorterDesc(obj, typeToSort, nameOfResultType)
@@ -48,6 +49,8 @@ func (g *Generate) Parse() error {
 		}
 		g.SorterDescs = append(g.SorterDescs, sortDesc)
 	}
+
+	sort.Sort(g.SorterDescs)
 
 	return nil
 }
