@@ -122,7 +122,7 @@ func CloneBase[T factoryOf](
 	}
 
 	// handle message extension:
-	extMsg = strings.TrimPrefix(extMsg, " ")
+	extMsg = strings.TrimSpace(extMsg)
 	if len(extMsg) > 0 {
 		if len(clone.Message) == 0 {
 			clone.Message = extMsg
