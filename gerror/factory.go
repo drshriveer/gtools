@@ -4,34 +4,65 @@ package gerror
 // But all errors implement this by default.
 // This allows for dynamic and mutable errors without modifying the base.
 type Factory interface {
-	// Base returns a copy of the embedded error without modifications.
+	// Base clones the error without modifications.
 	Base() Error
 
-	// Src returns a copy of the embedded error with Source populated if needed.
-	// Source is a limited stack.
-	Src() Error
+	// SourceOnly clones the error and ensures Source is populated.
+	SourceOnly() Error
 
-	// CustomSrc returns a copy of the embedded error with a custom source and without a stack.
-	CustomSrc(src string) Error
-
-	// Stack returns a copy of the embedded error with a Stack trace and diagnostic info.
+	// Stack clones the error and ensures there is a Stack. Source will also be populated
+	// if not already set.
 	Stack() Error
 
-	// ExtMsgf returns a copy of the embedded error with diagnostic info and the
-	// message extended with additional context.
-	ExtMsgf(format string, elems ...any) Error
+	// Src clones the error with a custom source.
+	Src(src string) Error
 
-	// DExtMsgf returns a copy of the embedded error with diagnostic info, a detail tag,
-	// and the message extended with additional context.
-	DExtMsgf(detailTag string, format string, elems ...any) Error
+	// DTag clones the error with a detailTag, and will populate Source if needed.
+	DTag(dTag string) Error
 
-	// DTag returns a copy of the embedded error with diagnostic info and a detail tag.
-	DTag(detailTag string) Error
+	// Msg clones the error, extends its message, and will populate a Source if needed.
+	Msg(fmt string, elems ...any) Error
+
+	// DTagSrcMsg clones the error, adds a Detail tag, custom source, and extends its message.
+	DTagSrcMsg(dTag, src, fmt string, elems ...any) Error
+
+	// DTagSrc clones the error, adds a detail tag and source.
+	DTagSrc(dTag, src string) Error
+
+	// SrcMsg clones the error, adds a source, and extends its message.
+	SrcMsg(src, fmt string, elems ...any) Error
+
+	// DTagSrc clones the error, adds a detail tag, and extends its message.
+	DTagMsg(dTag, fmt string, elems ...any) Error
+
+	// SrcS is the same as Src but also includes a full StackTrace.
+	SrcS(src string) Error
+
+	// DTagS is the same as DTag but also includes a full StackTrace.
+	DTagS(dTag string) Error
+
+	// MsgS is the same as Msg but also includes a full StackTrace.
+	MsgS(fmt string, elems ...any) Error
+
+	// DTagSrcMsgS is the same as DTagSrcMsg but also includes a full StackTrace.
+	DTagSrcMsgS(dTag, src, fmt string, elems ...any) Error
+
+	// DTagSrcS is the same as DTagSrc but also includes a full StackTrace.
+	DTagSrcS(dTag, src string) Error
+
+	// SrcMsgS is the same as SrcMsg but also includes a full StackTrace.
+	SrcMsgS(src, fmt string, elems ...any) Error
+
+	// DTagSrcS is the same as DTagMsg but also includes a full StackTrace.
+	DTagMsgS(dTag, fmt string, elems ...any) Error
 
 	// Convert will attempt to convert the supplied error into a gError.Error of the
 	// Factory's type, including the source errors details in the result's error message.
-	// The original error can be retrieved via utility methods.
+	// The original error's equality can be checked with errors.Is().
 	Convert(err error) Error
+
+	// ConvertS is the same as Convert but includes a full StackTrace.
+	ConvertS(err error) Error
 
 	// Error implements the standard Error interface so that a Factory
 	// can be passed into errors.Is() as a target.
@@ -57,6 +88,7 @@ func CloneBase[T factoryOf](
 	err T,
 	stackType StackType,
 	dTag string,
+	source string,
 	extMsg string, // PRE FORMATED!
 	srcError error, // Be careful with this...
 ) *GError {
@@ -65,18 +97,23 @@ func CloneBase[T factoryOf](
 		Name:       base.Name,
 		Message:    base.Message,
 		Source:     base.Source,
-		DetailTag:  base.DetailTag,
+		detailTag:  base.detailTag,
 		factoryRef: base.factoryRef,
 		stack:      base.stack,
 		srcError:   base.srcError,
 	}
 
+	// handle source:
+	if len(source) > 0 && len(clone.Source) == 0 {
+		clone.Source = source
+	}
+
 	// handle detail tags:
 	if len(dTag) > 0 {
-		if len(clone.DetailTag) == 0 {
-			clone.DetailTag = dTag
+		if len(clone.detailTag) == 0 {
+			clone.detailTag = dTag
 		} else {
-			clone.DetailTag += "-" + dTag
+			clone.detailTag += "-" + dTag
 		}
 	}
 

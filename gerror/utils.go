@@ -13,5 +13,5 @@ func ExtMsgf(err error, format string, args ...any) error {
 		return ErrUnknown.Convert(err)
 	}
 
-	return gerr.ExtMsgf(format, args...)
+	return gerr.Msg(format, args...)
 }

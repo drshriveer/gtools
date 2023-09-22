@@ -185,10 +185,15 @@ func TestStackSource(t *testing.T) {
 	}
 }
 
-func TestGError_ExtMsgf(t *testing.T) {
-	err := ErrMyError1.ExtMsgf("T-Shirts $%d", 5)
+func TestGError_Msg(t *testing.T) {
+	err := ErrMyError1.Msg("T-Shirts $%d", 5)
 	assert.NotSame(t, ErrMyError1, &err)
-	assert.Equal(t, "gerror_test:TestGError_ExtMsgf", err.ErrSource())
+	assert.Equal(t, "gerror_test:TestGError_Msg", err.ErrSource())
+	assert.Empty(t, err.ErrStack())
+
+	err = ErrMyError1.MsgS("T-Shirts $%d", 5)
+	assert.NotSame(t, ErrMyError1, &err)
+	assert.Equal(t, "gerror_test:TestGError_Msg", err.ErrSource())
 	assert.NotEmpty(t, err.ErrStack())
 	assert.Equal(t, ErrMyError1.(gerror.Error).ErrMessage()+" T-Shirts $5", err.ErrMessage())
 	assert.Same(t, gerror.ExtractFactoryReference(err), ErrMyError1)
@@ -203,7 +208,7 @@ func TestGError_ExtMsgf(t *testing.T) {
 
 func BenchmarkGError_WithSource(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_ = ErrMyError1.Src()
+		_ = ErrMyError1.SourceOnly()
 	}
 }
 
