@@ -1,5 +1,9 @@
 package gerror
 
+import (
+	"strings"
+)
+
 // The Factory interface exposes only methods that can be used for cloning an error.
 // But all errors implement this by default.
 // This allows for dynamic and mutable errors without modifying the base.
@@ -118,8 +122,13 @@ func CloneBase[T factoryOf](
 	}
 
 	// handle message extension:
+	extMsg = strings.TrimSpace(extMsg)
 	if len(extMsg) > 0 {
-		clone.Message += " " + extMsg
+		if len(clone.Message) == 0 {
+			clone.Message = extMsg
+		} else {
+			clone.Message += " " + extMsg
+		}
 	}
 
 	// handle error inheritance:
