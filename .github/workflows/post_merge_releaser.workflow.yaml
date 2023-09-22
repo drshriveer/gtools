@@ -41,7 +41,7 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version-file: go.work
-      - uses: go-semantic-release/action@v2
+      - uses: go-semantic-release/action@v1
         with:
           hooks: goreleaser
         env:
