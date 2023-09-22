@@ -24,10 +24,10 @@ type Factory interface {
 	Msg(fmt string, elems ...any) Error
 
 	// DTagSrcMsg clones the error, adds a Detail tag, custom source, and extends its message.
-	DTagSrcMsg(dTag, src, fmt string, elems ...any) Error
+	SrcDTagMsg(src, dTag, fmt string, elems ...any) Error
 
-	// DTagSrc clones the error, adds a detail tag and source.
-	DTagSrc(dTag, src string) Error
+	// SrcDTag clones the error, adds a detail tag and source.
+	SrcDTag(src, dTag string) Error
 
 	// SrcMsg clones the error, adds a source, and extends its message.
 	SrcMsg(src, fmt string, elems ...any) Error
@@ -44,11 +44,11 @@ type Factory interface {
 	// MsgS is the same as Msg but also includes a full StackTrace.
 	MsgS(fmt string, elems ...any) Error
 
-	// DTagSrcMsgS is the same as DTagSrcMsg but also includes a full StackTrace.
-	DTagSrcMsgS(dTag, src, fmt string, elems ...any) Error
+	// SrcDTagMsgS is the same as DTagSrcMsg but also includes a full StackTrace.
+	SrcDTagMsgS(src, dTag, fmt string, elems ...any) Error
 
-	// DTagSrcS is the same as DTagSrc but also includes a full StackTrace.
-	DTagSrcS(dTag, src string) Error
+	// SrcDTagS is the same as DTagSrc but also includes a full StackTrace.
+	SrcDTagS(src, dTag string) Error
 
 	// SrcMsgS is the same as SrcMsg but also includes a full StackTrace.
 	SrcMsgS(src, fmt string, elems ...any) Error

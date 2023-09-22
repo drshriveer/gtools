@@ -94,13 +94,13 @@ func (e *GError) Msg(format string, elems ...any) Error {
 	return CloneBase(e, SourceStack, "", "", fmt.Sprintf(format, elems...), nil)
 }
 
-// DTagSrcMsg clones the error, adds a Detail tag, custom source, and extends its message.
-func (e *GError) DTagSrcMsg(dTag, src, format string, elems ...any) Error {
+// SrcDTagMsg clones the error, adds a Detail tag, custom source, and extends its message.
+func (e *GError) SrcDTagMsg(src, dTag, format string, elems ...any) Error {
 	return CloneBase(e, SourceStack, dTag, src, fmt.Sprintf(format, elems...), nil)
 }
 
-// DTagSrc clones the error, adds a detail tag and source.
-func (e *GError) DTagSrc(dTag, src string) Error {
+// SrcDTag clones the error, adds a detail tag and source.
+func (e *GError) SrcDTag(src, dTag string) Error {
 	return CloneBase(e, SourceStack, dTag, src, "", nil)
 }
 
@@ -129,13 +129,13 @@ func (e *GError) MsgS(format string, elems ...any) Error {
 	return CloneBase(e, DefaultStack, "", "", fmt.Sprintf(format, elems...), nil)
 }
 
-// DTagSrcMsgS is the same as DTagSrcMsg but also includes a full StackTrace.
-func (e *GError) DTagSrcMsgS(dTag, src, format string, elems ...any) Error {
+// SrcDTagMsgS is the same as DTagSrcMsg but also includes a full StackTrace.
+func (e *GError) SrcDTagMsgS(src, dTag, format string, elems ...any) Error {
 	return CloneBase(e, DefaultStack, dTag, src, fmt.Sprintf(format, elems...), nil)
 }
 
-// DTagSrcS is the same as DTagSrc but also includes a full StackTrace.
-func (e *GError) DTagSrcS(dTag, src string) Error {
+// SrcDTagS is the same as DTagSrc but also includes a full StackTrace.
+func (e *GError) SrcDTagS(src, dTag string) Error {
 	return CloneBase(e, DefaultStack, dTag, src, "", nil)
 }
 

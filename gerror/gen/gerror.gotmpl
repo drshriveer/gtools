@@ -75,14 +75,14 @@ func (e *{{$desc.TypeName}}) Msg(format string, elems ...any) gerror.Error {
 	return e.toPrimaryType(clone)
 }
 
-{{index $.FactoryComments "DTagSrcMsg"}}
-func (e *{{$desc.TypeName}}) DTagSrcMsg(dTag, src, format string, elems ...any) gerror.Error {
+{{index $.FactoryComments "SrcDTagMsg"}}
+func (e *{{$desc.TypeName}}) SrcDTagMsg(src, dTag, format string, elems ...any) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.SourceStack, dTag, src, fmt.Sprintf(format, elems...), nil)
 	return e.toPrimaryType(clone)
 }
 
-{{index $.FactoryComments "DTagSrc"}}
-func (e *{{$desc.TypeName}}) DTagSrc(dTag, src string) gerror.Error {
+{{index $.FactoryComments "SrcDTag"}}
+func (e *{{$desc.TypeName}}) SrcDTag(src, dTag string) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.SourceStack, dTag, src, "", nil)
 	return e.toPrimaryType(clone)
 }
@@ -117,14 +117,14 @@ func (e *{{$desc.TypeName}}) MsgS(format string, elems ...any) gerror.Error {
 	return e.toPrimaryType(clone)
 }
 
-{{index $.FactoryComments "DTagSrcMsgS"}}
-func (e *{{$desc.TypeName}}) DTagSrcMsgS(dTag, src, format string, elems ...any) gerror.Error {
+{{index $.FactoryComments "SrcDTagMsgS"}}
+func (e *{{$desc.TypeName}}) SrcDTagMsgS(src, dTag,format string, elems ...any) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.DefaultStack, dTag, src, fmt.Sprintf(format, elems...), nil)
 	return e.toPrimaryType(clone)
 }
 
-{{index $.FactoryComments "DTagSrcS"}}
-func (e *{{$desc.TypeName}}) DTagSrcS(dTag, src string) gerror.Error {
+{{index $.FactoryComments "SrcDTagS"}}
+func (e *{{$desc.TypeName}}) SrcDTagS(src, dTag string) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.DefaultStack, dTag, src, "", nil)
 	return e.toPrimaryType(clone)
 }
