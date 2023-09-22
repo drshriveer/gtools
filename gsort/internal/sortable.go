@@ -7,7 +7,13 @@ type Sortable struct {
 	Category     Category `gsort:"1,String()"`
 	Property1    string   `gsort:"2"`
 	Property2    int      `gsort:"3"`
+	property3    int      `gsort:"4"`
 	UnsortedProp string
+}
+
+// NotSortable is for testing.
+type NotSortable struct {
+	Prop1 string
 }
 
 // Category exists to test the stringify tag.

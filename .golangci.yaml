@@ -35,6 +35,9 @@ linters:
     # - musttag
 
 linters-settings:
+  govet:
+    disable:
+      - loopclosure # we use GOEXPERIMENT := "loopvar"
   goimports:
     local-prefixes: github.com/drshriveer/gtools
 # if the stutter check in revive is annoying uncomment the following:

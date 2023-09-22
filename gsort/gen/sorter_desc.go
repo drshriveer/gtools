@@ -1,5 +1,7 @@
 package gen
 
+//go:generate gsort --types SorterDesc=SorterDescs,SortFieldDesc=SortFieldDescs
+
 import (
 	"errors"
 	"go/types"
@@ -14,10 +16,10 @@ import (
 // SorterDesc is a description of a sorter.
 type SorterDesc struct {
 	// The underlying type name (that we're making sortable).
-	TypeName string
+	TypeName string `gsort:"1"`
 
-	// The name of the sortable type.
-	SortType string
+	// The name of the sortable type (sorted in case we support generating different sorters per type)
+	SortType string `gsort:"2"`
 	Fields   SortFieldDescs
 }
 
@@ -74,21 +76,11 @@ func createSorterDesc(obj types.Object, typeName, sortableTypeName string) (*Sor
 	}, nil
 }
 
-// SortFieldDescs - a sortable interface for fieldDescriptions.
-type SortFieldDescs []*SortFieldDesc
-
-func (s SortFieldDescs) Len() int {
-	return len(s)
-}
-func (s SortFieldDescs) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-func (s SortFieldDescs) Less(i, j int) bool {
-	return s[i].Priority < s[j].Priority
-}
-
 // Validate returns an error if anything is broken.
 func (s SortFieldDescs) Validate() error {
+	if len(s) == 0 {
+		return errors.New("no sort attributes defined")
+	}
 	// TODO: could add more diagnostic info here, but too lazy for now.
 	known := set.Make[int]()
 	for _, fd := range s {
@@ -104,7 +96,7 @@ func (s SortFieldDescs) Validate() error {
 type SortFieldDesc struct {
 	FieldName      string
 	CustomAccessor string
-	Priority       int
+	Priority       int `gsort:"1"`
 }
 
 func sortFieldDescFromTag(fName, tagLine string) (*SortFieldDesc, error) {

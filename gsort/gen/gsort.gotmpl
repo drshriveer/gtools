@@ -30,7 +30,7 @@ func (s {{$desc.SortType}}) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 func (s {{$desc.SortType}}) Less(i, j int) bool {
-	{{template "PriorityBlock" $desc.PriorityTree}}
+	{{- template "PriorityBlock" $desc.PriorityTree}}
 }
 
 {{- end}}
