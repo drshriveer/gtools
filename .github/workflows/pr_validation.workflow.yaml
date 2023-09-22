@@ -18,6 +18,8 @@ jobs:
           filters: |
             changes:
               - '**/*.go'
+              - '**/go.mod'
+              - 'go.work'
 
   lint:
     needs: changes
