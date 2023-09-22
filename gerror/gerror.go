@@ -21,8 +21,8 @@ type GError struct {
 	// A derived source includes packageName, typeName (if applicable), and methodName.
 	Source string
 
-	// DetailTag is a metric-safe 'tag' that can distinguish between different uses of the same error.
-	DetailTag string
+	// detailTag is a metric-safe 'tag' that can distinguish between different uses of the same error.
+	detailTag string
 
 	// stack is the stack trace info.
 	stack Stack
@@ -55,7 +55,7 @@ func (e *GError) ErrName() string {
 
 // ErrDetailTag returns the metric-safe detail-tag of the error.
 func (e *GError) ErrDetailTag() string {
-	return e.DetailTag
+	return e.detailTag
 }
 
 // ErrStack returns an error stack (if available).
@@ -65,48 +65,106 @@ func (e *GError) ErrStack() Stack {
 
 // Base clones the base error but does not add any tracing info.
 func (e *GError) Base() Error {
-	return CloneBase(e, NoStack, "", "", nil)
+	return CloneBase(e, NoStack, "", "", "", nil)
 }
 
-// Convert attempts translates a non-gerror of an unknown kind into this base error.
+// SourceOnly clones the error and ensures Source is populated.
+func (e *GError) SourceOnly() Error {
+	return CloneBase(e, SourceStack, "", "", "", nil)
+}
+
+// Stack clones the error and ensures there is a Stack. Source will also be populated
+// if not already set.
+func (e *GError) Stack() Error {
+	return CloneBase(e, DefaultStack, "", "", "", nil)
+}
+
+// Src clones the error with a custom source.
+func (e *GError) Src(src string) Error {
+	return CloneBase(e, SourceStack, "", src, "", nil)
+}
+
+// DTag clones the error with a detailTag, and will populate Source if needed.
+func (e *GError) DTag(dTag string) Error {
+	return CloneBase(e, SourceStack, dTag, "", "", nil)
+}
+
+// Msg clones the error, extends its message, and will populate a Source if needed.
+func (e *GError) Msg(format string, elems ...any) Error {
+	return CloneBase(e, SourceStack, "", "", fmt.Sprintf(format, elems...), nil)
+}
+
+// SrcDTagMsg clones the error, adds a Detail tag, custom source, and extends its message.
+func (e *GError) SrcDTagMsg(src, dTag, format string, elems ...any) Error {
+	return CloneBase(e, SourceStack, dTag, src, fmt.Sprintf(format, elems...), nil)
+}
+
+// SrcDTag clones the error, adds a detail tag and source.
+func (e *GError) SrcDTag(src, dTag string) Error {
+	return CloneBase(e, SourceStack, dTag, src, "", nil)
+}
+
+// SrcMsg clones the error, adds a source, and extends its message.
+func (e *GError) SrcMsg(src, format string, elems ...any) Error {
+	return CloneBase(e, SourceStack, "", src, fmt.Sprintf(format, elems...), nil)
+}
+
+// DTagMsg clones the error, adds a detail tag, and extends its message.
+func (e *GError) DTagMsg(dTag, format string, elems ...any) Error {
+	return CloneBase(e, SourceStack, dTag, "", fmt.Sprintf(format, elems...), nil)
+}
+
+// SrcS is the same as Src but also includes a full StackTrace.
+func (e *GError) SrcS(src string) Error {
+	return CloneBase(e, DefaultStack, "", src, "", nil)
+}
+
+// DTagS is the same as DTag but also includes a full StackTrace.
+func (e *GError) DTagS(dTag string) Error {
+	return CloneBase(e, DefaultStack, dTag, "", "", nil)
+}
+
+// MsgS is the same as Msg but also includes a full StackTrace.
+func (e *GError) MsgS(format string, elems ...any) Error {
+	return CloneBase(e, DefaultStack, "", "", fmt.Sprintf(format, elems...), nil)
+}
+
+// SrcDTagMsgS is the same as DTagSrcMsg but also includes a full StackTrace.
+func (e *GError) SrcDTagMsgS(src, dTag, format string, elems ...any) Error {
+	return CloneBase(e, DefaultStack, dTag, src, fmt.Sprintf(format, elems...), nil)
+}
+
+// SrcDTagS is the same as DTagSrc but also includes a full StackTrace.
+func (e *GError) SrcDTagS(src, dTag string) Error {
+	return CloneBase(e, DefaultStack, dTag, src, "", nil)
+}
+
+// SrcMsgS is the same as SrcMsg but also includes a full StackTrace.
+func (e *GError) SrcMsgS(src, format string, elems ...any) Error {
+	return CloneBase(e, DefaultStack, "", src, fmt.Sprintf(format, elems...), nil)
+}
+
+// DTagMsgS is the same as DTagMsg but also includes a full StackTrace.
+func (e *GError) DTagMsgS(dTag, format string, elems ...any) Error {
+	return CloneBase(e, DefaultStack, dTag, "", fmt.Sprintf(format, elems...), nil)
+}
+
+// Convert will attempt to convert the supplied error into a gError.Error of the
+// Factory's type, including the source errors details in the result's error message.
+// The original error's equality can be checked with errors.Is().
 func (e *GError) Convert(err error) Error {
 	if gerr, ok := err.(Error); ok {
 		return gerr
 	}
-	clone := CloneBase(e, DefaultStack, "", fmt.Sprintf("originalError: %+v", err), err)
-	return clone
+	return CloneBase(e, SourceStack, "", "", fmt.Sprintf("originalError: %+v", err), err)
 }
 
-// DTag clones the base error and adds or extends a metric tag.
-func (e *GError) DTag(dTag string) Error {
-	return CloneBase(e, DefaultStack, dTag, "", nil)
-}
-
-// ExtMsgf clones the base error and adds an extended message.
-func (e *GError) ExtMsgf(format string, elems ...any) Error {
-	return CloneBase(e, DefaultStack, "", fmt.Sprintf(format, elems...), nil)
-}
-
-// DExtMsgf clones the base error and adds an extended message and metric tag.
-func (e *GError) DExtMsgf(dTag string, format string, elems ...any) Error {
-	return CloneBase(e, DefaultStack, dTag, fmt.Sprintf(format, elems...), nil)
-}
-
-// Src returns a copy of the embedded error with Source populated if needed.
-func (e *GError) Src() Error {
-	return CloneBase(e, SourceStack, "", "", nil)
-}
-
-// CustomSrc returns a copy of the embedded error with a custom source.
-func (e *GError) CustomSrc(src string) Error {
-	base := CloneBase(e, NoStack, "", "", nil)
-	base.Source = src
-	return base
-}
-
-// Stack is a factory method for cloning the base error with a full sack trace.
-func (e *GError) Stack() Error {
-	return CloneBase(e, DefaultStack, "", "", nil)
+// ConvertS is the same as Convert but includes a full StackTrace.
+func (e *GError) ConvertS(err error) Error {
+	if gerr, ok := err.(Error); ok {
+		return gerr
+	}
+	return CloneBase(e, DefaultStack, "", "", fmt.Sprintf("originalError: %+v", err), err)
 }
 
 // Error implements the "error" interface.
@@ -116,8 +174,8 @@ func (e *GError) Error() string {
 	if len(e.Name) > 0 {
 		result += "Name: " + e.Name + separator
 	}
-	if len(e.DetailTag) > 0 {
-		result += "DTag: " + e.DetailTag + separator
+	if len(e.detailTag) > 0 {
+		result += "DTag: " + e.detailTag + separator
 	}
 	if len(e.Source) > 0 {
 		result += "Source: " + e.Source + separator
