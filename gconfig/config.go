@@ -89,12 +89,12 @@ func extractAndConvert[T any](m map[string]any, key string) (T, error) {
 	result := *new(T)
 	v, ok := extract(m, paths)
 	if !ok {
-		return result, ErrConfigFailure.ExtMsgf("key `%s` not found", key)
+		return result, ErrConfigFailure.Msg("key `%s` not found", key)
 	}
 
 	bytes, err := yaml.Marshal(v)
 	if err != nil {
-		return result, ErrConfigFailure.ExtMsgf("key `%s` failed conversion back to yaml %+v", key, err)
+		return result, ErrConfigFailure.Msg("key `%s` failed conversion back to yaml %+v", key, err)
 	}
 
 	err = yaml.Unmarshal(bytes, &result)
