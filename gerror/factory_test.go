@@ -41,10 +41,10 @@ func TestCloneBase(t *testing.T) {
 		},
 		{
 			description:     "add message is trimmed + chaining",
-			input:           ErrNoMessage.Msg(" hi! blah ").(*gerror.GError).Msg(". bye! "),
+			input:           ErrNoMessage.Msg(" hi! blah ").(*gerror.GError).Msg("   \t bye! "),
 			expectedName:    "ErrBase",
 			expectedSource:  "gerror_test:TestCloneBase",
-			expectedMessage: "hi! blah. bye!",
+			expectedMessage: "hi! blah bye!",
 		},
 		{
 			description:     "lots of whitespace is trimmed",
