@@ -5,6 +5,8 @@ use (
 	./gencommon
 	./genum
 	./gerror
+	./gogenproto
+	./gogenproto/internal
 	./gsort
 	./gsync
 	./log
