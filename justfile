@@ -60,6 +60,7 @@ _tools-generate:
     go build -o bin/genum genum/cmd/genum/main.go
     go build -o bin/gsort gsort/cmd/gsort/main.go
     go build -o bin/gerror gerror/cmd/gerror/main.go
+    go build -o bin/gogenproto gogenproto/cmd/gogenproto/main.go
 
 # installs a go package at the version indicaed in go.work / go.mod.
 # This may break if we're using inconsistent versions across projects, but I don't think it will.
