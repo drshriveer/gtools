@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
 
 	"github.com/itzg/go-flagsfiller"
 
@@ -18,6 +17,6 @@ func main() {
 	flag.Parse()
 
 	if err := g.Run(); err != nil {
-		log.Fatalf("run failed: %+v", err)
+		gen.Logger.Fatalf("run failed: %+v", err)
 	}
 }

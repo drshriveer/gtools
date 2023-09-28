@@ -18,6 +18,8 @@ var Logger = log.New(log.Writer(), "[gogenproto] ", log.LstdFlags)
 type Generate struct {
 	InputDir  string `alias:"inputDir" env:"PWD" usage:"path to root directory for proto generation"`
 	OutputDir string `alias:"outputDir" default:"../" usage:"relative output path for generated files"`
+
+	Recurse bool `alias:"recurse" default:"false" usage:"generate protos recursively"`
 	// TODO: other flags, like VTProto, GRPC, TS, etc,
 }
 
@@ -43,9 +45,12 @@ func (g Generate) findProtos() ([]string, error) {
 	protoList := []string{}
 	err := filepath.WalkDir(g.InputDir,
 		func(pathname string, d fs.DirEntry, err error) error {
-			if err != nil || pathname == "." {
+			if err != nil || pathname == "." || pathname == g.InputDir {
 				return err
-			} else if d.Type().IsRegular() {
+			} else if d.IsDir() && !g.Recurse {
+				return fs.SkipDir
+			}
+			if d.Type().IsRegular() {
 				if filepath.Ext(d.Name()) == ".proto" {
 					protoList = append(protoList, pathname)
 				}
