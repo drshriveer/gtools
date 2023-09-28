@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package gtools.gogenproto.internal.skipped;
+
+option go_package = "internal/skipped";
+
+message ShouldBeSkipped{
+  int32 f = 1;
+}
