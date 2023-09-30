@@ -2,7 +2,9 @@ package gconfig_test
 
 import (
 	"embed"
+	"flag"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -23,6 +25,32 @@ type testStruct struct {
 	Duration time.Duration `yaml:"duration"`
 	UseReal  bool          `yaml:"useReal"`
 	Name     string        `yaml:"name"`
+}
+
+func TestFlagParsing(t *testing.T) {
+	builder := gconfig.NewBuilder().
+		WithDimension("d1", internal.D1a).
+		WithDimension("d2", internal.D2a)
+
+	require.NoError(t, flag.Set("d1", internal.D1c.String()))
+	require.NoError(t, flag.Set("d2", internal.D2e.String()))
+	cfg, err := builder.FromFile(testFS, "internal/test.yaml")
+	require.NoError(t, err)
+	assert.Equal(t, internal.D1c, gconfig.GetDimension[internal.DimensionOne](cfg))
+	assert.Equal(t, internal.D2e, gconfig.GetDimension[internal.DimensionTwo](cfg))
+}
+
+func TestEnvParsing(t *testing.T) {
+	require.NoError(t, os.Setenv("d1", internal.D1c.String()))
+	require.NoError(t, os.Setenv("d2", internal.D2e.String()))
+	cfg, err := gconfig.NewBuilder().
+		WithDimension("d1", internal.D1a).
+		WithDimension("d2", internal.D2a).
+		FromFile(testFS, "internal/test.yaml")
+
+	require.NoError(t, err)
+	assert.Equal(t, internal.D1c, gconfig.GetDimension[internal.DimensionOne](cfg))
+	assert.Equal(t, internal.D2e, gconfig.GetDimension[internal.DimensionTwo](cfg))
 }
 
 func TestDimensions(t *testing.T) {

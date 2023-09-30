@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"os"
 	"reflect"
 
 	"gopkg.in/yaml.v3"
@@ -32,23 +33,20 @@ type dimension struct {
 	// This is also used to determine the
 	defaultVal genum.Enum
 
-	// flagName is the name of the environment flag to parse when parseEnv is true.
+	// flagName is the name of the environment flag to parse when parseFlag is true.
 	flagName string
 
-	// parseEnv, if true, will parse the dimension as an environment flag.
-	parseEnv bool
+	// parseFlag, if true, will parse the dimension as an environment flag.
+	parseFlag bool
+
+	// flagParsed tracks if we parsed the value from a flag, if not we will default to environment variables.
+	flagParsed bool
 
 	parsed genum.Enum
 }
 
 func (d *dimension) initFlag() error {
 	d.parsed = d.defaultVal
-	if !d.parseEnv {
-		return nil
-	}
-
-	usage := fmt.Sprintf("%s (default=%s): configuration dimension valid options: %s",
-		d.flagName, d.defaultVal, d.defaultVal.StringValues())
 
 	eType := reflect.TypeOf(d.defaultVal)
 	ptrVal, ok := reflect.New(eType).Interface().(encoding.TextUnmarshaler)
@@ -56,6 +54,18 @@ func (d *dimension) initFlag() error {
 		return ErrFailedParsing.Msg(
 			"genum %T does not implement encoding.TextUnmarshaler as required",
 			d.defaultVal)
+	}
+
+	if s := os.Getenv(d.flagName); len(s) > 0 {
+		if err := ptrVal.UnmarshalText([]byte(s)); err != nil {
+			return err
+		}
+		d.parsed, ok = rutils.Unptr(ptrVal).(genum.Enum)
+		if !ok {
+			return ErrFailedParsing.Msg(
+				"environment variable %s=%s found but is not a valid option: %s",
+				d.flagParsed, s, d.defaultVal.StringValues())
+		}
 	}
 
 	// first look for flags that have already been registered..
@@ -67,9 +77,12 @@ func (d *dimension) initFlag() error {
 	//        a builder?
 	//        The whole flag part is ... maybe problematic.
 	//        Maybe there's an easier way?
-	if flag.Lookup(d.flagName) != nil {
+	if !d.parseFlag || flag.Lookup(d.flagName) != nil {
 		return nil
 	}
+
+	usage := fmt.Sprintf("%s (default=%s): configuration dimension valid options: %s",
+		d.flagName, d.defaultVal, d.defaultVal.StringValues())
 
 	flag.Func(d.flagName, usage, func(s string) error {
 		if err := ptrVal.UnmarshalText([]byte(s)); err != nil {
@@ -79,6 +92,7 @@ func (d *dimension) initFlag() error {
 		if !ok {
 			return ErrFailedParsing.Stack()
 		}
+		d.flagParsed = true
 		return nil
 	})
 
@@ -95,7 +109,7 @@ func (d *dimension) get() genum.Enum {
 // Builder is a configuration builder.
 type Builder struct {
 	// An ordered set of dimensions to switch a configuration on.
-	dimensions []dimension
+	dimensions []*dimension
 }
 
 // NewBuilder returns a new builder instance.
@@ -103,12 +117,12 @@ func NewBuilder() *Builder {
 	return &Builder{}
 }
 
-// WithDimension adds a new dimension to switch configurations on. By default `parseEnv` will be true when using this method.
+// WithDimension adds a new dimension to switch configurations on. By default `parseFlag` will be true when using this method.
 func (b *Builder) WithDimension(name string, defaultVal genum.Enum) *Builder {
-	d := dimension{
+	d := &dimension{
 		defaultVal: defaultVal,
 		flagName:   name,
-		parseEnv:   true,
+		parseFlag:  true,
 		parsed:     defaultVal,
 	}
 	if err := d.initFlag(); err != nil {
@@ -173,7 +187,7 @@ func (b *Builder) FromBytes(bytes []byte) (*Config, error) {
 //    . the parser/builder step could convert the differenced enums to parsable characters.
 //      . then
 
-func reduceAny(in any, dimensions []dimension, dIndex int) (any, error) {
+func reduceAny(in any, dimensions []*dimension, dIndex int) (any, error) {
 	switch v := in.(type) {
 	case map[string]any:
 		for i := dIndex; i < len(dimensions); i++ {
@@ -197,15 +211,15 @@ func reduceAny(in any, dimensions []dimension, dIndex int) (any, error) {
 	return in, nil
 }
 
-func reduce(in map[string]any, dimensions []dimension, dIndex int) (any, error) {
+func reduce(in map[string]any, dimensions []*dimension, dIndex int) (any, error) {
 	if dIndex+1 > len(dimensions) {
 		return in, nil
 	}
-	dimension := dimensions[dIndex]
-	// check if this a valid dimension to reduce.
+	dim := dimensions[dIndex]
+	// check if this a valid dim to reduce.
 	// if it is, grab the correct one and reduce the rest.
 	keys, hasDefault := keySet(in)
-	keys.Remove(dimension.defaultVal.StringValues()...)
+	keys.Remove(dim.defaultVal.StringValues()...)
 	if len(keys) != 0 {
 		for k, v := range in {
 			var err error
@@ -214,12 +228,12 @@ func reduce(in map[string]any, dimensions []dimension, dIndex int) (any, error) 
 				return nil, err
 			}
 		}
-		// NOT reducable with this dimension. need to try next,
+		// NOT reducable with this dim. need to try next,
 		return in, nil
 	}
 	// otherwise this is reducable.
-	// case 1: we have the dimension's key. Simply follow it.
-	if v, ok := in[dimension.parsed.String()]; ok {
+	// case 1: we have the dim's key. Simply follow it.
+	if v, ok := in[dim.get().String()]; ok {
 		return reduceAny(v, dimensions, dIndex+1)
 	}
 	// case 2: we have default
@@ -234,8 +248,8 @@ func reduce(in map[string]any, dimensions []dimension, dIndex int) (any, error) 
 	// ...going with #1.
 	keys, _ = keySet(in)
 	return nil, ErrFailedParsing.Msg(
-		"broken dimension key! %T dimensions identified around keys %s, but no `default` or `%s` value found.",
-		dimension.defaultVal, keys.Slice(), dimension.parsed)
+		"broken dim key! %T dimensions identified around keys %s, but no `default` or `%s` value found.",
+		dim.defaultVal, keys.Slice(), dim.get())
 }
 
 func keySet(in map[string]any) (set.Set[string], bool) {
