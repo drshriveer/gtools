@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"reflect"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 
@@ -53,7 +54,7 @@ func (d *dimension) initFlag() error {
 			d.defaultVal)
 	}
 
-	if s := os.Getenv(d.flagName); len(s) > 0 {
+	if s, ok := lookupEnv(d.flagName); ok {
 		if err := ptrVal.UnmarshalText([]byte(s)); err != nil {
 			return err
 		}
@@ -68,12 +69,6 @@ func (d *dimension) initFlag() error {
 	// first look for flags that have already been registered..
 	// if so, this is probably a testing environment, so skip the flag registration.
 	// long term need to decide if we want to disallow this for safety?
-	// FIXME: Gavin! test the behavior here... Do we need to tie into the parse function
-	//        in a different way to receive updates if parse is called?
-	//        or is this just all nuts, and that's why I was originally approaching this w/o
-	//        a builder?
-	//        The whole flag part is ... maybe problematic.
-	//        Maybe there's an easier way?
 	if !d.parseFlag || flag.Lookup(d.flagName) != nil {
 		return nil
 	}
@@ -259,4 +254,18 @@ func keySet(in map[string]any) (set.Set[string], bool) {
 		}
 	}
 	return result, hasDefault
+}
+
+// lookupEnv looks for an environment variable in case sensitive, upper, and lower case forms.
+func lookupEnv(key string) (string, bool) {
+	if s, ok := os.LookupEnv(key); ok {
+		return s, ok
+	}
+	if s, ok := os.LookupEnv(strings.ToUpper(key)); ok {
+		return s, ok
+	}
+	if s, ok := os.LookupEnv(strings.ToLower(key)); ok {
+		return s, ok
+	}
+	return "", false
 }
