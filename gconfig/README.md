@@ -21,7 +21,9 @@ go get -u github.com/drshriveer/gtools/gconfig
 -	**Generics:** This library uses generics to fetch configuration values from a yaml file. This works with primitives, slices, maps<sup>†</sup>, and structs (supporting yaml). The same key can be resolved into multiple types. *<sup>†</sup> - note: maps with dimensional keys do not currently work*
 -	**Internal Type Caching:** After a setting has been parsed into a type it is cached along with that type information for future resolution.  
 -	**Dimensions:** A single configuration file may multiple "dimensions" that are resolved at runtime based on program flags to determine the variation of a setting to vend. Differentiating setting variables by environment/stage (e.g. Development, Beta, Prod) is a great example of how this can be leveraged.
-	-	**Auto-flagging:** The configuration library will automatically turn dimensions into flags! (unless otherwise specified)
+	-	**Auto-flagging:** The configuration library will automatically turn dimensions into flags and parse them! (unless otherwise specified)
+	-	**Env Parsing:** The configuration library will automatically parse dimensions environment variables.
+	-	**GetDimension:** Extract a Dimension value via `gconfig.GetDimension[my.DimensionType](cfg)`.  
 -	**Environmental Overrides:** (TODO) In some cases it is useful to override a single static configuration variable in a specific environment. This can be done though the use of environmental variables.
 
 ### Usage
@@ -90,6 +92,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	// ...
 }
 ```
@@ -98,6 +101,9 @@ func main() {
 
 ```go
 func DoSomething(cfg *gconfig.Config) {
+	// Extract the current dimension value (parsed from flags or environment variables).
+	stage := gconfig.GetDimension[environment.Stage](cfg)
+
 	// Fetch individual values:
 	maxRoutines := gconfig.MustGet[uint64](cfg, "runtime.max-goroutines")
 	reqTimeout := gconfig.MustGet[time.Duration](cfg, "runtime.request-timeout")
