@@ -43,6 +43,10 @@ func TestFlagParsing(t *testing.T) {
 func TestEnvParsing(t *testing.T) {
 	require.NoError(t, os.Setenv("D1", internal.D1c.String()))
 	require.NoError(t, os.Setenv("d2", internal.D2e.String()))
+	t.Cleanup(func() {
+		require.NoError(t, os.Unsetenv("D1"))
+		require.NoError(t, os.Unsetenv("d2"))
+	})
 	cfg, err := gconfig.NewBuilder().
 		WithDimension("d1", internal.D1a).
 		WithDimension("d2", internal.D2a).
