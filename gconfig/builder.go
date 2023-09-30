@@ -39,9 +39,6 @@ type dimension struct {
 	// parseFlag, if true, will parse the dimension as an environment flag.
 	parseFlag bool
 
-	// flagParsed tracks if we parsed the value from a flag, if not we will default to environment variables.
-	flagParsed bool
-
 	parsed genum.Enum
 }
 
@@ -64,7 +61,7 @@ func (d *dimension) initFlag() error {
 		if !ok {
 			return ErrFailedParsing.Msg(
 				"environment variable %s=%s found but is not a valid option: %s",
-				d.flagParsed, s, d.defaultVal.StringValues())
+				d.parsed, s, d.defaultVal.StringValues())
 		}
 	}
 
@@ -92,7 +89,6 @@ func (d *dimension) initFlag() error {
 		if !ok {
 			return ErrFailedParsing.Stack()
 		}
-		d.flagParsed = true
 		return nil
 	})
 
