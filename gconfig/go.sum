@@ -1,5 +1,13 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/drshriveer/gtools/genum v0.0.0-20230930003530-cb32961727bb h1:qwV5Uas6fnsFDi68305gBnhIfOuPT73ndPh/IlV0AqY=
+github.com/drshriveer/gtools/genum v0.0.0-20230930003530-cb32961727bb/go.mod h1:3iUomhh2XL5r4NV+HJI4MXGUUOogb0HtdHtjoUk1jzE=
+github.com/drshriveer/gtools/gerror v0.0.0-20230930003530-cb32961727bb h1:mgI03hRiwIjXfrFR88y9p2bVJFgny1WjlVlgaSYFiEY=
+github.com/drshriveer/gtools/gerror v0.0.0-20230930003530-cb32961727bb/go.mod h1:pEfIMHEmI6AECeO97OqXAtV448U4ZXP24UzU5H5qCP8=
+github.com/drshriveer/gtools/rutils v0.0.0-20230930003530-cb32961727bb h1:8yGWqfxpdX4HmH0paIlvaicr7xANpvgKOvLqzYIZJDo=
+github.com/drshriveer/gtools/rutils v0.0.0-20230930003530-cb32961727bb/go.mod h1:ixRN41tPraNiLhfegjbhtt9zFLW8XXhZxUlmSaGGU3w=
+github.com/drshriveer/gtools/set v0.0.0-20230930003530-cb32961727bb h1:hcbSPONRM43gffx9PEsls5MSLDnyGZgewTvXGUs5mGQ=
+github.com/drshriveer/gtools/set v0.0.0-20230930003530-cb32961727bb/go.mod h1:oKjRVsjkkR+xeL/D3IqO/QrSSibcoXYuDapbc46LQyA=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/puzpuzpuz/xsync/v2 v2.5.0 h1:2k4qrO/orvmEXZ3hmtHqIy9XaQtPTwzMZk1+iErpE8c=

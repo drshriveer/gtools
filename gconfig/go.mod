@@ -3,21 +3,13 @@ module github.com/drshriveer/gtools/gconfig
 go 1.21.1
 
 require (
-	github.com/drshriveer/gtools/genum v0.0.0
-	github.com/drshriveer/gtools/gerror v0.0.0
-	github.com/drshriveer/gtools/rutils v0.0.0
-	github.com/drshriveer/gtools/set v0.0.0
+	github.com/drshriveer/gtools/genum v0.0.0-20230930003530-cb32961727bb
+	github.com/drshriveer/gtools/gerror v0.0.0-20230930003530-cb32961727bb
+	github.com/drshriveer/gtools/rutils v0.0.0-20230930003530-cb32961727bb
+	github.com/drshriveer/gtools/set v0.0.0-20230930003530-cb32961727bb
 	github.com/puzpuzpuz/xsync/v2 v2.5.0
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v3 v3.0.1
-)
-
-replace (
-	github.com/drshriveer/gtools/genncommon v0.0.0 => ../gencommon // indirect
-	github.com/drshriveer/gtools/genum v0.0.0 => ../genum
-	github.com/drshriveer/gtools/gerror v0.0.0 => ../gerror
-	github.com/drshriveer/gtools/rutils v0.0.0 => ../rutils
-	github.com/drshriveer/gtools/set v0.0.0 => ../set
 )
 
 require (
