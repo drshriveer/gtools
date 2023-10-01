@@ -63,10 +63,12 @@ _tools-install tool version cmd:
     then
       echo "{{ tool }} @ {{ version }} already installed"
     else
-      # remove the tool from the tools file file:
-      echo "installing {{ tool }} @ {{ version }}"
+      # remove references to previous installed versions:
+      # why the one-liner won't work i have no idea.
       tmp=`grep -v '{{tool}}' {{INSTALLED_TOOLS}}`
       echo "$tmp" > {{INSTALLED_TOOLS}}
+
+      echo "installing {{ tool }} @ {{ version }}"
       {{ cmd }}
       echo "{{ tool }} {{ version }}" >> {{ INSTALLED_TOOLS }}
       sort {{ INSTALLED_TOOLS }} -o {{ INSTALLED_TOOLS }}
