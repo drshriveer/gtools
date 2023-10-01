@@ -1,6 +1,7 @@
 GO_LINT_VERSION := '1.54.2'
 MDFMT_VERSION := 'latest'
 PKG_ROOT := `pwd`
+TOOLS_SUM := PKG_ROOT / "bin" / ".tools.sum"
 MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
 export GOBIN := PKG_ROOT + "/bin"
@@ -42,19 +43,9 @@ generate: _tools-generate
     @just _invokeMod "go generate -C {} ./..." "{{ CURRENT_DIR }}"
 
 _tools-linter:
-    #!/usr/bin/env bash
-    if command -v golangci-lint && golangci-lint --version | grep -q '{{ GO_LINT_VERSION }}'; then
-      echo 'golangci-lint v{{ GO_LINT_VERSION }} already installed!'
-    else
-      echo "installing golangci-lint at version v{{ GO_LINT_VERSION }}"
-      if test -e ./bin/golangci-lint; then
-        rm ./bin/golangci-lint
-      fi
-      curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v{{ GO_LINT_VERSION }}
-    fi
+    just _tools-install "golangci-lint" "{{GO_LINT_VERSION}}" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v{{ GO_LINT_VERSION }}"
 
 # Always rebuild the genum, gsort, and gerror executibles from this package direclty for testing.
-
 # Other packages should use the _install-go-pkg script.
 _tools-generate:
     go build -o bin/genum genum/cmd/genum/main.go
@@ -62,15 +53,30 @@ _tools-generate:
     go build -o bin/gerror gerror/cmd/gerror/main.go
     go build -o bin/gogenproto gogenproto/cmd/gogenproto/main.go
 
+_tools-install tool version cmd:
+    #!/usr/bin/env bash
+    mkdir -p {{parent_directory(TOOLS_SUM)}}
+    touch {{TOOLS_SUM}}
+    if grep -Fxq "{{tool}} {{version}}" {{TOOLS_SUM}}
+    then
+      echo "{{tool}} @ {{version}} already installed"
+    else
+      # remove the tool from the sum file:
+      echo "installing {{tool}} @ {{version}}"
+      sed '/^{{tool}}/ d' < {{TOOLS_SUM}} > {{TOOLS_SUM}}
+      {{cmd}}
+      echo "{{tool}} {{version}}" >> {{TOOLS_SUM}}
+      sort {{TOOLS_SUM}} -o {{TOOLS_SUM}}
+    fi
+
 # installs a go package at the version indicaed in go.work / go.mod.
 # This may break if we're using inconsistent versions across projects, but I don't think it will.
 
 # If it does, we might consider picking the latest version, or maybe we just want it to break.
 _install-go-pkg package cmdpath:
     #!/usr/bin/env bash
-    pkgVersion=`go list -f '{{{{.Version}}' -m {{ package }}`
-    echo "installing {{ package / cmdpath }}@$pkgVersion"
-    go install {{ package / cmdpath }}@$pkgVersion
+    pkgVersion :=`go list -f '{{{{.Version}}' -m {{ package }}`
+    just _tools-install {{package}} $pkgVersion "go install {{ package / cmdpath }}@$pkgVersion"
 
 # a the placeholder `{}` which is the path to the correct module.
 _invokeMod cmd target='all':
