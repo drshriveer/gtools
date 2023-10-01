@@ -1,7 +1,7 @@
 GO_LINT_VERSION := '1.54.2'
 MDFMT_VERSION := 'latest'
 PKG_ROOT := `pwd`
-TOOLS_SUM := PKG_ROOT / "bin" / ".tools.sum"
+INSTALLED_TOOLS := PKG_ROOT / "bin" / ".installed_tools"
 MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
 export GOBIN := PKG_ROOT + "/bin"
@@ -43,9 +43,10 @@ generate: _tools-generate
     @just _invokeMod "go generate -C {} ./..." "{{ CURRENT_DIR }}"
 
 _tools-linter:
-    just _tools-install "golangci-lint" "{{GO_LINT_VERSION}}" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v{{ GO_LINT_VERSION }}"
+    just _tools-install "golangci-lint" "{{ GO_LINT_VERSION }}" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v{{ GO_LINT_VERSION }}"
 
 # Always rebuild the genum, gsort, and gerror executibles from this package direclty for testing.
+
 # Other packages should use the _install-go-pkg script.
 _tools-generate:
     go build -o bin/genum genum/cmd/genum/main.go
@@ -55,18 +56,18 @@ _tools-generate:
 
 _tools-install tool version cmd:
     #!/usr/bin/env bash
-    mkdir -p {{parent_directory(TOOLS_SUM)}}
-    touch {{TOOLS_SUM}}
-    if grep -Fxq "{{tool}} {{version}}" {{TOOLS_SUM}}
+    mkdir -p {{ parent_directory(INSTALLED_TOOLS) }}
+    touch {{ INSTALLED_TOOLS }}
+    if grep -Fxq "{{ tool }} {{ version }}" {{ INSTALLED_TOOLS }}
     then
-      echo "{{tool}} @ {{version}} already installed"
+      echo "{{ tool }} @ {{ version }} already installed"
     else
       # remove the tool from the sum file:
-      echo "installing {{tool}} @ {{version}}"
-      sed '/^{{tool}}/ d' < {{TOOLS_SUM}} > {{TOOLS_SUM}}
-      {{cmd}}
-      echo "{{tool}} {{version}}" >> {{TOOLS_SUM}}
-      sort {{TOOLS_SUM}} -o {{TOOLS_SUM}}
+      echo "installing {{ tool }} @ {{ version }}"
+      sed '/^{{ tool }}/ d' < {{ INSTALLED_TOOLS }} > {{ INSTALLED_TOOLS }}
+      {{ cmd }}
+      echo "{{ tool }} {{ version }}" >> {{ INSTALLED_TOOLS }}
+      sort {{ INSTALLED_TOOLS }} -o {{ INSTALLED_TOOLS }}
     fi
 
 # installs a go package at the version indicaed in go.work / go.mod.
@@ -76,7 +77,7 @@ _tools-install tool version cmd:
 _install-go-pkg package cmdpath:
     #!/usr/bin/env bash
     pkgVersion :=`go list -f '{{{{.Version}}' -m {{ package }}`
-    just _tools-install {{package}} $pkgVersion "go install {{ package / cmdpath }}@$pkgVersion"
+    just _tools-install {{ package }} $pkgVersion "go install {{ package / cmdpath }}@$pkgVersion"
 
 # a the placeholder `{}` which is the path to the correct module.
 _invokeMod cmd target='all':
