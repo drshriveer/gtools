@@ -35,7 +35,7 @@ fix: _tools-linter format-md
 
 # Formats markdown.
 format-md:
-    @go install github.com/moorereason/mdfmt@{{ MDFMT_VERSION }}
+    just _install-go-pkg "github.com/moorereason/mdfmt"
     mdfmt -w -l ./**/*.md
 
 # Runs `go generate` on all modules in the current directory.
@@ -56,15 +56,17 @@ _tools-generate:
 
 _tools-install tool version cmd:
     #!/usr/bin/env bash
+    set -euxo pipefail
     mkdir -p {{ parent_directory(INSTALLED_TOOLS) }}
     touch {{ INSTALLED_TOOLS }}
     if grep -Fxq "{{ tool }} {{ version }}" {{ INSTALLED_TOOLS }}
     then
       echo "{{ tool }} @ {{ version }} already installed"
     else
-      # remove the tool from the sum file:
+      # remove the tool from the tools file file:
       echo "installing {{ tool }} @ {{ version }}"
-      sed '/^{{ tool }}/ d' < {{ INSTALLED_TOOLS }} > {{ INSTALLED_TOOLS }}
+      tmp=`grep -v '{{tool}}' {{INSTALLED_TOOLS}}`
+      echo "$tmp" > {{INSTALLED_TOOLS}}
       {{ cmd }}
       echo "{{ tool }} {{ version }}" >> {{ INSTALLED_TOOLS }}
       sort {{ INSTALLED_TOOLS }} -o {{ INSTALLED_TOOLS }}
@@ -72,16 +74,22 @@ _tools-install tool version cmd:
 
 # installs a go package at the version indicaed in go.work / go.mod.
 # This may break if we're using inconsistent versions across projects, but I don't think it will.
-
 # If it does, we might consider picking the latest version, or maybe we just want it to break.
-_install-go-pkg package cmdpath:
+_install-go-pkg package cmdpath="":
     #!/usr/bin/env bash
-    pkgVersion :=`go list -f '{{{{.Version}}' -m {{ package }}`
-    just _tools-install {{ package }} $pkgVersion "go install {{ package / cmdpath }}@$pkgVersion"
+    set -euxo pipefail
+    pkgVersion=`go list -f '{{{{.Version}}' -m {{ package }}`
+    if [ "{{ cmdpath }}" = "" ]; then
+        just _tools-install {{ package }} $pkgVersion "go install {{ package }}@$pkgVersion"
+    else
+        just _tools-install {{ package }} $pkgVersion "go install {{ package / cmdpath }}@$pkgVersion"
+    fi
+
 
 # a the placeholder `{}` which is the path to the correct module.
 _invokeMod cmd target='all':
     #!/usr/bin/env bash
+    set -euxo pipefail
     if [ "{{ target }}" = "{{ PKG_ROOT }}" ]; then
       xargs -L1 -P {{ PARALLEL }} -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
