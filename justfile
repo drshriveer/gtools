@@ -59,15 +59,14 @@ _tools-install tool version cmd:
     then
       echo "{{ tool }} @ {{ version }} already installed"
     else
-      # remove references to previous installed versions:
-      tmp=`grep -v '{{ tool }}' {{ INSTALLED_TOOLS }}`
-      echo "$tmp" > {{ INSTALLED_TOOLS }}
-
       echo "installing {{ tool }} @ {{ version }}"
       {{ cmd }}
-      echo "{{ tool }} {{ version }}" >> {{ INSTALLED_TOOLS }}
-      sort {{ INSTALLED_TOOLS }} -o {{ INSTALLED_TOOLS }}
     fi
+    # Always refresh references to ensure the tools file is clean.
+    tmp=`grep -v '{{ tool }}' {{ INSTALLED_TOOLS }}`
+    echo "$tmp" > {{ INSTALLED_TOOLS }}
+    echo "{{ tool }} {{ version }}" >> {{ INSTALLED_TOOLS }}
+    sort {{ INSTALLED_TOOLS }} -o {{ INSTALLED_TOOLS }}
 
 # installs a go package at the version indicaed in go.work / go.mod.
 # This may break if we're using inconsistent versions across projects, but I don't think it will.
