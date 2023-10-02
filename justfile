@@ -87,5 +87,5 @@ _invokeMod cmd target='all':
     if [ "{{ target }}" = "{{ PKG_ROOT }}" ]; then
       xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
-      xargs -L1 -t -I {} {{ cmd }} <<< "{{ target }}"
+      xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ target }}"
     fi
