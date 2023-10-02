@@ -62,8 +62,7 @@ _tools-install tool version cmd:
       {{ cmd }}
     fi
     # Always refresh references to ensure the tools file is clean.
-    tmp=`grep -v '{{ tool }}' {{ INSTALLED_TOOLS }}`
-    echo "$tmp" > {{ INSTALLED_TOOLS }}
+    echo "$(grep -v '{{ tool }}' {{ INSTALLED_TOOLS }})" > {{ INSTALLED_TOOLS }}
     echo "{{ tool }} {{ version }}" >> {{ INSTALLED_TOOLS }}
     sort {{ INSTALLED_TOOLS }} -o {{ INSTALLED_TOOLS }}
 
