@@ -49,6 +49,15 @@ _tools-generate:
     go build -o bin/gerror gerror/cmd/gerror/main.go
     go build -o bin/gogenproto gogenproto/cmd/gogenproto/main.go
 
+# installs a go package at the version indicated in go.work / go.mod.
+_install-go-pkg package cmdpath="":
+    #!/usr/bin/env bash
+    set -euxo pipefail
+    pkgVersion=`go list -f '{{{{.Version}}' -m {{ package }}`
+    pkgPath="{{ trim_end_match(package / cmdpath, '/') }}"
+    just _tools-install {{ package }} $pkgVersion "go install $pkgPath@$pkgVersion"
+
+# installs a tool with a command
 _tools-install tool version cmd:
     #!/usr/bin/env bash
     set -euxo pipefail
@@ -65,20 +74,6 @@ _tools-install tool version cmd:
     echo "$(grep -v '{{ tool }}' {{ INSTALLED_TOOLS }})" > {{ INSTALLED_TOOLS }}
     echo "{{ tool }} {{ version }}" >> {{ INSTALLED_TOOLS }}
     sort {{ INSTALLED_TOOLS }} -o {{ INSTALLED_TOOLS }}
-
-# installs a go package at the version indicaed in go.work / go.mod.
-# This may break if we're using inconsistent versions across projects, but I don't think it will.
-
-# If it does, we might consider picking the latest version, or maybe we just want it to break.
-_install-go-pkg package cmdpath="":
-    #!/usr/bin/env bash
-    set -euxo pipefail
-    pkgVersion=`go list -f '{{{{.Version}}' -m {{ package }}`
-    if [ "{{ cmdpath }}" = "" ]; then
-        just _tools-install {{ package }} $pkgVersion "go install {{ package }}@$pkgVersion"
-    else
-        just _tools-install {{ package }} $pkgVersion "go install {{ package / cmdpath }}@$pkgVersion"
-    fi
 
 # a the placeholder `{}` which is the path to the correct module.
 _invokeMod cmd target='all':
