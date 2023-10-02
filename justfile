@@ -64,7 +64,6 @@ _tools-install tool version cmd:
     # Always refresh references to ensure the tools file is clean.
     echo "$(grep -v '{{ tool }}' {{ INSTALLED_TOOLS }})" > {{ INSTALLED_TOOLS }}
     echo "{{ tool }} {{ version }}" >> {{ INSTALLED_TOOLS }}
-    sed -i '' '/^$/d' {{ INSTALLED_TOOLS }} # remove blank lines
     sort {{ INSTALLED_TOOLS }} -o {{ INSTALLED_TOOLS }}
 
 # installs a go package at the version indicaed in go.work / go.mod.
