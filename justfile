@@ -8,10 +8,6 @@ export GOBIN := PKG_ROOT + "/bin"
 export GOEXPERIMENT := "loopvar"
 CURRENT_DIR := invocation_directory_native()
 
-# Github Actions doesn't appreciate high parallelism... The rest of us develop on macos.
-
-PARALLEL := if os() == "macos" { '8' } else { '1' }
-
 # Runs `go mod tidy` for all modules in the current directory, then sync go workspaces.
 tidy:
     @just _invokeMod "go mod tidy -C {}" "{{ CURRENT_DIR }}"
@@ -64,9 +60,8 @@ _tools-install tool version cmd:
       echo "{{ tool }} @ {{ version }} already installed"
     else
       # remove references to previous installed versions:
-      # why the one-liner won't work i have no idea.
-      tmp=`grep -v '{{tool}}' {{INSTALLED_TOOLS}}`
-      echo "$tmp" > {{INSTALLED_TOOLS}}
+      tmp=`grep -v '{{ tool }}' {{ INSTALLED_TOOLS }}`
+      echo "$tmp" > {{ INSTALLED_TOOLS }}
 
       echo "installing {{ tool }} @ {{ version }}"
       {{ cmd }}
@@ -76,6 +71,7 @@ _tools-install tool version cmd:
 
 # installs a go package at the version indicaed in go.work / go.mod.
 # This may break if we're using inconsistent versions across projects, but I don't think it will.
+
 # If it does, we might consider picking the latest version, or maybe we just want it to break.
 _install-go-pkg package cmdpath="":
     #!/usr/bin/env bash
@@ -87,13 +83,12 @@ _install-go-pkg package cmdpath="":
         just _tools-install {{ package }} $pkgVersion "go install {{ package / cmdpath }}@$pkgVersion"
     fi
 
-
 # a the placeholder `{}` which is the path to the correct module.
 _invokeMod cmd target='all':
     #!/usr/bin/env bash
     set -euxo pipefail
     if [ "{{ target }}" = "{{ PKG_ROOT }}" ]; then
-      xargs -L1 -P {{ PARALLEL }} -t -I {} {{ cmd }} <<< "{{ MODS }}"
+      xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
       xargs -L1 -t -I {} {{ cmd }} <<< "{{ target }}"
     fi
