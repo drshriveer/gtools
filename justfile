@@ -52,7 +52,7 @@ _tools-generate:
 # installs a go package at the version indicated in go.work / go.mod.
 _install-go-pkg package cmdpath="":
     #!/usr/bin/env bash
-    set -euo pipefail
+    set -euo pipefail # makes scripts act like justfiles (https://github.com/casey/just#safer-bash-shebang-recipes)
     pkgVersion=`go list -f '{{{{.Version}}' -m {{ package }}`
     pkgPath="{{ trim_end_match(package / cmdpath, '/') }}"
     just _tools-install {{ package }} "go install $pkgPath@$pkgVersion"
@@ -60,11 +60,10 @@ _install-go-pkg package cmdpath="":
 # Installs a given "tool" with command "cmd" provided, if it isn't already installed.
 # If the command changes in any way the tool will be re-installed.
 # The tool's name "tool" should be unique and is used to keep the dependency list clear
-
 # of previous installs.
 _tools-install tool cmd:
     #!/usr/bin/env bash
-    set -euo pipefail
+    set -euo pipefail # makes scripts act like justfiles (https://github.com/casey/just#safer-bash-shebang-recipes)
     mkdir -p {{ parent_directory(INSTALLED_TOOLS) }}
     touch {{ INSTALLED_TOOLS }}
     if grep -Fxq "{{ tool }} # {{ cmd }}" {{ INSTALLED_TOOLS }}
@@ -82,7 +81,7 @@ _tools-install tool cmd:
 # a the placeholder `{}` which is the path to the correct module.
 _invokeMod cmd target='all':
     #!/usr/bin/env bash
-    set -euo pipefail
+    set -euo pipefail # makes scripts act like justfiles (https://github.com/casey/just#safer-bash-shebang-recipes)
     if [ "{{ target }}" = "{{ PKG_ROOT }}" ]; then
       xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
