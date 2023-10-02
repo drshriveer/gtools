@@ -38,7 +38,7 @@ generate: _tools-generate
     @just _invokeMod "go generate -C {} ./..." "{{ CURRENT_DIR }}"
 
 _tools-linter:
-    just _tools-install "golangci-lint" "{{ GO_LINT_VERSION }}" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v{{ GO_LINT_VERSION }}"
+    just _tools-install "golangci-lint" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v{{ GO_LINT_VERSION }}"
 
 # Always rebuild the genum, gsort, and gerror executibles from this package direclty for testing.
 
@@ -55,24 +55,28 @@ _install-go-pkg package cmdpath="":
     set -euxo pipefail
     pkgVersion=`go list -f '{{{{.Version}}' -m {{ package }}`
     pkgPath="{{ trim_end_match(package / cmdpath, '/') }}"
-    just _tools-install {{ package }} $pkgVersion "go install $pkgPath@$pkgVersion"
+    just _tools-install {{ package }} "go install $pkgPath@$pkgVersion"
 
-# installs "tool" at the "version" with the install "cmd", if it isn't already installed.
-_tools-install tool version cmd:
+# Installs a given "tool" with command "cmd" provided, if it isn't already installed.
+# If the command changes in any way the tool will be re-installed.
+# The tool's name "tool" should be unique and is used to keep the dependency list clear
+
+# of previous installs.
+_tools-install tool cmd:
     #!/usr/bin/env bash
-    set -euxo pipefail
+    set -euo pipefail
     mkdir -p {{ parent_directory(INSTALLED_TOOLS) }}
     touch {{ INSTALLED_TOOLS }}
-    if grep -Fxq "{{ tool }} {{ version }}" {{ INSTALLED_TOOLS }}
+    if grep -Fxq "{{ tool }} {{ cmd }}" {{ INSTALLED_TOOLS }}
     then
-      echo "{{ tool }} @ {{ version }} already installed"
+      echo "[tool_install]: {{ tool }} already installed"
     else
-      echo "installing {{ tool }} @ {{ version }}"
+      echo "[tool_install]: installing {{ tool }} with command {{ cmd }}"
       {{ cmd }}
     fi
     # Always refresh references to ensure the tools file is clean.
     echo "$(grep -v '{{ tool }}' {{ INSTALLED_TOOLS }})" > {{ INSTALLED_TOOLS }}
-    echo "{{ tool }} {{ version }}" >> {{ INSTALLED_TOOLS }}
+    echo "{{ tool }} {{ cmd }}" >> {{ INSTALLED_TOOLS }}
     sort {{ INSTALLED_TOOLS }} -o {{ INSTALLED_TOOLS }}
 
 # a the placeholder `{}` which is the path to the correct module.
