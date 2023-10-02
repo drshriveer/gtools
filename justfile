@@ -1,5 +1,4 @@
 GO_LINT_VERSION := '1.54.2'
-MDFMT_VERSION := 'latest'
 PKG_ROOT := `pwd`
 INSTALLED_TOOLS := PKG_ROOT / "bin" / ".installed_tools"
 MODS := `go list -f '{{.Dir}}' -m`
