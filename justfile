@@ -30,15 +30,15 @@ fix: _tools-linter format-md
 
 # Formats markdown.
 format-md:
-    just _install-go-pkg "github.com/moorereason/mdfmt"
-    mdfmt -w -l ./**/*.md
+    @just _install-go-pkg "github.com/moorereason/mdfmt"
+    @mdfmt -w -l ./**/*.md
 
 # Runs `go generate` on all modules in the current directory.
 generate: _tools-generate
     @just _invokeMod "go generate -C {} ./..." "{{ CURRENT_DIR }}"
 
 _tools-linter:
-    just _tools-install "golangci-lint" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v{{ GO_LINT_VERSION }}"
+    @just _tools-install "golangci-lint" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v{{ GO_LINT_VERSION }}"
 
 # Always rebuild the genum, gsort, and gerror executibles from this package direclty for testing.
 
@@ -52,7 +52,7 @@ _tools-generate:
 # installs a go package at the version indicated in go.work / go.mod.
 _install-go-pkg package cmdpath="":
     #!/usr/bin/env bash
-    set -euxo pipefail
+    set -euo pipefail
     pkgVersion=`go list -f '{{{{.Version}}' -m {{ package }}`
     pkgPath="{{ trim_end_match(package / cmdpath, '/') }}"
     just _tools-install {{ package }} "go install $pkgPath@$pkgVersion"
@@ -67,7 +67,7 @@ _tools-install tool cmd:
     set -euo pipefail
     mkdir -p {{ parent_directory(INSTALLED_TOOLS) }}
     touch {{ INSTALLED_TOOLS }}
-    if grep -Fxq "{{ tool }} {{ cmd }}" {{ INSTALLED_TOOLS }}
+    if grep -Fxq "{{ tool }} # {{ cmd }}" {{ INSTALLED_TOOLS }}
     then
       echo "[tool_install]: {{ tool }} already installed"
     else
@@ -76,13 +76,13 @@ _tools-install tool cmd:
     fi
     # Always refresh references to ensure the tools file is clean.
     echo "$(grep -v '{{ tool }}' {{ INSTALLED_TOOLS }})" > {{ INSTALLED_TOOLS }}
-    echo "{{ tool }} {{ cmd }}" >> {{ INSTALLED_TOOLS }}
+    echo "{{ tool }} # {{ cmd }}" >> {{ INSTALLED_TOOLS }}
     sort {{ INSTALLED_TOOLS }} -o {{ INSTALLED_TOOLS }}
 
 # a the placeholder `{}` which is the path to the correct module.
 _invokeMod cmd target='all':
     #!/usr/bin/env bash
-    set -euxo pipefail
+    set -euo pipefail
     if [ "{{ target }}" = "{{ PKG_ROOT }}" ]; then
       xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
