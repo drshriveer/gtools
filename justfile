@@ -1,15 +1,11 @@
 GO_LINT_VERSION := '1.54.2'
-MDFMT_VERSION := 'latest'
 PKG_ROOT := `pwd`
+INSTALLED_TOOLS := PKG_ROOT / "bin" / ".installed_tools"
 MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
 export GOBIN := PKG_ROOT + "/bin"
 export GOEXPERIMENT := "loopvar"
 CURRENT_DIR := invocation_directory_native()
-
-# Github Actions doesn't appreciate high parallelism... The rest of us develop on macos.
-
-PARALLEL := if os() == "macos" { '8' } else { '1' }
 
 # Runs `go mod tidy` for all modules in the current directory, then sync go workspaces.
 tidy:
@@ -34,24 +30,15 @@ fix: _tools-linter format-md
 
 # Formats markdown.
 format-md:
-    @go install github.com/moorereason/mdfmt@{{ MDFMT_VERSION }}
-    mdfmt -w -l ./**/*.md
+    @just _install-go-pkg "github.com/moorereason/mdfmt"
+    @mdfmt -w -l ./**/*.md
 
 # Runs `go generate` on all modules in the current directory.
 generate: _tools-generate
     @just _invokeMod "go generate -C {} ./..." "{{ CURRENT_DIR }}"
 
 _tools-linter:
-    #!/usr/bin/env bash
-    if command -v golangci-lint && golangci-lint --version | grep -q '{{ GO_LINT_VERSION }}'; then
-      echo 'golangci-lint v{{ GO_LINT_VERSION }} already installed!'
-    else
-      echo "installing golangci-lint at version v{{ GO_LINT_VERSION }}"
-      if test -e ./bin/golangci-lint; then
-        rm ./bin/golangci-lint
-      fi
-      curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v{{ GO_LINT_VERSION }}
-    fi
+    @just _tools-install "golangci-lint" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v{{ GO_LINT_VERSION }}"
 
 # Always rebuild the genum, gsort, and gerror executibles from this package direclty for testing.
 
@@ -62,21 +49,41 @@ _tools-generate:
     go build -o bin/gerror gerror/cmd/gerror/main.go
     go build -o bin/gogenproto gogenproto/cmd/gogenproto/main.go
 
-# installs a go package at the version indicaed in go.work / go.mod.
-# This may break if we're using inconsistent versions across projects, but I don't think it will.
-
-# If it does, we might consider picking the latest version, or maybe we just want it to break.
-_install-go-pkg package cmdpath:
+# installs a go package at the version indicated in go.work / go.mod.
+_install-go-pkg package cmdpath="":
     #!/usr/bin/env bash
+    set -euo pipefail # makes scripts act like justfiles (https://github.com/casey/just#safer-bash-shebang-recipes)
     pkgVersion=`go list -f '{{{{.Version}}' -m {{ package }}`
-    echo "installing {{ package / cmdpath }}@$pkgVersion"
-    go install {{ package / cmdpath }}@$pkgVersion
+    pkgPath="{{ trim_end_match(package / cmdpath, '/') }}"
+    just _tools-install {{ package }} "go install $pkgPath@$pkgVersion"
+
+# Installs a given "tool" with command "cmd" provided, if it isn't already installed.
+# If the command changes in any way the tool will be re-installed.
+# The tool's name "tool" should be unique and is used to keep the dependency list clear
+# of previous installs.
+_tools-install tool cmd:
+    #!/usr/bin/env bash
+    set -euo pipefail # makes scripts act like justfiles (https://github.com/casey/just#safer-bash-shebang-recipes)
+    mkdir -p {{ parent_directory(INSTALLED_TOOLS) }}
+    touch {{ INSTALLED_TOOLS }}
+    if grep -Fxq "{{ tool }} # {{ cmd }}" {{ INSTALLED_TOOLS }}
+    then
+      echo "[tool_install]: {{ tool }} already installed"
+    else
+      echo "[tool_install]: installing {{ tool }} with command {{ cmd }}"
+      {{ cmd }}
+    fi
+    # Always refresh references to ensure the tools file is clean.
+    echo "$(grep -v '{{ tool }}' {{ INSTALLED_TOOLS }})" > {{ INSTALLED_TOOLS }}
+    echo "{{ tool }} # {{ cmd }}" >> {{ INSTALLED_TOOLS }}
+    sort {{ INSTALLED_TOOLS }} -o {{ INSTALLED_TOOLS }}
 
 # a the placeholder `{}` which is the path to the correct module.
 _invokeMod cmd target='all':
     #!/usr/bin/env bash
+    set -euo pipefail # makes scripts act like justfiles (https://github.com/casey/just#safer-bash-shebang-recipes)
     if [ "{{ target }}" = "{{ PKG_ROOT }}" ]; then
-      xargs -L1 -P {{ PARALLEL }} -t -I {} {{ cmd }} <<< "{{ MODS }}"
+      xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ MODS }}"
      else
-      xargs -L1 -t -I {} {{ cmd }} <<< "{{ target }}"
+      xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ target }}"
     fi
