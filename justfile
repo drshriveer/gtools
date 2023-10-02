@@ -57,7 +57,7 @@ _install-go-pkg package cmdpath="":
     pkgPath="{{ trim_end_match(package / cmdpath, '/') }}"
     just _tools-install {{ package }} $pkgVersion "go install $pkgPath@$pkgVersion"
 
-# installs "tool" at the "version" with the install "cmd".
+# installs "tool" at the "version" with the install "cmd", if it isn't already installed.
 _tools-install tool version cmd:
     #!/usr/bin/env bash
     set -euxo pipefail
