@@ -1,10 +1,10 @@
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/drshriveer/gtools/gencommon v0.0.0-20230921080944-8f1b8f9e43fd h1:LisEEDhhY1ocfXBydiV4A2/8NTFcAlubkjZjcIulnSs=
-github.com/drshriveer/gtools/gencommon v0.0.0-20230921080944-8f1b8f9e43fd/go.mod h1:ER4mobl8fvlqt9fpQSph/LpbiPyNfmR+4QszQrJgcZg=
-github.com/drshriveer/gtools/set v0.0.0-20230921080944-8f1b8f9e43fd h1:v/TVR0hLiWJ+LCxxf4PirDki8o4bvz1EuQPYVwxEHho=
-github.com/drshriveer/gtools/set v0.0.0-20230921080944-8f1b8f9e43fd/go.mod h1:oKjRVsjkkR+xeL/D3IqO/QrSSibcoXYuDapbc46LQyA=
+github.com/drshriveer/gtools/gencommon v0.0.0-20231005181201-9d99596881c4 h1:b5fyZbb68KSxJeilfzCIcAx6G0Y0dHiCzMB1v17e2BI=
+github.com/drshriveer/gtools/gencommon v0.0.0-20231005181201-9d99596881c4/go.mod h1:+ZVQi9Z4FasSzMXoxfTD9X4seCEKSDB1F6XG7RNSYI0=
+github.com/drshriveer/gtools/set v0.0.0-20231005181201-9d99596881c4 h1:ipTB+6FtCckFXpabC++XR8nsgXIZ3+Q7fz5y5MQaEVQ=
+github.com/drshriveer/gtools/set v0.0.0-20231005181201-9d99596881c4/go.mod h1:oKjRVsjkkR+xeL/D3IqO/QrSSibcoXYuDapbc46LQyA=
 github.com/fatih/structtag v1.2.0 h1:/OdNE99OxoI/PqaW/SuSK9uxxT3f/tcSZgon/ssNSx4=
 github.com/fatih/structtag v1.2.0/go.mod h1:mBJUNpUnHmRKrKlQQlmCrh5PuhftFbNv8Ys4/aAZl94=
 github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
