@@ -3,9 +3,9 @@ module github.com/drshriveer/gtools/genum
 go 1.21.1
 
 require (
-	github.com/drshriveer/gtools/gencommon v0.0.0-20230921080944-8f1b8f9e43fd
-	github.com/drshriveer/gtools/rutils v0.0.0-20230921080944-8f1b8f9e43fd
-	github.com/drshriveer/gtools/set v0.0.0-20230921080944-8f1b8f9e43fd
+	github.com/drshriveer/gtools/gencommon v0.0.0-20231005181201-9d99596881c4
+	github.com/drshriveer/gtools/rutils v0.0.0-20231005181201-9d99596881c4
+	github.com/drshriveer/gtools/set v0.0.0-20231005181201-9d99596881c4
 	github.com/itzg/go-flagsfiller v1.12.0
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v3 v3.0.1
