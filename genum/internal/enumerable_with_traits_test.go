@@ -17,7 +17,7 @@ func TestGenerate_EnumerableWithTraits(t *testing.T) {
 	generator := gen.Generate{
 		InFile:  "./enumerable_with_traits.go",
 		OutFile: "./enumerable_with_traits.genum.go",
-		Types:   []string{"EnumerableWithTraits"},
+		Types:   []string{"EnumWithPackageImports"},
 		GenJSON: true,
 		GenYAML: true,
 		GenText: true,

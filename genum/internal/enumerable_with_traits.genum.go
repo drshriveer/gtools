@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gopkg.in/yaml.v3"
+	reflect "reflect"
 	"slices"
 	"strconv"
 	stupidTime "time"
@@ -364,3 +365,138 @@ func (e *Creatures) UnmarshalYAML(value *yaml.Node) error {
 
 // IsEnum implements an empty function required to implement Enum.
 func (Creatures) IsEnum() {}
+
+var _EnumWithPackageImportsValues = []EnumWithPackageImports{
+	EnumWithPackageImports0,
+	EnumWithPackageImports1,
+	EnumWithPackageImports2,
+}
+
+// Kind returns the enum's associated trait of the same name.
+// If no trait exists for the enumeration a default value will be returned.
+func (e EnumWithPackageImports) Kind() reflect.Kind {
+	switch e {
+	case EnumWithPackageImports0:
+		return _Kind
+	case EnumWithPackageImports1:
+		return reflect.Uint64
+	case EnumWithPackageImports2:
+		return reflect.Bool
+	}
+
+	return *new(reflect.Kind)
+}
+
+// IsValid returns true if the enum value is, in fact, valid.
+func (e EnumWithPackageImports) IsValid() bool {
+	for _, v := range _EnumWithPackageImportsValues {
+		if v == e {
+			return true
+		}
+	}
+	return false
+}
+
+// Values returns a list of all potential values of this enum.
+func (EnumWithPackageImports) Values() []EnumWithPackageImports {
+	return slices.Clone(_EnumWithPackageImportsValues)
+}
+
+// StringValues returns a list of all potential values of this enum as strings.
+// Note: This does not return duplicates.
+func (EnumWithPackageImports) StringValues() []string {
+	return []string{
+		"EnumWithPackageImports0",
+		"EnumWithPackageImports1",
+		"EnumWithPackageImports2",
+	}
+}
+
+// String returns a string representation of this enum.
+// Note: in the case of duplicate values only the first alphabetical definition will be choosen.
+func (e EnumWithPackageImports) String() string {
+	switch e {
+	case EnumWithPackageImports0:
+		return "EnumWithPackageImports0"
+	case EnumWithPackageImports1:
+		return "EnumWithPackageImports1"
+	case EnumWithPackageImports2:
+		return "EnumWithPackageImports2"
+	default:
+		return fmt.Sprintf("UndefinedEnumWithPackageImports:%d", e)
+	}
+}
+
+// ParseString will return a value as defined in string form.
+func (e EnumWithPackageImports) ParseString(text string) (EnumWithPackageImports, error) {
+	switch text {
+	case "EnumWithPackageImports0":
+		return EnumWithPackageImports0, nil
+	case "EnumWithPackageImports1":
+		return EnumWithPackageImports1, nil
+	case "EnumWithPackageImports2":
+		return EnumWithPackageImports2, nil
+	default:
+		return 0, fmt.Errorf("`%s` is not a valid enum of type EnumWithPackageImports", text)
+	}
+}
+
+// MarshalJSON implements the json.Marshaler interface for EnumWithPackageImports.
+func (e EnumWithPackageImports) MarshalJSON() ([]byte, error) {
+	return json.Marshal(e.String())
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface for EnumWithPackageImports.
+func (e *EnumWithPackageImports) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		var err error
+		*e, err = EnumWithPackageImports(0).ParseString(s)
+		return err
+	}
+	var i int
+	if err := json.Unmarshal(data, &i); err == nil {
+		*e = EnumWithPackageImports(i)
+		if e.IsValid() {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unable to unmarshal EnumWithPackageImports from `%v`", data)
+}
+
+// MarshalText implements the encoding.TextMarshaler interface for EnumWithPackageImports.
+func (e EnumWithPackageImports) MarshalText() ([]byte, error) {
+	return []byte(e.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface for EnumWithPackageImports.
+func (e *EnumWithPackageImports) UnmarshalText(text []byte) error {
+	var err error
+	*e, err = EnumWithPackageImports(0).ParseString(string(text))
+	return err
+}
+
+// MarshalYAML implements a YAML Marshaler for EnumWithPackageImports.
+func (e EnumWithPackageImports) MarshalYAML() (any, error) {
+	return e.String(), nil
+}
+
+// UnmarshalYAML implements a YAML Unmarshaler for EnumWithPackageImports.
+func (e *EnumWithPackageImports) UnmarshalYAML(value *yaml.Node) error {
+	i, err := strconv.ParseInt(value.Value, 10, 64)
+	if err == nil {
+		*e = EnumWithPackageImports(i)
+	} else {
+		*e, err = EnumWithPackageImports(0).ParseString(value.Value)
+	}
+	if err != nil {
+		return err
+	} else if e.IsValid() {
+		return nil
+	}
+	return fmt.Errorf("unable to unmarshal EnumWithPackageImports from yaml `%s`", value.Value)
+}
+
+// IsEnum implements an empty function required to implement Enum.
+func (EnumWithPackageImports) IsEnum() {}

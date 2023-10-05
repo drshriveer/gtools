@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
+	"path"
 	"sort"
 	"strings"
 
@@ -30,6 +31,7 @@ func calcImports(pkg *packages.Package, fAST *ast.File) *ImportHandler {
 		imports: make(map[string]*ImportDesc),
 	}
 
+	// Note: we do this loop here because we understand import aliases in this path.
 	for _, iSpec := range fAST.Imports {
 		pkgPath := strings.Trim(iSpec.Path.Value, `"`)
 		id := &ImportDesc{
@@ -38,6 +40,8 @@ func calcImports(pkg *packages.Package, fAST *ast.File) *ImportHandler {
 		}
 		if iSpec.Name != nil {
 			id.Alias = iSpec.Name.Name
+		} else {
+			id.Alias = path.Base(pkgPath)
 		}
 		result.imports[pkgPath] = id
 	}
