@@ -60,6 +60,7 @@ _install-go-pkg package cmdpath="":
 # Installs a given "tool" with command "cmd" provided, if it isn't already installed.
 # If the command changes in any way the tool will be re-installed.
 # The tool's name "tool" should be unique and is used to keep the dependency list clear
+
 # of previous installs.
 _tools-install tool cmd:
     #!/usr/bin/env bash

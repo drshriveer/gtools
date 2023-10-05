@@ -1,9 +1,10 @@
 //nolint:revive // test only
 package internal
 
-//go:generate genum -types=EnumerableWithTraits,Creatures
+//go:generate genum -types=EnumerableWithTraits,Creatures,EnumWithPackageImports
 
 import (
+	"reflect"
 	stupidTime "time"
 )
 
@@ -15,6 +16,14 @@ const (
 	E1, _Trait, _Timeout, _TypedStringTrait = EnumerableWithTraits(iota), "trait 1", 5 * stupidTime.Minute, OtherType("OtherType0")
 	E2, _, _, _                             = EnumerableWithTraits(iota), "trait 2", 1 * stupidTime.Minute, OtherType("OtherType2")
 	E3, _, _, _                             = EnumerableWithTraits(iota), "trait 3", 2 * stupidTime.Minute, OtherType("OtherType3")
+)
+
+type EnumWithPackageImports int
+
+const (
+	EnumWithPackageImports0, _Kind = EnumWithPackageImports(iota), reflect.String
+	EnumWithPackageImports1, _     = EnumWithPackageImports(iota), reflect.Uint64
+	EnumWithPackageImports2, _     = EnumWithPackageImports(iota), reflect.Bool
 )
 
 type Creatures int
