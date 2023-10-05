@@ -38,9 +38,11 @@ func calcImports(pkg *packages.Package, fAST *ast.File) *ImportHandler {
 			PkgPath: pkgPath,
 			inUse:   false,
 		}
+		// iSpec.Name != nil indicates an alias for the package import.
 		if iSpec.Name != nil {
 			id.Alias = iSpec.Name.Name
 		} else {
+			// Otherwise just use the base package name as the alias.
 			id.Alias = path.Base(pkgPath)
 		}
 		result.imports[pkgPath] = id
