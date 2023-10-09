@@ -9,6 +9,8 @@ import (
 //go:generate gerror --types ErrWithCustomConvert --skipConvertGen
 
 // ErrWithCustomConvert is just a test.
+//
+//nolint:errname
 type ErrWithCustomConvert struct {
 	gerror.GError
 	Property Status `gerror:"_,print,clone"`
