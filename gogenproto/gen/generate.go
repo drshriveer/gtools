@@ -16,10 +16,10 @@ var Logger = log.New(log.Writer(), "[gogenproto] ", log.LstdFlags)
 // Generate is a simple script for generating proto files with a go:generate directive
 // relative to the input directory.
 type Generate struct {
-	InputDir  string `alias:"inputDir" env:"PWD" usage:"path to root directory for proto generation"`
-	OutputDir string `alias:"outputDir" default:"../" usage:"relative output path for generated files"`
+	InputDir  string `aliases:"inputDir" env:"PWD" usage:"path to root directory for proto generation"`
+	OutputDir string `aliases:"outputDir" default:"../" usage:"relative output path for generated files"`
 
-	Recurse bool `alias:"recurse" default:"false" usage:"generate protos recursively"`
+	Recurse bool `aliases:"recurse" default:"false" usage:"generate protos recursively"`
 	// TODO: other flags, like VTProto, GRPC, TS, etc,
 }
 

@@ -141,6 +141,7 @@ func (e *{{$desc.TypeName}}) DTagMsgS(dTag, format string, elems ...any) gerror.
 	return e.toPrimaryType(clone)
 }
 
+{{- if not $.SkipConvertGen }}
 {{index $.FactoryComments "Convert"}}
 func (e *{{$desc.TypeName}}) Convert(err error) gerror.Error {
 	if gerr, ok := err.(gerror.Error); ok {
@@ -158,6 +159,7 @@ func (e *{{$desc.TypeName}}) ConvertS(err error) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.DefaultStack, "", "", fmt.Sprintf("originalError: %+v", err), err)
 	return e.toPrimaryType(clone)
 }
+{{- end }}
 
 // toPrimaryType accepts a base gerror and will populate clone fields.
 func (e *{{$desc.TypeName}}) toPrimaryType(gerr *gerror.GError) gerror.Error {

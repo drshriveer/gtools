@@ -17,10 +17,10 @@ var (
 // Generate is the parser and writer of sorters
 // It seems to double as its own 'options' holder.
 type Generate struct {
-	InFile     string            `alias:"in" env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
-	OutFile    string            `alias:"out" usage:"name of output file (defaults to go:generate context filename.gerror.go)"`
+	InFile     string            `aliases:"in" env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
+	OutFile    string            `aliases:"out" usage:"name of output file (defaults to go:generate context filename.gerror.go)"`
 	Types      map[string]string `usage:"[required] mapping of type names to generate sorters for to name to use for the generated type"`
-	UsePointer bool              `default:"true" usage:"use pointer to value in slice"`
+	UsePointer bool              `aliases:"usePointer" default:"true" usage:"use pointer to value in slice"`
 
 	// derived, (exposed for template use):
 	Imports     *gencommon.ImportHandler `flag:""` // ignore these fields
@@ -30,7 +30,6 @@ type Generate struct {
 
 // Parse the input file and drives the attributes above.
 func (g *Generate) Parse() error {
-	println("infil!", g.InFile)
 	_, pkg, _, imports, err := gencommon.LoadPackages(g.InFile)
 	if err != nil {
 		return err

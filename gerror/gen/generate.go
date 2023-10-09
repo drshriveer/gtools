@@ -24,9 +24,10 @@ var (
 // Generate is the parser and writer of gerror.
 // It seems to double as its own 'options' holder.
 type Generate struct {
-	InFile  string   `env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
-	OutFile string   `alias:"out" usage:"name of output file (defaults to go:generate context filename.gerror.go)"`
-	Types   []string `usage:"[required] names of types to generate gerror for"`
+	InFile         string   `env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
+	OutFile        string   `aliases:"out" usage:"name of output file (defaults to go:generate context filename.gerror.go)"`
+	Types          []string `usage:"[required] names of types to generate gerror for"`
+	SkipConvertGen bool     `aliases:"skipConvertGen" default:"false" usage:"Skip generating convert methods; caller must implement their own. (defaults to false)"`
 
 	// derived, (exposed for template use):
 	FactoryComments map[string]string        `flag:""` // ignore these fields
