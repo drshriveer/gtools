@@ -64,16 +64,9 @@ func EnableDebug(ctx context.Context) context.Context {
 // SetLevel sets a specific log level for this context.
 func SetLevel(ctx context.Context, level zapcore.Level) context.Context {
 	lh, ok := getOrDefault(ctx)
-	logger := lh.Load().WithOptions(zap.WrapCore(func(core zapcore.Core) zapcore.Core {
-		return &customLevelCoreWrapper{
-			Core:     core,
-			minLevel: level,
-		}
-	}))
-
-	lh.Store(logger)
+	lh.Store(CustomLevelLogger(lh.Load(), level))
 	if !ok {
-		ctx = context.WithValue(ctx, logHolderKey, logger)
+		ctx = context.WithValue(ctx, logHolderKey, lh)
 	}
 	return ctx
 }
@@ -85,7 +78,7 @@ func WithFields(ctx context.Context, fields ...zap.Field) context.Context {
 	logger := lh.Load()
 	lh.Store(logger.With(fields...))
 	if !ok {
-		ctx = context.WithValue(ctx, logHolderKey, logger)
+		ctx = context.WithValue(ctx, logHolderKey, lh)
 	}
 	return ctx
 }

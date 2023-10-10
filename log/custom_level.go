@@ -1,12 +1,26 @@
 package log
 
 import (
+	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
+// customLevelCoreWrapper wraps a zap core to enable setting any log level for a specific logger.
 type customLevelCoreWrapper struct {
 	zapcore.Core
+
+	// minLevel to log.
 	minLevel zapcore.Level
+}
+
+// CustomLevelLogger will enable any log level on a given logger.
+func CustomLevelLogger(logger *zap.Logger, level zapcore.Level) *zap.Logger {
+	return logger.WithOptions(zap.WrapCore(func(core zapcore.Core) zapcore.Core {
+		return &customLevelCoreWrapper{
+			Core:     core,
+			minLevel: level,
+		}
+	}))
 }
 
 // Level returns the level of this wrapped core.
