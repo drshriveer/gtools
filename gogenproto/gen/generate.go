@@ -19,7 +19,7 @@ type Generate struct {
 	InputDir  string `aliases:"inputDir" env:"PWD" usage:"path to root directory for proto generation"`
 	OutputDir string `aliases:"outputDir" default:"../" usage:"relative output path for generated files"`
 
-	Recurse bool `aliases:"recurse" default:"false" usage:"generate protos recursively"`
+	Recurse bool `default:"false" usage:"generate protos recursively"`
 	// TODO: other flags, like VTProto, GRPC, TS, etc,
 }
 

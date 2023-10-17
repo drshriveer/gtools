@@ -7,6 +7,7 @@ import (
 	"go/types"
 	"slices"
 	"sort"
+	"strings"
 	"text/template"
 
 	"github.com/fatih/structtag"
@@ -44,13 +45,13 @@ func (g *Generate) Parse() error {
 	}
 	g.Imports = imports
 
-	iFact, err := gencommon.FindInterface(pkgs, "github.com/drshriveer/gtools/gerror", "Factory")
+	iFact, err := gencommon.FindInterface(imports, pkgs, "github.com/drshriveer/gtools/gerror", "Factory", false)
 	if err != nil {
 		return err
 	}
-	g.FactoryComments = make(map[string]string, len(iFact.Methods.List))
-	for _, m := range iFact.Methods.List {
-		g.FactoryComments[m.Names[0].Name] = gencommon.CommentGroupRaw(m.Doc)
+	g.FactoryComments = make(map[string]string, len(iFact.Methods))
+	for _, m := range iFact.Methods {
+		g.FactoryComments[m.Name] = strings.Join(m.Comments, "\n")
 	}
 
 	pkg.Types.Scope()

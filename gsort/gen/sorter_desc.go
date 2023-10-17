@@ -30,6 +30,7 @@ func (s SorterDesc) PriorityTree() *CompareLine {
 	result := &CompareLine{}
 	current := result
 	for i, v := range s.Fields {
+		current.IsBool = v.FieldType.String() == "bool"
 		current.Accessor = v.FieldName
 		if len(v.CustomAccessor) > 0 {
 			current.Accessor += "." + v.CustomAccessor
@@ -56,7 +57,7 @@ func createSorterDesc(obj types.Object, typeName, sortableTypeName string) (*Sor
 	// pull out tags and ordering info.
 	sortFields := make(SortFieldDescs, 0)
 	for i := 0; i < strukt.NumFields(); i++ {
-		sfd, err := sortFieldDescFromTag(strukt.Field(i).Name(), strukt.Tag(i))
+		sfd, err := sortFieldDescFromTag(strukt.Field(i).Name(), strukt.Tag(i), strukt.Field(i).Type())
 		if err != nil {
 			return nil, err
 		} else if sfd != nil {
@@ -95,11 +96,12 @@ func (s SortFieldDescs) Validate() error {
 // SortFieldDesc describes a single field used for sorting.
 type SortFieldDesc struct {
 	FieldName      string
+	FieldType      types.Type
 	CustomAccessor string
 	Priority       int `gsort:"1"`
 }
 
-func sortFieldDescFromTag(fName, tagLine string) (*SortFieldDesc, error) {
+func sortFieldDescFromTag(fName, tagLine string, fType types.Type) (*SortFieldDesc, error) {
 	tags, err := structtag.Parse(tagLine)
 	if err != nil { // error returned when not found
 		return nil, nil
@@ -112,6 +114,7 @@ func sortFieldDescFromTag(fName, tagLine string) (*SortFieldDesc, error) {
 
 	result := &SortFieldDesc{
 		FieldName: fName,
+		FieldType: fType,
 	}
 	result.Priority, err = strconv.Atoi(sortTags.Name)
 	if err != nil {
@@ -129,6 +132,8 @@ func sortFieldDescFromTag(fName, tagLine string) (*SortFieldDesc, error) {
 
 // CompareLine is what's actually used by the template to generate if/else statements.
 type CompareLine struct {
+	// IsBool indicates this is a bool for making a different kind of comparison.
+	IsBool bool
 	// Accessor is how to access the field that sorts things.
 	Accessor string
 	// Nest is another if/template call to be nested in an if statement.
@@ -138,4 +143,12 @@ type CompareLine struct {
 // HasNest is a helper for templates.
 func (c CompareLine) HasNest() bool {
 	return c.Nest != nil
+}
+
+// String returns the Comparison like as a string.
+func (c CompareLine) String() string {
+	if c.IsBool {
+		return "s[j]." + c.Accessor
+	}
+	return "s[i]." + c.Accessor + " < " + "s[j]." + c.Accessor
 }

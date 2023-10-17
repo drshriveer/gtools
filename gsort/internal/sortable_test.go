@@ -1,6 +1,7 @@
 package internal_test
 
 import (
+	"path"
 	"sort"
 	"testing"
 
@@ -27,6 +28,10 @@ func TestGenerate(t *testing.T) {
 			typeName:    "Sortable",
 		},
 		{
+			description: "sortable success with bool",
+			typeName:    "SortBool",
+		},
+		{
 			description:   "fails because there are no properties to sort",
 			typeName:      "NotSortable",
 			expectedError: true,
@@ -39,17 +44,17 @@ func TestGenerate(t *testing.T) {
 			t.Parallel()
 			g := gen.Generate{
 				InFile:     "./sortable.go",
-				OutFile:    "sortable.gsort.go",
+				OutFile:    path.Join(t.TempDir(), "sortable.gsort.go"),
 				Types:      map[string]string{test.typeName: test.typeName + "s"},
 				UsePointer: true,
 			}
 			err := g.Parse()
 			if test.expectedError {
 				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
+				return
 			}
-			// require.NoError(t, g.Write())
+			require.NoError(t, err)
+			require.NoError(t, g.Write())
 		})
 	}
 }
