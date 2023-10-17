@@ -38,6 +38,22 @@ func CommentsFromMethod(pkg *packages.Package, typeName string, methodName strin
 	return nil
 }
 
+// CommentsFromObj attempts to find comments associated with the typename provided in
+// the package provided.
+func CommentsFromObj(pkg *packages.Package, typeName string) Comments {
+	for _, stax := range pkg.Syntax {
+		obj := stax.Scope.Lookup(typeName)
+		if obj == nil {
+			continue
+		}
+
+		if decl, ok := obj.Decl.(*ast.TypeSpec); ok {
+			return FromCommentGroup(decl.Doc)
+		}
+	}
+	return nil
+}
+
 // FromCommentGroup converts a CommentGroup into Comments!
 func FromCommentGroup(group *ast.CommentGroup) Comments {
 	if group == nil {

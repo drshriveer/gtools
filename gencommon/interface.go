@@ -23,6 +23,9 @@ type Interface struct {
 	// IsInterface returns false if the actual underlying object is a struct rather than an interface.
 	IsInterface bool
 
+	// Comments related to the interface.
+	Comments Comments
+
 	// Name of the type (or interface).
 	Name string
 
@@ -76,9 +79,11 @@ func namedTypeToInterface(ih *ImportHandler, pkg *packages.Package, t *types.Nam
 	*Interface,
 	error,
 ) {
+
 	result := &Interface{
 		Name:        t.Obj().Name(),
 		IsInterface: false,
+		Comments:    CommentsFromObj(pkg, t.Obj().Name()),
 		Methods:     make(Methods, 0, t.NumMethods()),
 	}
 
