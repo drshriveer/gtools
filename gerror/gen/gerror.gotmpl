@@ -4,9 +4,8 @@ package {{.PkgName}}
 import (
 	"fmt"
 
-	"github.com/drshriveer/gtools/gerror"
 	{{- range $import := $.Imports.GetActive}}
-	{{$import.Alias}} "{{$import.PkgPath}}"
+	{{$import.ImportString}}
 	{{- end}}
 )
 
