@@ -79,6 +79,17 @@ func namedTypeToInterface(ih *ImportHandler, pkg *packages.Package, t *types.Nam
 	*Interface,
 	error,
 ) {
+	type hasMethods interface {
+		NumMethods() int
+		Method(i int) *types.Func
+	}
+
+	var methodz hasMethods = t
+	if methodz.NumMethods() == 0 {
+		if iface, ok := t.Underlying().(*types.Interface); ok {
+			methodz = iface
+		}
+	}
 
 	result := &Interface{
 		Name:        t.Obj().Name(),
@@ -87,8 +98,8 @@ func namedTypeToInterface(ih *ImportHandler, pkg *packages.Package, t *types.Nam
 		Methods:     make(Methods, 0, t.NumMethods()),
 	}
 
-	for i := 0; i < t.NumMethods(); i++ {
-		mInfo := t.Method(i)
+	for i := 0; i < methodz.NumMethods(); i++ {
+		mInfo := methodz.Method(i)
 		if includePrivate || mInfo.Exported() {
 			method := MethodFromSignature(ih, mInfo.Type().(*types.Signature))
 			method.Name = mInfo.Name()

@@ -15,11 +15,17 @@ func CommentsFromMethod(pkg *packages.Package, typeName string, methodName strin
 	for _, stax := range pkg.Syntax {
 		obj := stax.Scope.Lookup(typeName)
 		if obj != nil {
+			v, ok := obj.Decl.(*ast.InterfaceType)
+			if !ok {
+				if ts, tsok := obj.Decl.(*ast.TypeSpec); tsok {
+					v, ok = ts.Type.(*ast.InterfaceType)
+				}
+			}
 			// if this is an interface type extracting comments is easier.
-			if v, ok := obj.Type.(*ast.InterfaceType); ok {
+			if ok {
 				for _, mInfo := range v.Methods.List {
 					if getName(mInfo.Names...) == methodName {
-						return FromCommentGroup(mInfo.Comment)
+						return FromCommentGroup(mInfo.Doc)
 					}
 				}
 			}

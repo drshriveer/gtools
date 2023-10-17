@@ -3,6 +3,7 @@ package gencommon
 import (
 	"go/ast"
 	"go/types"
+	"strconv"
 	"strings"
 )
 
@@ -47,7 +48,7 @@ func (ps Params) TypeNames() string {
 	for i, p := range ps {
 		result.WriteString(p.TypeRef)
 		if i+1 < len(ps) {
-			result.WriteString(",")
+			result.WriteString(", ")
 		}
 	}
 	return result.String()
@@ -56,11 +57,12 @@ func (ps Params) TypeNames() string {
 // ParamNames returns a comma-separated list of the parameter names.
 // e.g. arg1, arg2, arg3...
 func (ps Params) ParamNames() string {
+	ps.ensureNames()
 	result := strings.Builder{}
 	for i, p := range ps {
 		result.WriteString(p.Name)
 		if i+1 < len(ps) {
-			result.WriteString(",")
+			result.WriteString(", ")
 		}
 	}
 	return result.String()
@@ -69,16 +71,29 @@ func (ps Params) ParamNames() string {
 // Declarations returns a comma-separated list of parameter name and type:
 // e.g. arg1 Type1, arg2 Type2 ...,.
 func (ps Params) Declarations() string {
+	ps.ensureNames()
 	result := strings.Builder{}
 	for i, p := range ps {
 		result.WriteString(p.Name)
 		result.WriteString(" ")
 		result.WriteString(p.TypeRef)
 		if i+1 < len(ps) {
-			result.WriteString(",")
+			result.WriteString(", ")
 		}
 	}
 	return result.String()
+}
+
+func (ps Params) ensureNames() {
+	for i, p := range ps {
+		if len(p.Name) == 0 {
+			if len(ps)-1 == i && types.Implements(p.actualType, ErrorInterface) {
+				p.Name = "err"
+			} else {
+				p.Name = "arg" + strconv.FormatInt(int64(i), 10)
+			}
+		}
+	}
 }
 
 // Param has information about a single parameter.
