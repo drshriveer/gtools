@@ -2,7 +2,7 @@ package internal
 
 // Sortable is for testing.
 //
-//go:generate gsort -types Sortable=Sortables
+//go:generate gsort -types Sortable=Sortables SortBool=SortedWithBools
 type Sortable struct {
 	Category     Category `gsort:"1,String()"`
 	Property1    string   `gsort:"2"`
@@ -14,6 +14,12 @@ type Sortable struct {
 // NotSortable is for testing.
 type NotSortable struct {
 	Prop1 string
+}
+
+// SortBool is for testing.
+type SortBool struct {
+	Category  bool   `gsort:"1"`
+	Property1 string `gsort:"2"`
 }
 
 // Category exists to test the stringify tag.

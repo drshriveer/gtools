@@ -15,7 +15,7 @@ if s[i].{{.Accessor}} == s[j].{{.Accessor}} {
 	{{- template "PriorityBlock" .Nest}}
 }
 {{- end}}
-return s[i].{{.Accessor}} < s[j].{{.Accessor}}
+return {{.String}}
 {{- end -}}
 
 
