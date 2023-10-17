@@ -45,7 +45,7 @@ func LoadPackages(fileName string, additional ...string) (
 		return nil, nil, nil, nil, err
 	}
 
-	return pkgs, pkg, fAST, calcImports(pkgs[0], fAST), nil
+	return pkgs, pkg, fAST, calcImports(pkg, fAST), nil
 }
 
 // FindFAST finds an *ast.File in a package.
@@ -65,7 +65,6 @@ func FindFAST(pkg *packages.Package, fileName string) (*ast.File, error) {
 // FindPackageWihFile finds a package with a file.
 func FindPackageWihFile(pkgs []*packages.Package, fileName string) (*packages.Package, error) {
 	cleanFName := path.Clean(fileName)
-
 	for _, pkg := range pkgs {
 		for _, fName := range pkg.GoFiles {
 			// Depending on the run context we might have absolute or relative paths...
