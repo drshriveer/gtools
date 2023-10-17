@@ -45,7 +45,7 @@ func (g *Generate) Parse() error {
 	}
 	g.Imports = imports
 
-	iFact, err := gencommon.FindInterface(pkgs, "github.com/drshriveer/gtools/gerror", "Factory")
+	iFact, err := gencommon.FindInterface(imports, pkgs, "github.com/drshriveer/gtools/gerror", "Factory", false)
 	if err != nil {
 		return err
 	}

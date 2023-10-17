@@ -2,28 +2,49 @@ package gencommon
 
 import (
 	"fmt"
-	"go/ast"
+	"go/types"
+
 	"golang.org/x/tools/go/packages"
-	"sort"
 )
 
-// Interface is a parsed interface
+// ErrorInterface defines the error interface as a type for comparison.
+var ErrorInterface = types.NewInterfaceType([]*types.Func{
+	types.NewFunc(
+		0,
+		nil,
+		"Error",
+		types.NewSignatureType(nil, nil, nil, nil,
+			types.NewTuple(types.NewVar(0, nil, "", types.Typ[types.String])),
+			false)),
+}, nil)
+
+// Interface is a parsed interface.
 type Interface struct {
-	// IsInterface returns false if the actual underlying object is an struct rather than an interface.
+	// IsInterface returns false if the actual underlying object is a struct rather than an interface.
 	IsInterface bool
-	Name        string
-	Methods     Methods
+
+	// Name of the type (or interface).
+	Name string
+
+	// List of methods!
+	Methods Methods
 }
 
 // FindInterface locates a given *ast.Interface in a package.
-func FindInterface(pkgs []*packages.Package, pkgName, target string) (*Interface, error) {
+func FindInterface(
+	ih *ImportHandler,
+	pkgs []*packages.Package,
+	pkgName, target string,
+	includePrivate bool,
+) (*Interface, error) {
 	for _, pkg := range pkgs {
 		if pkg.PkgPath == pkgName {
-			return findIfaceByNameInPackage(pkg, target)
+			return findIFaceByNameInPackage(ih, pkg, target, includePrivate)
 		}
+		// I don't really see why this should be necessary...
 		for pkgPath, pkg := range pkg.Imports {
 			if pkgPath == pkgName {
-				return findIfaceByNameInPackage(pkg, target)
+				return findIFaceByNameInPackage(ih, pkg, target, includePrivate)
 			}
 		}
 
@@ -31,74 +52,47 @@ func FindInterface(pkgs []*packages.Package, pkgName, target string) (*Interface
 	return nil, fmt.Errorf("target %s in package %s not found", target, pkgName)
 }
 
-func findIfaceByNameInPackage(pkg *packages.Package, target string) (*Interface, error) {
-	for _, file := range pkg.Syntax {
-		tt := file.Scope.Lookup(target)
-		if tt == nil {
-			continue
-		}
-		ts, ok := tt.Decl.(*ast.TypeSpec)
-		if !ok {
-			continue
-		}
-
-		switch v := ts.Type.(type) {
-		case *ast.InterfaceType:
-			return interfaceAsInterface(v, target)
-		case *ast.StructType:
-			return structAsInterface(pkg, target)
-		}
+func findIFaceByNameInPackage(ih *ImportHandler, pkg *packages.Package, target string, includePrivate bool) (
+	*Interface,
+	error,
+) {
+	typ := pkg.Types.Scope().Lookup(target)
+	if typ == nil {
+		return nil, fmt.Errorf("target %s not found", target)
+	}
+	typLayer1, ok := typ.(*types.TypeName)
+	if !ok {
+		return nil, fmt.Errorf("target %s found but not a handled type (found %T)", target, typ)
+	}
+	typLayer2, ok := typLayer1.Type().(*types.Named)
+	if !ok {
+		return nil, fmt.Errorf("target %s found but not a handled nested type (found %T)", target, typLayer1)
 	}
 
-	return nil, fmt.Errorf("target %s not found", target)
+	return namedTypeToInterface(ih, pkg, typLayer2, includePrivate)
 }
 
-func structAsInterface(pkg *packages.Package, iFaceName string) (*Interface, error) {
+func namedTypeToInterface(ih *ImportHandler, pkg *packages.Package, t *types.Named, includePrivate bool) (
+	*Interface,
+	error,
+) {
 	result := &Interface{
-		Name:        iFaceName,
+		Name:        t.Obj().Name(),
 		IsInterface: false,
-		Methods:     make([]*Method, 0),
+		Methods:     make(Methods, 0, t.NumMethods()),
 	}
 
-	for _, stax := range pkg.Syntax {
-		for _, decl := range stax.Decls {
-			if v, ok := decl.(*ast.FuncDecl); ok {
-				if m, ok := MethodFrom(v, iFaceName); ok {
-					result.Methods = append(result.Methods, m)
-				}
-			}
+	for i := 0; i < t.NumMethods(); i++ {
+		mInfo := t.Method(i)
+		if includePrivate || mInfo.Exported() {
+			method := MethodFromSignature(ih, mInfo.Type().(*types.Signature))
+			method.Name = mInfo.Name()
+			method.IsExported = mInfo.Exported()
+			method.Comments = CommentsFromMethod(pkg, t.Obj().Name(), mInfo.Name())
+			result.Methods = append(result.Methods, method)
 		}
 	}
-
-	sort.Sort(result.Methods)
-
 	return result, nil
-}
-
-func interfaceAsInterface(v *ast.InterfaceType, iFaceName string) (*Interface, error) {
-	result := &Interface{
-		Name:        iFaceName,
-		IsInterface: true,
-		Methods:     make([]*Method, v.Methods.NumFields()),
-	}
-	for i, m := range v.Methods.List {
-		funcType := m.Type.(*ast.FuncType)
-		result.Methods[i] = &Method{
-			Name:       m.Names[0].Name,
-			IsExported: m.Names[0].IsExported(),
-			Comments:   docToString(m.Comment),
-			Input:      ParamsFromFieldList(funcType.Params),
-			Output:     ParamsFromFieldList(funcType.Results),
-		}
-	}
-	return nil, nil
-}
-
-func docToString(group *ast.CommentGroup) []string {
-	if group == nil {
-		return nil
-	}
-	return mapper(group.List, func(in *ast.Comment) string { return in.Text })
 }
 
 func mapper[Tin any, Tout any](input []Tin, mapFn func(in Tin) Tout) []Tout {

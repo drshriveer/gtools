@@ -18,6 +18,14 @@ type ImportDesc struct {
 	inUse   bool
 }
 
+// ImportString returns a formatted import string with alias (if required).
+func (id *ImportDesc) ImportString() string {
+	if strings.HasSuffix(id.PkgPath, id.Alias) {
+		return "\"" + id.PkgPath + "\""
+	}
+	return id.Alias + " \"" + id.PkgPath + "\""
+}
+
 // ImportHandler a collection of import descriptions indexed by package path.
 type ImportHandler struct {
 	PInfo   *packages.Package
@@ -52,42 +60,55 @@ func calcImports(pkg *packages.Package, fAST *ast.File) *ImportHandler {
 }
 
 // ExtractTypeRef returns the way the type should be referenced in code.
-func (id ImportHandler) ExtractTypeRef(t types.Type) string {
+func (ih *ImportHandler) ExtractTypeRef(typ types.Type) string {
 	// "named" means it is a type which may require importing.
-	named, ok := t.(*types.Named)
-	if !ok {
+	switch t := typ.(type) {
+	case *types.Pointer:
+		return "*" + ih.ExtractTypeRef(t.Elem())
+	case *types.Slice:
+		return "[]" + ih.ExtractTypeRef(t.Elem())
+	case *types.Array:
+		return fmt.Sprintf("[%d]", t.Len()) + ih.ExtractTypeRef(t.Elem())
+	case *types.Signature:
+		// recurse to register relevant method imports-> then we only need the signature.
+		m := MethodFromSignature(ih, t)
+		return m.Signature()
+
+	case *types.Named:
+		pkg := t.Obj().Pkg()
+		typeName := t.Obj().Name()
+		if pkg == nil || pkg.Path() == ih.PInfo.PkgPath {
+			return typeName
+		}
+
+		// first check if we have a mapping for the package:
+		i, ok := ih.imports[pkg.Path()]
+		if ok {
+			i.inUse = true
+		} else {
+			i = &ImportDesc{
+				Alias:   pkg.Name(),
+				PkgPath: pkg.Path(),
+				inUse:   true,
+			}
+			ih.imports[i.PkgPath] = i
+		}
+
+		return fmt.Sprintf("%s.%s", i.Alias, typeName)
+
+	default:
+		// *types.Interface is usually handled here too.
 		// "*types.Basic"s e.g. string come out as "untyped string"; we need to drop
 		//  that part... Not sure why this is how the type information is conveyed :-/.
 		return strings.TrimPrefix(t.String(), "untyped ")
 	}
-
-	pkg := named.Obj().Pkg()
-	typeName := named.Obj().Name()
-	if pkg.Path() == id.PInfo.PkgPath {
-		return typeName
-	}
-
-	// first check if we have a mapping for the package:
-	i, ok := id.imports[pkg.Path()]
-	if ok {
-		i.inUse = true
-	} else {
-		i = &ImportDesc{
-			Alias:   pkg.Name(),
-			PkgPath: pkg.Path(),
-			inUse:   true,
-		}
-		id.imports[i.PkgPath] = i
-	}
-
-	return fmt.Sprintf("%s.%s", i.Alias, typeName)
 }
 
 // GetActive returns ordered, active imports.
 // Used by templates.
-func (id ImportHandler) GetActive() []ImportDesc {
-	result := make([]ImportDesc, 0, len(id.imports))
-	for _, i := range id.imports {
+func (ih *ImportHandler) GetActive() []ImportDesc {
+	result := make([]ImportDesc, 0, len(ih.imports))
+	for _, i := range ih.imports {
 		if i.inUse {
 			result = append(result, *i)
 		}
@@ -99,6 +120,6 @@ func (id ImportHandler) GetActive() []ImportDesc {
 }
 
 // HasActiveImports returns true if there are any active imports.
-func (id ImportHandler) HasActiveImports() bool {
-	return len(id.GetActive()) > 0
+func (ih *ImportHandler) HasActiveImports() bool {
+	return len(ih.GetActive()) > 0
 }

@@ -7,24 +7,24 @@ import (
 //go:generate gsort --types Method=Methods
 
 // Exported returns ony exported methods.
-func (m Methods) Exported() Methods {
-	sort.Sort(m)
-	for i, m_ := range m {
-		if m_.IsExported {
-			return m[i:]
+func (ms Methods) Exported() Methods {
+	sort.Sort(ms)
+	for i, m := range ms {
+		if m.IsExported {
+			return ms[i:]
 		}
 	}
-	return m
+	return ms
 }
 
 // Private returns ony Private methods.
-func (m Methods) Private() Methods {
-	sort.Sort(m)
-	for i, m_ := range m {
-		if m_.IsExported {
-			return m[:i]
+func (ms Methods) Private() Methods {
+	sort.Sort(ms)
+	for i, m := range ms {
+		if m.IsExported {
+			return ms[:i]
 		}
 	}
 
-	return m
+	return ms
 }
