@@ -53,9 +53,9 @@ func (ps Params) TypeNames() string {
 	return result.String()
 }
 
-// ParamsNames returns a comma-separated list of the parameter names.
+// ParamNames returns a comma-separated list of the parameter names.
 // e.g. arg1, arg2, arg3...
-func (ps Params) ParamsNames() string {
+func (ps Params) ParamNames() string {
 	result := strings.Builder{}
 	for i, p := range ps {
 		result.WriteString(p.Name)
