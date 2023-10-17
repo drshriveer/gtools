@@ -27,7 +27,7 @@ var enumTemplate = template.Must(template.New("genum").Parse(tmpl))
 type Generate struct {
 	InFile        string   `aliases:"in" env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
 	OutFile       string   `aliases:"out" usage:"name of output file (defaults to go:generate context filename.enum.go)"`
-	Types         []string `aliases:"types" usage:"[required] comma-separated names of types to generate enum code for"`
+	Types         []string `usage:"[required] comma-separated names of types to generate enum code for"`
 	GenJSON       bool     `aliases:"json" default:"true" usage:"generate json marshal methods"`
 	GenYAML       bool     `aliases:"yaml" default:"true" usage:"generate yaml marshal methods"`
 	GenText       bool     `aliases:"text" default:"true" usage:"generate text marshal methods"`
