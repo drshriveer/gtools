@@ -33,91 +33,112 @@ func (e *GRPCError) Error() string {
 	return result
 }
 
+// Base clones the error without modifications.
 func (e *GRPCError) Base() gerror.Error {
 	clone := gerror.CloneBase(e, gerror.NoStack, "", "", "", nil)
 	return e.toPrimaryType(clone)
 }
 
+// SourceOnly clones the error and ensures Source is populated.
 func (e *GRPCError) SourceOnly() gerror.Error {
 	clone := gerror.CloneBase(e, gerror.SourceStack, "", "", "", nil)
 	return e.toPrimaryType(clone)
 }
 
+// Stack clones the error and ensures there is a Stack. Source will also be populated
+// if not already set.
 func (e *GRPCError) Stack() gerror.Error {
 	clone := gerror.CloneBase(e, gerror.DefaultStack, "", "", "", nil)
 	return e.toPrimaryType(clone)
 }
 
+// Src clones the error with a custom source.
 func (e *GRPCError) Src(src string) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.SourceStack, "", src, "", nil)
 	return e.toPrimaryType(clone)
 }
 
+// DTag clones the error with a detailTag, and will populate Source if needed.
 func (e *GRPCError) DTag(dTag string) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.SourceStack, dTag, "", "", nil)
 	return e.toPrimaryType(clone)
 }
 
+// Msg clones the error, extends its message, and will populate a Source if needed.
 func (e *GRPCError) Msg(format string, elems ...any) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.SourceStack, "", "", fmt.Sprintf(format, elems...), nil)
 	return e.toPrimaryType(clone)
 }
 
+// DTagSrcMsg clones the error, adds a Detail tag, custom source, and extends its message.
 func (e *GRPCError) SrcDTagMsg(src, dTag, format string, elems ...any) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.SourceStack, dTag, src, fmt.Sprintf(format, elems...), nil)
 	return e.toPrimaryType(clone)
 }
 
+// SrcDTag clones the error, adds a detail tag and source.
 func (e *GRPCError) SrcDTag(src, dTag string) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.SourceStack, dTag, src, "", nil)
 	return e.toPrimaryType(clone)
 }
 
+// SrcMsg clones the error, adds a source, and extends its message.
 func (e *GRPCError) SrcMsg(src, format string, elems ...any) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.SourceStack, "", src, fmt.Sprintf(format, elems...), nil)
 	return e.toPrimaryType(clone)
 }
 
+// DTagSrc clones the error, adds a detail tag, and extends its message.
 func (e *GRPCError) DTagMsg(dTag, format string, elems ...any) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.SourceStack, dTag, "", fmt.Sprintf(format, elems...), nil)
 	return e.toPrimaryType(clone)
 }
 
+// SrcS is the same as Src but also includes a full StackTrace.
 func (e *GRPCError) SrcS(src string) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.DefaultStack, "", "", "", nil)
 	return e.toPrimaryType(clone)
 }
 
+// DTagS is the same as DTag but also includes a full StackTrace.
 func (e *GRPCError) DTagS(dTag string) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.DefaultStack, dTag, "", "", nil)
 	return e.toPrimaryType(clone)
 }
 
+// MsgS is the same as Msg but also includes a full StackTrace.
 func (e *GRPCError) MsgS(format string, elems ...any) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.DefaultStack, "", "", fmt.Sprintf(format, elems...), nil)
 	return e.toPrimaryType(clone)
 }
 
+// SrcDTagMsgS is the same as DTagSrcMsg but also includes a full StackTrace.
 func (e *GRPCError) SrcDTagMsgS(src, dTag, format string, elems ...any) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.DefaultStack, dTag, src, fmt.Sprintf(format, elems...), nil)
 	return e.toPrimaryType(clone)
 }
 
+// SrcDTagS is the same as DTagSrc but also includes a full StackTrace.
 func (e *GRPCError) SrcDTagS(src, dTag string) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.DefaultStack, dTag, src, "", nil)
 	return e.toPrimaryType(clone)
 }
 
+// SrcMsgS is the same as SrcMsg but also includes a full StackTrace.
 func (e *GRPCError) SrcMsgS(src, format string, elems ...any) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.DefaultStack, "", src, fmt.Sprintf(format, elems...), nil)
 	return e.toPrimaryType(clone)
 }
 
+// DTagSrcS is the same as DTagMsg but also includes a full StackTrace.
 func (e *GRPCError) DTagMsgS(dTag, format string, elems ...any) gerror.Error {
 	clone := gerror.CloneBase(e, gerror.DefaultStack, dTag, "", fmt.Sprintf(format, elems...), nil)
 	return e.toPrimaryType(clone)
 }
 
+// Convert will attempt to convert the supplied error into a gError.Error of the
+// Factory's type, including the source errors details in the result's error message.
+// The original error's equality can be checked with errors.Is().
 func (e *GRPCError) Convert(err error) gerror.Error {
 	if gerr, ok := err.(gerror.Error); ok {
 		return gerr
@@ -126,6 +147,7 @@ func (e *GRPCError) Convert(err error) gerror.Error {
 	return e.toPrimaryType(clone)
 }
 
+// ConvertS is the same as Convert but includes a full StackTrace.
 func (e *GRPCError) ConvertS(err error) gerror.Error {
 	if gerr, ok := err.(gerror.Error); ok {
 		return gerr

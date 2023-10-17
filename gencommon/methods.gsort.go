@@ -4,15 +4,15 @@ package gencommon
 // Methods implements the sort.Sort interface for Method.
 type Methods []*Method
 
-func (ms Methods) Len() int {
-	return len(ms)
+func (s Methods) Len() int {
+	return len(s)
 }
-func (ms Methods) Swap(i, j int) {
-	ms[i], ms[j] = ms[j], ms[i]
+func (s Methods) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
 }
-func (ms Methods) Less(i, j int) bool {
-	if ms[i].IsExported == ms[j].IsExported {
-		return ms[i].Name < ms[j].Name
+func (s Methods) Less(i, j int) bool {
+	if s[i].IsExported == s[j].IsExported {
+		return s[i].Name < s[j].Name
 	}
-	return ms[j].IsExported
+	return s[j].IsExported
 }

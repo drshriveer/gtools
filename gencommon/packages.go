@@ -35,8 +35,6 @@ func LoadPackages(fileName string, additional ...string) (
 		return nil, nil, nil, nil, errors.New("package for file " + fileName + " NOT FOUND")
 	}
 
-	// XXX: this might be wrong; I don't like the idea of picking the first package randomly.
-	// might need to search through to find one with the target file instead.
 	pkg, err := FindPackageWihFile(pkgs, fileName)
 	if err != nil {
 		return nil, nil, nil, nil, err
