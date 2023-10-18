@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
-	"strings"
 )
 
 // Method is a type representing a method.
@@ -21,8 +20,8 @@ type Method struct {
 func MethodFromSignature(ih *ImportHandler, signature *types.Signature) *Method {
 	return &Method{
 		Name:   "func", // default name
-		Input:  ParamsFromSignatureTuple(ih, signature.Params()),
-		Output: ParamsFromSignatureTuple(ih, signature.Results()),
+		Input:  ParamsFromSignatureTuple(ih, signature.Params(), signature.Variadic()),
+		Output: ParamsFromSignatureTuple(ih, signature.Results(), false),
 	}
 }
 
@@ -38,8 +37,7 @@ func (m *Method) Signature() string {
 // Call returns a method call of the form:
 // e.g. MethodName(arg1, arg2, arg3).
 func (m *Method) Call() string {
-	args := mapper(m.Input, func(in *Param) string { return in.Name })
-	return fmt.Sprintf("%s(%s) ", m.Name, strings.Join(args, ", "))
+	return fmt.Sprintf("%s(%s) ", m.Name, m.Input.ParamNames())
 }
 
 // ReturnsError indicates whether this method return a type that implements the error
