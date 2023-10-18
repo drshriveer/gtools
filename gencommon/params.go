@@ -85,6 +85,13 @@ func (ps Params) ParamNames() string {
 	return result.String()
 }
 
+// ParamNamesOmitLast returns a comma-separated list of the parameter names.
+// But will omit the last element; useful for custom error
+// e.g. arg1, arg2, arg3...
+func (ps Params) ParamNamesOmitLast() string {
+	return ps[:len(ps)-1].ParamNames()
+}
+
 // Declarations returns a comma-separated list of parameter name and type:
 // e.g. arg1 Type1, arg2 Type2 ...,.
 func (ps Params) Declarations() string {

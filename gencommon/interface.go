@@ -33,6 +33,20 @@ type Interface struct {
 	Methods Methods
 }
 
+// ModErrorRefs modifies error references in method returns.
+// Swapping out the inner type reference for the type supplied.
+// This will return an empty string for ease of calling from inside templates.
+// ...use with care.
+func (i *Interface) ModErrorRefs(newRef string) string {
+	for _, m := range i.Methods {
+		if m.ReturnsError() {
+			last := m.Output[len(m.Output)-1]
+			last.TypeRef = newRef
+		}
+	}
+	return ""
+}
+
 // FindInterface locates a given *ast.Interface in a package.
 func FindInterface(
 	ih *ImportHandler,
