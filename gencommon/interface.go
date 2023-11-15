@@ -18,6 +18,9 @@ type Interface struct {
 	// Name of the type (or interface).
 	Name string
 
+	// TypeRef is how to reference this interface outside of the current package.
+	TypeRef string
+
 	// List of methods!
 	Methods Methods
 }
@@ -99,6 +102,7 @@ func namedTypeToInterface(ih *ImportHandler, pkg *packages.Package, t *types.Nam
 	result := &Interface{
 		Name:        t.Obj().Name(),
 		IsInterface: false,
+		TypeRef:     ih.ExtractTypeRef(t),
 		Comments:    CommentsFromObj(pkg, t.Obj().Name()),
 		Methods:     make(Methods, 0, t.NumMethods()),
 	}
