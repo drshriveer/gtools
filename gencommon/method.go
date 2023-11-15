@@ -47,7 +47,7 @@ func (m *Method) ReturnsError() bool {
 		return false
 	}
 	last := m.Output[len(m.Output)-1]
-	return types.Implements(last.actualType, ErrorInterface)
+	return TypeImplements(last.ActualType, ErrorInterface)
 }
 
 // AcceptsContext returns true if the first argument implements the context interface.
@@ -56,7 +56,7 @@ func (m *Method) AcceptsContext() bool {
 		return false
 	}
 	first := m.Input[0]
-	return types.Implements(first.actualType, ContextInterface)
+	return TypeImplements(first.ActualType, ContextInterface)
 }
 
 // HasResults returns true if the method has results to return.

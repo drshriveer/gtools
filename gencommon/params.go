@@ -33,7 +33,7 @@ func ParamsFromSignatureTuple(ih *ImportHandler, tuple *types.Tuple, variadic bo
 	for i := 0; i < tuple.Len(); i++ {
 		v := tuple.At(i)
 		p := &Param{
-			actualType: v.Type(),
+			ActualType: v.Type(),
 			TypeRef:    ih.ExtractTypeRef(v.Type()),
 			Name:       v.Name(),
 			Variadic:   tuple.Len() == i+1 && variadic,
@@ -114,7 +114,7 @@ func (ps Params) Declarations() string {
 func (ps Params) ensureNames() {
 	for i, p := range ps {
 		if len(p.Name) == 0 {
-			if len(ps)-1 == i && types.Implements(p.actualType, ErrorInterface) {
+			if len(ps)-1 == i && types.Implements(p.ActualType, ErrorInterface) {
 				p.Name = "err"
 			} else {
 				p.Name = "arg" + strconv.FormatInt(int64(i), 10)
@@ -125,7 +125,7 @@ func (ps Params) ensureNames() {
 
 // Param has information about a single parameter.
 type Param struct {
-	actualType types.Type
+	ActualType types.Type
 	TypeRef    string
 	Name       string
 	Comments   Comments
@@ -135,13 +135,4 @@ type Param struct {
 // Declaration returns a name and type.
 func (p Param) Declaration() string {
 	return p.Name + " " + p.TypeRef
-}
-
-// Implements returns true if the parameter implements the interface type provided.
-func (p Param) Implements(pkgName, typeName string) bool {
-	iFace, err := FindIFaceDef(pkgName, typeName)
-	if err != nil {
-		return false
-	}
-	return types.Implements(p.actualType, iFace)
 }

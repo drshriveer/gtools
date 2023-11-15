@@ -3,12 +3,13 @@ package gencommon
 import (
 	"bytes"
 	"go/format"
-	"golang.org/x/tools/imports"
 	"log"
 	"os"
 	"path"
 	"strings"
 	"text/template"
+
+	"golang.org/x/tools/imports"
 )
 
 // SanitizeSourceFile ensures a valid source context.

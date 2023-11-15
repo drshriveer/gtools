@@ -22,6 +22,12 @@ type Interface struct {
 	Methods Methods
 }
 
+// utility helper for various things.
+type hasMethods interface {
+	NumMethods() int
+	Method(i int) *types.Func
+}
+
 // ModErrorRefs modifies error references in method returns.
 // Swapping out the inner type reference for the type supplied.
 // This will return an empty string for ease of calling from inside templates.
@@ -82,10 +88,6 @@ func namedTypeToInterface(ih *ImportHandler, pkg *packages.Package, t *types.Nam
 	*Interface,
 	error,
 ) {
-	type hasMethods interface {
-		NumMethods() int
-		Method(i int) *types.Func
-	}
 
 	var methodz hasMethods = t
 	if methodz.NumMethods() == 0 {
@@ -120,4 +122,75 @@ func mapper[Tin any, Tout any](input []Tin, mapFn func(in Tin) Tout) []Tout {
 		result[i] = mapFn(val)
 	}
 	return result
+}
+
+// TypeImplements seems to work where types.Implements does not.
+func TypeImplements(aType types.Type, target *types.Interface) bool {
+	a, ok := unwrapToHasMethods(aType)
+	if !ok {
+		// just kuz i guess?
+		return types.Implements(aType, target)
+	}
+
+	targetMethods := make(map[string]*types.Func, target.NumMethods())
+	for i := 0; i < target.NumMethods(); i++ {
+		mInfo := target.Method(i)
+		targetMethods[mInfo.Name()] = mInfo
+	}
+
+	for i := 0; i < a.NumMethods(); i++ {
+		mA := a.Method(i)
+		mB, ok := targetMethods[mA.Name()]
+		if !ok {
+			continue
+		}
+		sigA := mA.Type().(*types.Signature)
+		sigB := mB.Type().(*types.Signature)
+		if !IsSameSignature(sigA, sigB) {
+			return false
+		}
+		delete(targetMethods, mA.Name())
+	}
+	return len(targetMethods) == 0
+}
+
+// IsSameSignature returns true if signature is essentially the same.
+// It does this *with out* checking receivers.
+func IsSameSignature(a, b *types.Signature) bool {
+	// check inputs:
+	if a.Variadic() != b.Variadic() {
+		return false
+	}
+	if !IsTupleSame(a.Params(), b.Params()) {
+		return false
+	}
+	if !IsTupleSame(a.Results(), b.Results()) {
+		return false
+	}
+	return true
+}
+
+// IsTupleSame checks if two tuples share the same order of types.
+func IsTupleSame(a, b *types.Tuple) bool {
+	if a.Len() != b.Len() {
+		return false
+	}
+	for i := 0; i < a.Len(); i++ {
+		aParam, bParam := a.At(i), b.At(i)
+		if aParam.Type().String() != bParam.Type().String() {
+			return false
+		}
+	}
+	return true
+}
+
+func unwrapToHasMethods(t types.Type) (hasMethods, bool) {
+	if t == nil {
+		return nil, false
+	}
+	v, ok := t.(hasMethods)
+	if !ok || v.NumMethods() == 0 {
+		return unwrapToHasMethods(t.Underlying())
+	}
+	return v, true
 }
