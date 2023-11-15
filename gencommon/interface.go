@@ -188,9 +188,16 @@ func unwrapToHasMethods(t types.Type) (hasMethods, bool) {
 	if t == nil {
 		return nil, false
 	}
-	v, ok := t.(hasMethods)
-	if !ok || v.NumMethods() == 0 {
-		return unwrapToHasMethods(t.Underlying())
+
+	// so.. i know it is absolutely necessary to do one unwrap sometimes
+	// but why it looks infitiely other times I cannot say.
+	// I reallly wish go's tooling was better around all these types.
+	for i := 0; i < 5; i++ {
+		v, ok := t.(hasMethods)
+		if ok && v.NumMethods() > 0 {
+			return v, true
+		}
+		t = t.Underlying()
 	}
-	return v, true
+	return nil, false
 }
