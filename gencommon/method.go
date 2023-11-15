@@ -59,6 +59,11 @@ func (m *Method) AcceptsContext() bool {
 	return types.Implements(first.actualType, ContextInterface)
 }
 
+// HasResults returns true if the method has results to return.
+func (m *Method) HasResults() bool {
+	return len(m.Output) > 0
+}
+
 func getName(names ...*ast.Ident) string {
 	for _, name := range names {
 		return name.Name
