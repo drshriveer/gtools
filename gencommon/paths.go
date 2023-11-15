@@ -3,6 +3,7 @@ package gencommon
 import (
 	"bytes"
 	"go/format"
+	"golang.org/x/tools/imports"
 	"log"
 	"os"
 	"path"
@@ -49,6 +50,12 @@ func Write(tmpl *template.Template, templateData any, destination string) error 
 	if err != nil {
 		log.Printf("[WARN] - formatting of source file failed with error: %+v", err)
 		result = buf.Bytes()
+	}
+
+	// process imports; format and add/remove if needed.
+	result, err = imports.Process("", result, nil)
+	if err != nil {
+		log.Printf("[WARN] - formatting imports of source file failed with error: %+v", err)
 	}
 
 	f, err := os.OpenFile(destination, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
