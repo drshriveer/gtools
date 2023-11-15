@@ -7,17 +7,6 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// ErrorInterface defines the error interface as a type for comparison.
-var ErrorInterface = types.NewInterfaceType([]*types.Func{
-	types.NewFunc(
-		0,
-		nil,
-		"Error",
-		types.NewSignatureType(nil, nil, nil, nil,
-			types.NewTuple(types.NewVar(0, nil, "", types.Typ[types.String])),
-			false)),
-}, nil)
-
 // Interface is a parsed interface.
 type Interface struct {
 	// IsInterface returns false if the actual underlying object is a struct rather than an interface.
@@ -29,8 +18,17 @@ type Interface struct {
 	// Name of the type (or interface).
 	Name string
 
+	// TypeRef is how to reference this interface outside of the current package.
+	TypeRef string
+
 	// List of methods!
 	Methods Methods
+}
+
+// utility helper for various things.
+type hasMethods interface {
+	NumMethods() int
+	Method(i int) *types.Func
 }
 
 // ModErrorRefs modifies error references in method returns.
@@ -93,10 +91,6 @@ func namedTypeToInterface(ih *ImportHandler, pkg *packages.Package, t *types.Nam
 	*Interface,
 	error,
 ) {
-	type hasMethods interface {
-		NumMethods() int
-		Method(i int) *types.Func
-	}
 
 	var methodz hasMethods = t
 	if methodz.NumMethods() == 0 {
@@ -108,6 +102,7 @@ func namedTypeToInterface(ih *ImportHandler, pkg *packages.Package, t *types.Nam
 	result := &Interface{
 		Name:        t.Obj().Name(),
 		IsInterface: false,
+		TypeRef:     ih.ExtractTypeRef(t),
 		Comments:    CommentsFromObj(pkg, t.Obj().Name()),
 		Methods:     make(Methods, 0, t.NumMethods()),
 	}
@@ -131,4 +126,82 @@ func mapper[Tin any, Tout any](input []Tin, mapFn func(in Tin) Tout) []Tout {
 		result[i] = mapFn(val)
 	}
 	return result
+}
+
+// TypeImplements seems to work where types.Implements does not.
+func TypeImplements(aType types.Type, target *types.Interface) bool {
+	a, ok := unwrapToHasMethods(aType)
+	if !ok {
+		// just kuz i guess?
+		return types.Implements(aType, target)
+	}
+
+	targetMethods := make(map[string]*types.Func, target.NumMethods())
+	for i := 0; i < target.NumMethods(); i++ {
+		mInfo := target.Method(i)
+		targetMethods[mInfo.Name()] = mInfo
+	}
+
+	for i := 0; i < a.NumMethods(); i++ {
+		mA := a.Method(i)
+		mB, ok := targetMethods[mA.Name()]
+		if !ok {
+			continue
+		}
+		sigA := mA.Type().(*types.Signature)
+		sigB := mB.Type().(*types.Signature)
+		if !IsSameSignature(sigA, sigB) {
+			return false
+		}
+		delete(targetMethods, mA.Name())
+	}
+	return len(targetMethods) == 0
+}
+
+// IsSameSignature returns true if signature is essentially the same.
+// It does this *with out* checking receivers.
+func IsSameSignature(a, b *types.Signature) bool {
+	// check inputs:
+	if a.Variadic() != b.Variadic() {
+		return false
+	}
+	if !IsTupleSame(a.Params(), b.Params()) {
+		return false
+	}
+	if !IsTupleSame(a.Results(), b.Results()) {
+		return false
+	}
+	return true
+}
+
+// IsTupleSame checks if two tuples share the same order of types.
+func IsTupleSame(a, b *types.Tuple) bool {
+	if a.Len() != b.Len() {
+		return false
+	}
+	for i := 0; i < a.Len(); i++ {
+		aParam, bParam := a.At(i), b.At(i)
+		if aParam.Type().String() != bParam.Type().String() {
+			return false
+		}
+	}
+	return true
+}
+
+func unwrapToHasMethods(t types.Type) (hasMethods, bool) {
+	if t == nil {
+		return nil, false
+	}
+
+	// so.. i know it is absolutely necessary to do one unwrap sometimes
+	// but why it looks infitiely other times I cannot say.
+	// I reallly wish go's tooling was better around all these types.
+	for i := 0; i < 5; i++ {
+		v, ok := t.(hasMethods)
+		if ok && v.NumMethods() > 0 {
+			return v, true
+		}
+		t = t.Underlying()
+	}
+	return nil, false
 }

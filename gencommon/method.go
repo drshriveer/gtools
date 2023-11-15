@@ -47,7 +47,21 @@ func (m *Method) ReturnsError() bool {
 		return false
 	}
 	last := m.Output[len(m.Output)-1]
-	return types.Implements(last.actualType, ErrorInterface)
+	return TypeImplements(last.ActualType, ErrorInterface)
+}
+
+// AcceptsContext returns true if the first argument implements the context interface.
+func (m *Method) AcceptsContext() bool {
+	if len(m.Input) == 0 {
+		return false
+	}
+	first := m.Input[0]
+	return TypeImplements(first.ActualType, ContextInterface)
+}
+
+// HasResults returns true if the method has results to return.
+func (m *Method) HasResults() bool {
+	return len(m.Output) > 0
 }
 
 func getName(names ...*ast.Ident) string {

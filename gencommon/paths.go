@@ -8,6 +8,8 @@ import (
 	"path"
 	"strings"
 	"text/template"
+
+	"golang.org/x/tools/imports"
 )
 
 // SanitizeSourceFile ensures a valid source context.
@@ -44,17 +46,24 @@ func Write(tmpl *template.Template, templateData any, destination string) error 
 	if err != nil {
 		return err
 	}
-
-	result, err := format.Source(buf.Bytes())
+	tempResult := buf.Bytes()
+	result, err := format.Source(tempResult)
+	if err == nil {
+		// process imports; format and add/remove if needed.
+		result, err = imports.Process("", result, nil)
+	}
 	if err != nil {
 		log.Printf("[WARN] - formatting of source file failed with error: %+v", err)
-		result = buf.Bytes()
+		// gracefully recover- the actual file is broken but it is helpful to see
+		// what is wrong with the output itself.
+		result = tempResult
 	}
 
 	f, err := os.OpenFile(destination, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		return err
 	}
+
 	defer f.Close()
 	_, err = f.WriteAt(result, 0)
 	return err
