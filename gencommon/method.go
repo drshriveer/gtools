@@ -50,6 +50,15 @@ func (m *Method) ReturnsError() bool {
 	return types.Implements(last.actualType, ErrorInterface)
 }
 
+// AcceptsContext returns true if the first argument implements the context interface.
+func (m *Method) AcceptsContext() bool {
+	if len(m.Input) == 0 {
+		return false
+	}
+	first := m.Input[0]
+	return types.Implements(first.actualType, ContextInterface)
+}
+
 func getName(names ...*ast.Ident) string {
 	for _, name := range names {
 		return name.Name

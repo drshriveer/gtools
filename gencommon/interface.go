@@ -7,17 +7,6 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// ErrorInterface defines the error interface as a type for comparison.
-var ErrorInterface = types.NewInterfaceType([]*types.Func{
-	types.NewFunc(
-		0,
-		nil,
-		"Error",
-		types.NewSignatureType(nil, nil, nil, nil,
-			types.NewTuple(types.NewVar(0, nil, "", types.Typ[types.String])),
-			false)),
-}, nil)
-
 // Interface is a parsed interface.
 type Interface struct {
 	// IsInterface returns false if the actual underlying object is a struct rather than an interface.

@@ -1,6 +1,8 @@
 gError
 ======
 
+TL;DR Don't use this! This was an attempt at something cool that ultimately didn't work out. I haven't removed this just yet, because I still intend to borrow some bits of it in the future (and technically the base gerror is still used in code within this package). But just don't use it! :)
+
 gError is an opinionated error model for Go that takes a metric-first standpoint on errors.
 
 [Docs](https://pkg.go.dev/github.com/drshriveer/gtool/gerror)
@@ -32,7 +34,7 @@ Below are the tenants that lead to this library's development. Keeping them in m
 	-	Implement client interceptors to automatically convert errors into the correct type.
 	-	TODO: provide example.
 -	**Returned errors should be tested**
-	-	Raw string matching and error wrapping make testing errors brittle. Verify the error returned is the error you intended.
+	-	Raw string matching and error wrapping make testing errors brittle.
 -	**Errors must treat metrics as a first-class citizen**
 	-	That means errors need to be *Named* and have a concept of their *Source*.
 	-	Consider pairing gError with something like [gowrap](https://github.com/hexdigest/gowrap) to generate instrumented interfaces that emit metrics when an error is encountered.

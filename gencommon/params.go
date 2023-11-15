@@ -136,3 +136,12 @@ type Param struct {
 func (p Param) Declaration() string {
 	return p.Name + " " + p.TypeRef
 }
+
+// Implements returns true if the parameter implements the interface type provided.
+func (p Param) Implements(pkgName, typeName string) bool {
+	iFace, err := FindIFaceDef(pkgName, typeName)
+	if err != nil {
+		return false
+	}
+	return types.Implements(p.actualType, iFace)
+}
