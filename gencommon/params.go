@@ -71,7 +71,6 @@ func (ps Params) TypeNames() string {
 // ParamNames returns a comma-separated list of the parameter names.
 // e.g. arg1, arg2, arg3...
 func (ps Params) ParamNames() string {
-	ps.ensureNames()
 	result := strings.Builder{}
 	for i, p := range ps {
 		result.WriteString(p.Name)
@@ -85,17 +84,9 @@ func (ps Params) ParamNames() string {
 	return result.String()
 }
 
-// ParamNamesOmitLast returns a comma-separated list of the parameter names.
-// But will omit the last element; useful for custom error
-// e.g. arg1, arg2, arg3...
-func (ps Params) ParamNamesOmitLast() string {
-	return ps[:len(ps)-1].ParamNames()
-}
-
 // Declarations returns a comma-separated list of parameter name and type:
 // e.g. arg1 Type1, arg2 Type2 ...,.
 func (ps Params) Declarations() string {
-	ps.ensureNames()
 	result := strings.Builder{}
 	for i, p := range ps {
 		result.WriteString(p.Name)
@@ -111,13 +102,28 @@ func (ps Params) Declarations() string {
 	return result.String()
 }
 
-func (ps Params) ensureNames() {
+func (ps Params) ensureNames(paramDeduper map[string]int, isOutput bool) {
+	// paramName == the unnamed parameter paramName to use.
+	prefix := "arg"
+	if isOutput {
+		prefix = "ret"
+	}
+	// To better preserve a customer's naming in case of them colliding with our own,
+	// process the named variables first:
+	for _, p := range ps {
+		if p.Name != "" {
+			p.Name = getSafeParamName(paramDeduper, p.Name, false)
+		}
+	}
+
 	for i, p := range ps {
-		if len(p.Name) == 0 {
-			if len(ps)-1 == i && types.Implements(p.ActualType, ErrorInterface) {
-				p.Name = "err"
+		if p.Name == "" {
+			if isOutput && len(ps)-1 == i && TypeImplements(p.ActualType, ErrorInterface) {
+				p.Name = getSafeParamName(paramDeduper, "err", false)
+			} else if !isOutput && i == 0 && TypeImplements(p.ActualType, ContextInterface) {
+				p.Name = getSafeParamName(paramDeduper, "ctx", false)
 			} else {
-				p.Name = "arg" + strconv.FormatInt(int64(i), 10)
+				p.Name = getSafeParamName(paramDeduper, prefix, true)
 			}
 		}
 	}
@@ -135,4 +141,20 @@ type Param struct {
 // Declaration returns a name and type.
 func (p Param) Declaration() string {
 	return p.Name + " " + p.TypeRef
+}
+
+// getSafeParamName returns a "safe" param name.
+// note: I'm pretty sure this is technically only safe when the already defined params
+// are processed first which is exactly what ensureNames does.
+func getSafeParamName(paramDeduper map[string]int, paramName string, alwaysNumber bool) string {
+	v, ok := paramDeduper[paramName]
+	result := paramName
+	if ok || alwaysNumber {
+		result += strconv.FormatInt(int64(v), 10)
+		v++
+	}
+	// else don't modify the intended paramName.
+	// ensure the paramName is in the map:
+	paramDeduper[paramName] = v
+	return result
 }

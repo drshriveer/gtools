@@ -15,7 +15,7 @@ import (
 // SanitizeSourceFile ensures a valid source context.
 func SanitizeSourceFile(srcFile string) string {
 	pwd := os.Getenv("PWD")
-	if len(srcFile) == 0 {
+	if srcFile == "" {
 		log.Fatal("this command should be run in a go:generate context or with the correct source file flag set.")
 	}
 
@@ -29,7 +29,7 @@ func SanitizeSourceFile(srcFile string) string {
 // This should be run AFTER SanitizeSourceFile, using the result of it as the srcFile argument.
 func SanitizeOutFile(flagVal, srcFile, genName string) string {
 	srcFileDir, srcFileName := path.Split(srcFile)
-	if len(flagVal) == 0 {
+	if flagVal == "" {
 		return path.Join(srcFileDir, strings.TrimSuffix(srcFileName, ".go")+"."+genName+".go")
 	}
 	if !path.IsAbs(flagVal) {

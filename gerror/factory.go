@@ -108,13 +108,13 @@ func CloneBase[T factoryOf](
 	}
 
 	// handle source:
-	if len(source) > 0 && len(clone.Source) == 0 {
+	if len(source) > 0 && clone.Source == "" {
 		clone.Source = source
 	}
 
 	// handle detail tags:
 	if len(dTag) > 0 {
-		if len(clone.detailTag) == 0 {
+		if clone.detailTag == "" {
 			clone.detailTag = dTag
 		} else {
 			clone.detailTag += "-" + dTag
@@ -124,7 +124,7 @@ func CloneBase[T factoryOf](
 	// handle message extension:
 	extMsg = strings.TrimSpace(extMsg)
 	if len(extMsg) > 0 {
-		if len(clone.Message) == 0 {
+		if clone.Message == "" {
 			clone.Message = extMsg
 		} else {
 			clone.Message += " " + extMsg
@@ -149,7 +149,7 @@ func CloneBase[T factoryOf](
 	}
 
 	clone.stack = makeStack(stackType, defaultSkip)
-	if len(clone.Source) == 0 {
+	if clone.Source == "" {
 		clone.Source = clone.stack.NearestExternal().Metric()
 		if stackType == SourceStack {
 			clone.stack = nil

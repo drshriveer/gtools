@@ -41,13 +41,62 @@ linters-settings:
       - loopclosure # we use GOEXPERIMENT := "loopvar"
   goimports:
     local-prefixes: github.com/drshriveer/gtools
-# if the stutter check in revive is annoying uncomment the following:
-#  revive:
-#    rules:
-#      - name: exported
-#        arguments:
-#          - disableStutteringCheck
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      # ifElseChain forces a switch statement for any if/else block > 2 conditions dumb.
+      # Do what you want when you want.
+      - ifElseChain
+      # paramTypeCombine requires
+      # func(thing, thing string) over func(thing string, thing string)
+      # I don't care.
+      - paramTypeCombine
+      # filepathJoin wants path.Join(prefix,node,node)
+      # instead of path.Join(prefix, "node/node")
+      # I don't care..
+      - filepathJoin
+      # hugeParam is actually pretty interesting-
+      # it detects objects that are large and better to pass by
+      # pointer. I like this in theory, but it is noisy.
+      - hugeParam
+      # .. do we really have to name them all?
+      - unnamedResult
+  gosec:
+    excludes:
+      # G601 Implicit memory aliasing in for loop. should not be valid with loopvar experiment...
+      - G601
+  nakedret:
+    # No naked returns, ever.
+    max-func-lines: 1 # Default: 30
+
 issues:
   include:
-    - EXC0012  # EXC0012 revive: Annoying issue about not having a comment. The rare codebase has such comments
-    - EXC0014  # EXC0014 revive: Annoying issue about not having a comment. The rare codebase has such comments
+    - EXC0012  # I prefer to force comments.
+    - EXC0014  # I prefer to force comments.
+  exclude-rules:
+    # Ignore use of weak random number generators in tests
+    - path: _test\.go
+      text: "G404:"
+      linters:
+        - gosec
+
+    # go:generate directives must be on one line; no long-line linting here.
+    - linters:
+        - lll
+      source: "^//go:generate "
+
+    # I don't want to disable all of var-naming in revive, but I do want to permit
+    # the use of ctx_ as a var name for specific use cases.
+    - linters:
+        - revive
+      text: "var-naming: don't use leading k in Go names|var-naming: don't use underscores in Go names; method parameter ctx_ should be ctx|var-naming: don't use underscores in Go names; var err_ should be err"
+
+    # embedded generated 'unimplentedXXXServer's can be unused at times.
+    - linters:
+        - unused
+      source: "^\\s*unimplemented\\w*Server"
