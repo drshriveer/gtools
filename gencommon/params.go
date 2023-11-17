@@ -112,15 +112,15 @@ func (ps Params) ensureNames(paramDeduper map[string]int, isOutput bool) {
 	// process the named variables first:
 	for _, p := range ps {
 		if p.Name != "" {
-			p.Name = getSafeParamName(paramDeduper, prefix, false)
+			p.Name = getSafeParamName(paramDeduper, p.Name, false)
 		}
 	}
 
 	for i, p := range ps {
 		if p.Name == "" {
-			if isOutput && len(ps)-1 == i && types.Implements(p.ActualType, ErrorInterface) {
+			if isOutput && len(ps)-1 == i && TypeImplements(p.ActualType, ErrorInterface) {
 				p.Name = getSafeParamName(paramDeduper, "err", false)
-			} else if !isOutput && i == 0 && types.Implements(p.ActualType, ContextInterface) {
+			} else if !isOutput && i == 0 && TypeImplements(p.ActualType, ContextInterface) {
 				p.Name = getSafeParamName(paramDeduper, "ctx", false)
 			} else {
 				p.Name = getSafeParamName(paramDeduper, prefix, true)
