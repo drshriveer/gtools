@@ -135,7 +135,6 @@ outer:
 			if curr == theRest[j] {
 				// only use everything before the repeat.
 				theRest = theRest[:i]
-				// theRest = theRest[:i-1]
 				break outer
 			}
 		}

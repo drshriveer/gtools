@@ -102,17 +102,28 @@ func (ps Params) Declarations() string {
 	return result.String()
 }
 
-func (ps Params) ensureNames(isOutput bool) {
+func (ps Params) ensureNames(isOutput bool, paramDeduper map[string]int) {
+	// prefix == the unnamed parameter prefix to use.
 	prefix := "arg"
 	if isOutput {
 		prefix = "ret"
 	}
+	// To better preserve a customer's naming in case of them colliding with our own,
+	// process the named variables first:
+	for _, p := range ps {
+		if p.Name != "" {
+			p.Name = getSafeParamName(paramDeduper, prefix, false)
+		}
+	}
+
 	for i, p := range ps {
-		if len(p.Name) == 0 {
+		if p.Name == "" {
 			if isOutput && len(ps)-1 == i && types.Implements(p.ActualType, ErrorInterface) {
-				p.Name = "err"
+				p.Name = getSafeParamName(paramDeduper, "err", false)
+			} else if !isOutput && i == 0 && types.Implements(p.ActualType, ContextInterface) {
+				p.Name = getSafeParamName(paramDeduper, "ctx", false)
 			} else {
-				p.Name = prefix + strconv.FormatInt(int64(i), 10)
+				p.Name = getSafeParamName(paramDeduper, prefix, true)
 			}
 		}
 	}
@@ -130,4 +141,17 @@ type Param struct {
 // Declaration returns a name and type.
 func (p Param) Declaration() string {
 	return p.Name + " " + p.TypeRef
+}
+
+func getSafeParamName(prefixCounter map[string]int, prefix string, alwaysNumber bool) string {
+	v, ok := prefixCounter[prefix]
+	result := prefix
+	if ok || alwaysNumber {
+		result += strconv.FormatInt(int64(v), 10)
+		v++
+	}
+	// else don't modify the intended prefix.
+	// ensure the prefix is in the map:
+	prefixCounter[prefix] = v
+	return result
 }
