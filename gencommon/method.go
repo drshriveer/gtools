@@ -68,8 +68,8 @@ func (m *Method) HasResults() bool {
 
 func (m *Method) ensureParamNames() {
 	paramDeduper := make(map[string]int, len(m.Input)+len(m.Output))
-	m.Input.ensureNames(false, paramDeduper)
-	m.Output.ensureNames(true, paramDeduper)
+	m.Input.ensureNames(paramDeduper, false)
+	m.Output.ensureNames(paramDeduper, true)
 }
 
 func getName(names ...*ast.Ident) string {

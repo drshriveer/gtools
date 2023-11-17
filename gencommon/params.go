@@ -102,8 +102,8 @@ func (ps Params) Declarations() string {
 	return result.String()
 }
 
-func (ps Params) ensureNames(isOutput bool, paramDeduper map[string]int) {
-	// prefix == the unnamed parameter prefix to use.
+func (ps Params) ensureNames(paramDeduper map[string]int, isOutput bool) {
+	// paramName == the unnamed parameter paramName to use.
 	prefix := "arg"
 	if isOutput {
 		prefix = "ret"
@@ -143,15 +143,18 @@ func (p Param) Declaration() string {
 	return p.Name + " " + p.TypeRef
 }
 
-func getSafeParamName(prefixCounter map[string]int, prefix string, alwaysNumber bool) string {
-	v, ok := prefixCounter[prefix]
-	result := prefix
+// getSafeParamName returns a "safe" param name.
+// note: I'm pretty sure this is technically only safe when the already defined params
+// are processed first which is exactly what ensureNames does.
+func getSafeParamName(paramDeduper map[string]int, paramName string, alwaysNumber bool) string {
+	v, ok := paramDeduper[paramName]
+	result := paramName
 	if ok || alwaysNumber {
 		result += strconv.FormatInt(int64(v), 10)
 		v++
 	}
-	// else don't modify the intended prefix.
-	// ensure the prefix is in the map:
-	prefixCounter[prefix] = v
+	// else don't modify the intended paramName.
+	// ensure the paramName is in the map:
+	paramDeduper[paramName] = v
 	return result
 }
