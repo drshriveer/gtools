@@ -18,11 +18,13 @@ type Method struct {
 // MethodFromSignature returns a partially constructed Method-- it contains the raw function
 // info, nothing else.
 func MethodFromSignature(ih *ImportHandler, signature *types.Signature) *Method {
-	return &Method{
+	m := &Method{
 		Name:   "func", // default name
 		Input:  ParamsFromSignatureTuple(ih, signature.Params(), signature.Variadic()),
 		Output: ParamsFromSignatureTuple(ih, signature.Results(), false),
 	}
+	m.ensureParamNames()
+	return m
 }
 
 // Signature returns the full signature of the method.
@@ -62,6 +64,11 @@ func (m *Method) AcceptsContext() bool {
 // HasResults returns true if the method has results to return.
 func (m *Method) HasResults() bool {
 	return len(m.Output) > 0
+}
+
+func (m *Method) ensureParamNames() {
+	m.Input.ensureNames(false)
+	m.Output.ensureNames(true)
 }
 
 func getName(names ...*ast.Ident) string {

@@ -71,7 +71,6 @@ func (ps Params) TypeNames() string {
 // ParamNames returns a comma-separated list of the parameter names.
 // e.g. arg1, arg2, arg3...
 func (ps Params) ParamNames() string {
-	ps.ensureNames()
 	result := strings.Builder{}
 	for i, p := range ps {
 		result.WriteString(p.Name)
@@ -85,17 +84,9 @@ func (ps Params) ParamNames() string {
 	return result.String()
 }
 
-// ParamNamesOmitLast returns a comma-separated list of the parameter names.
-// But will omit the last element; useful for custom error
-// e.g. arg1, arg2, arg3...
-func (ps Params) ParamNamesOmitLast() string {
-	return ps[:len(ps)-1].ParamNames()
-}
-
 // Declarations returns a comma-separated list of parameter name and type:
 // e.g. arg1 Type1, arg2 Type2 ...,.
 func (ps Params) Declarations() string {
-	ps.ensureNames()
 	result := strings.Builder{}
 	for i, p := range ps {
 		result.WriteString(p.Name)
@@ -111,13 +102,17 @@ func (ps Params) Declarations() string {
 	return result.String()
 }
 
-func (ps Params) ensureNames() {
+func (ps Params) ensureNames(isOutput bool) {
+	prefix := "arg"
+	if isOutput {
+		prefix = "ret"
+	}
 	for i, p := range ps {
 		if len(p.Name) == 0 {
-			if len(ps)-1 == i && types.Implements(p.ActualType, ErrorInterface) {
+			if isOutput && len(ps)-1 == i && types.Implements(p.ActualType, ErrorInterface) {
 				p.Name = "err"
 			} else {
-				p.Name = "arg" + strconv.FormatInt(int64(i), 10)
+				p.Name = prefix + strconv.FormatInt(int64(i), 10)
 			}
 		}
 	}
