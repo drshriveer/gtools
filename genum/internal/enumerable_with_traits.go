@@ -1,7 +1,7 @@
 //nolint:revive // test only
 package internal
 
-//go:generate genum -types=EnumerableWithTraits,Creatures,EnumWithPackageImports
+//go:generate genum -types=EnumerableWithTraits,Creatures,EnumWithPackageImports -caseInsensitive
 
 import (
 	"reflect"

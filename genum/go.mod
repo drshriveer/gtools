@@ -3,7 +3,7 @@ module github.com/drshriveer/gtools/genum
 go 1.21.1
 
 require (
-	github.com/drshriveer/gtools/gencommon v0.0.0-20231005181201-9d99596881c4
+	github.com/drshriveer/gtools/gencommon v0.0.0-20231117073232-2d1ce4e9eb99
 	github.com/drshriveer/gtools/rutils v0.0.0-20231005181201-9d99596881c4
 	github.com/drshriveer/gtools/set v0.0.0-20231005181201-9d99596881c4
 	github.com/itzg/go-flagsfiller v1.12.0

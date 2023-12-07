@@ -6,6 +6,9 @@ import (
 	{{- if .GenJSON}}
 	"encoding/json"
 	{{- end}}
+	{{- if .CaseInsensitive}}
+	"strings"
+	{{- end}}
 	{{- if .GenYAML}}
 	"gopkg.in/yaml.v3"
 	"strconv"
@@ -91,6 +94,14 @@ func (e {{$enumTypeName}}) ParseString(text string) ({{$enumTypeName}}, error) {
 		return {{$val.Name}}, nil
 	{{- end }}
 	default:
+		{{- if $.CaseInsensitive }}
+		switch {
+		{{- range $val := $values}}
+		case strings.EqualFold(text, "{{$val.Name}}"):
+			return {{$val.Name}}, nil
+		{{- end }}
+		}
+		{{- end }}
 		return 0, fmt.Errorf("`%s` is not a valid enum of type {{$enumTypeName}}", text)
 	}
 }

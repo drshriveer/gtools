@@ -4,11 +4,13 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	reflect "reflect"
 	"slices"
 	"strconv"
+	"strings"
 	stupidTime "time"
+
+	"gopkg.in/yaml.v3"
 )
 
 var _EnumerableWithTraitsValues = []EnumerableWithTraits{
@@ -112,6 +114,14 @@ func (e EnumerableWithTraits) ParseString(text string) (EnumerableWithTraits, er
 	case "E3":
 		return E3, nil
 	default:
+		switch {
+		case strings.EqualFold(text, "E1"):
+			return E1, nil
+		case strings.EqualFold(text, "E2"):
+			return E2, nil
+		case strings.EqualFold(text, "E3"):
+			return E3, nil
+		}
 		return 0, fmt.Errorf("`%s` is not a valid enum of type EnumerableWithTraits", text)
 	}
 }
@@ -302,6 +312,26 @@ func (e Creatures) ParseString(text string) (Creatures, error) {
 	case "SeaAnemone":
 		return SeaAnemone, nil
 	default:
+		switch {
+		case strings.EqualFold(text, "NotCreature"):
+			return NotCreature, nil
+		case strings.EqualFold(text, "Cat"):
+			return Cat, nil
+		case strings.EqualFold(text, "Feline"):
+			return Feline, nil
+		case strings.EqualFold(text, "Feline2"):
+			return Feline2, nil
+		case strings.EqualFold(text, "Dog"):
+			return Dog, nil
+		case strings.EqualFold(text, "Ant"):
+			return Ant, nil
+		case strings.EqualFold(text, "Spider"):
+			return Spider, nil
+		case strings.EqualFold(text, "Human"):
+			return Human, nil
+		case strings.EqualFold(text, "SeaAnemone"):
+			return SeaAnemone, nil
+		}
 		return 0, fmt.Errorf("`%s` is not a valid enum of type Creatures", text)
 	}
 }
@@ -437,6 +467,14 @@ func (e EnumWithPackageImports) ParseString(text string) (EnumWithPackageImports
 	case "EnumWithPackageImports2":
 		return EnumWithPackageImports2, nil
 	default:
+		switch {
+		case strings.EqualFold(text, "EnumWithPackageImports0"):
+			return EnumWithPackageImports0, nil
+		case strings.EqualFold(text, "EnumWithPackageImports1"):
+			return EnumWithPackageImports1, nil
+		case strings.EqualFold(text, "EnumWithPackageImports2"):
+			return EnumWithPackageImports2, nil
+		}
 		return 0, fmt.Errorf("`%s` is not a valid enum of type EnumWithPackageImports", text)
 	}
 }
