@@ -10,7 +10,7 @@ import (
 
 // ErrWithCustomConvert is just a test.
 //
-//nolint:errname
+//nolint:errname // dumb
 type ErrWithCustomConvert struct {
 	gerror.GError
 	Property Status `gerror:"_,print,clone"`
