@@ -25,13 +25,14 @@ var enumTemplate = template.Must(template.New("genum").Parse(tmpl))
 // Generate is the parser and writer of enums and their generated code.
 // It seems to double as its own 'options' holder.
 type Generate struct {
-	InFile        string   `aliases:"in" env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
-	OutFile       string   `aliases:"out" usage:"name of output file (defaults to go:generate context filename.enum.go)"`
-	Types         []string `usage:"[required] comma-separated names of types to generate enum code for"`
-	GenJSON       bool     `aliases:"json" default:"true" usage:"generate json marshal methods"`
-	GenYAML       bool     `aliases:"yaml" default:"true" usage:"generate yaml marshal methods"`
-	GenText       bool     `aliases:"text" default:"true" usage:"generate text marshal methods"`
-	DisableTraits bool     `aliases:"disableTraits" default:"false" usage:"disable trait syntax inspection"`
+	InFile          string   `aliases:"in" env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
+	OutFile         string   `aliases:"out" usage:"name of output file (defaults to go:generate context filename.enum.go)"`
+	Types           []string `usage:"[required] comma-separated names of types to generate enum code for"`
+	GenJSON         bool     `aliases:"json" default:"true" usage:"generate json marshal methods"`
+	GenYAML         bool     `aliases:"yaml" default:"true" usage:"generate yaml marshal methods"`
+	GenText         bool     `aliases:"text" default:"true" usage:"generate text marshal methods"`
+	DisableTraits   bool     `aliases:"disableTraits" default:"false" usage:"disable trait syntax inspection"`
+	CaseInsensitive bool     `aliases:"caseInsensitive" default:"false" usage:"parsing will be case insensitive"`
 
 	// derived, (exposed for template use):
 	Values  []Values                 `flag:""` // ignore these fields

@@ -4,9 +4,10 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"slices"
 	"strconv"
+
+	"gopkg.in/yaml.v3"
 )
 
 var _MyEnumValues = []MyEnum{
