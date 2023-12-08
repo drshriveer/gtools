@@ -107,10 +107,10 @@ func (e {{$enumTypeName}}) ParseString(text string) ({{$enumTypeName}}, error) {
 	}
 }
 
-// EnumParseString calls TypedEnum.ParseString but returns the result
-// in the Enum interface. Which is useful when you are only able to work with
+// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+// in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e {{$enumTypeName}}) EnumParseString(text string) (genum.Enum, error) {
+func (e {{$enumTypeName}}) ParseStringGeneric(text string) (genum.Enum, error) {
 	return e.ParseString(text)
 }
 {{- if $.GenJSON }}

@@ -127,10 +127,10 @@ func (e EnumerableWithTraits) ParseString(text string) (EnumerableWithTraits, er
 	}
 }
 
-// EnumParseString calls TypedEnum.ParseString but returns the result
-// in the Enum interface. Which is useful when you are only able to work with
+// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+// in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e EnumerableWithTraits) EnumParseString(text string) (genum.Enum, error) {
+func (e EnumerableWithTraits) ParseStringGeneric(text string) (genum.Enum, error) {
 	return e.ParseString(text)
 }
 
@@ -344,10 +344,10 @@ func (e Creatures) ParseString(text string) (Creatures, error) {
 	}
 }
 
-// EnumParseString calls TypedEnum.ParseString but returns the result
-// in the Enum interface. Which is useful when you are only able to work with
+// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+// in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e Creatures) EnumParseString(text string) (genum.Enum, error) {
+func (e Creatures) ParseStringGeneric(text string) (genum.Enum, error) {
 	return e.ParseString(text)
 }
 
@@ -494,10 +494,10 @@ func (e EnumWithPackageImports) ParseString(text string) (EnumWithPackageImports
 	}
 }
 
-// EnumParseString calls TypedEnum.ParseString but returns the result
-// in the Enum interface. Which is useful when you are only able to work with
+// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+// in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e EnumWithPackageImports) EnumParseString(text string) (genum.Enum, error) {
+func (e EnumWithPackageImports) ParseStringGeneric(text string) (genum.Enum, error) {
 	return e.ParseString(text)
 }
 

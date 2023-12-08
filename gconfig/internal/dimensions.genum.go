@@ -88,10 +88,10 @@ func (e DimensionOne) ParseString(text string) (DimensionOne, error) {
 	}
 }
 
-// EnumParseString calls TypedEnum.ParseString but returns the result
-// in the Enum interface. Which is useful when you are only able to work with
+// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+// in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e DimensionOne) EnumParseString(text string) (genum.Enum, error) {
+func (e DimensionOne) ParseStringGeneric(text string) (genum.Enum, error) {
 	return e.ParseString(text)
 }
 
@@ -239,10 +239,10 @@ func (e DimensionTwo) ParseString(text string) (DimensionTwo, error) {
 	}
 }
 
-// EnumParseString calls TypedEnum.ParseString but returns the result
-// in the Enum interface. Which is useful when you are only able to work with
+// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+// in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e DimensionTwo) EnumParseString(text string) (genum.Enum, error) {
+func (e DimensionTwo) ParseStringGeneric(text string) (genum.Enum, error) {
 	return e.ParseString(text)
 }
 
@@ -374,10 +374,10 @@ func (e DimensionThree) ParseString(text string) (DimensionThree, error) {
 	}
 }
 
-// EnumParseString calls TypedEnum.ParseString but returns the result
-// in the Enum interface. Which is useful when you are only able to work with
+// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+// in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e DimensionThree) EnumParseString(text string) (genum.Enum, error) {
+func (e DimensionThree) ParseStringGeneric(text string) (genum.Enum, error) {
 	return e.ParseString(text)
 }
 

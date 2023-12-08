@@ -53,7 +53,7 @@ func (d *dimension) initFlag() error {
 
 	if s, ok := lookupEnv(d.flagName); ok {
 		var err error
-		d.parsed, err = d.defaultVal.EnumParseString(s)
+		d.parsed, err = d.defaultVal.ParseStringGeneric(s)
 		if err != nil {
 			return err
 		}
@@ -71,7 +71,7 @@ func (d *dimension) initFlag() error {
 
 	flag.Func(d.flagName, usage, func(s string) error {
 		var err error
-		d.parsed, err = d.defaultVal.EnumParseString(s)
+		d.parsed, err = d.defaultVal.ParseStringGeneric(s)
 		return err
 	})
 
@@ -201,7 +201,7 @@ func reduce(in map[string]any, dimensions []*dimension, dIndex int) (any, error)
 
 	foundDimKey := ""
 	for k := range keys {
-		if foundD, err := dim.defaultVal.EnumParseString(k); err == nil {
+		if foundD, err := dim.defaultVal.ParseStringGeneric(k); err == nil {
 			keys.Remove(k)
 			if dim.get() == foundD {
 				foundDimKey = k
