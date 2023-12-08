@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/drshriveer/gtools/genum"
 	"gopkg.in/yaml.v3"
 )
 
@@ -85,6 +86,13 @@ func (e DimensionOne) ParseString(text string) (DimensionOne, error) {
 		}
 		return 0, fmt.Errorf("`%s` is not a valid enum of type DimensionOne", text)
 	}
+}
+
+// EnumParseString calls TypedEnum.ParseString but returns the result
+// in the Enum interface. Which is useful when you are only able to work with
+// the un-typed interface.
+func (e DimensionOne) EnumParseString(text string) (genum.Enum, error) {
+	return e.ParseString(text)
 }
 
 // MarshalJSON implements the json.Marshaler interface for DimensionOne.
@@ -231,6 +239,13 @@ func (e DimensionTwo) ParseString(text string) (DimensionTwo, error) {
 	}
 }
 
+// EnumParseString calls TypedEnum.ParseString but returns the result
+// in the Enum interface. Which is useful when you are only able to work with
+// the un-typed interface.
+func (e DimensionTwo) EnumParseString(text string) (genum.Enum, error) {
+	return e.ParseString(text)
+}
+
 // MarshalJSON implements the json.Marshaler interface for DimensionTwo.
 func (e DimensionTwo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
@@ -357,6 +372,13 @@ func (e DimensionThree) ParseString(text string) (DimensionThree, error) {
 		}
 		return 0, fmt.Errorf("`%s` is not a valid enum of type DimensionThree", text)
 	}
+}
+
+// EnumParseString calls TypedEnum.ParseString but returns the result
+// in the Enum interface. Which is useful when you are only able to work with
+// the un-typed interface.
+func (e DimensionThree) EnumParseString(text string) (genum.Enum, error) {
+	return e.ParseString(text)
 }
 
 // MarshalJSON implements the json.Marshaler interface for DimensionThree.

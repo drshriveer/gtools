@@ -10,6 +10,7 @@ import (
 	"strings"
 	stupidTime "time"
 
+	"github.com/drshriveer/gtools/genum"
 	"gopkg.in/yaml.v3"
 )
 
@@ -114,16 +115,23 @@ func (e EnumerableWithTraits) ParseString(text string) (EnumerableWithTraits, er
 	case "E3":
 		return E3, nil
 	default:
-		switch {
-		case strings.EqualFold(text, "E1"):
+		switch strings.ToLower(text) {
+		case "e1":
 			return E1, nil
-		case strings.EqualFold(text, "E2"):
+		case "e2":
 			return E2, nil
-		case strings.EqualFold(text, "E3"):
+		case "e3":
 			return E3, nil
 		}
 		return 0, fmt.Errorf("`%s` is not a valid enum of type EnumerableWithTraits", text)
 	}
+}
+
+// EnumParseString calls TypedEnum.ParseString but returns the result
+// in the Enum interface. Which is useful when you are only able to work with
+// the un-typed interface.
+func (e EnumerableWithTraits) EnumParseString(text string) (genum.Enum, error) {
+	return e.ParseString(text)
 }
 
 // MarshalJSON implements the json.Marshaler interface for EnumerableWithTraits.
@@ -312,28 +320,35 @@ func (e Creatures) ParseString(text string) (Creatures, error) {
 	case "SeaAnemone":
 		return SeaAnemone, nil
 	default:
-		switch {
-		case strings.EqualFold(text, "NotCreature"):
+		switch strings.ToLower(text) {
+		case "notcreature":
 			return NotCreature, nil
-		case strings.EqualFold(text, "Cat"):
+		case "cat":
 			return Cat, nil
-		case strings.EqualFold(text, "Feline"):
+		case "feline":
 			return Feline, nil
-		case strings.EqualFold(text, "Feline2"):
+		case "feline2":
 			return Feline2, nil
-		case strings.EqualFold(text, "Dog"):
+		case "dog":
 			return Dog, nil
-		case strings.EqualFold(text, "Ant"):
+		case "ant":
 			return Ant, nil
-		case strings.EqualFold(text, "Spider"):
+		case "spider":
 			return Spider, nil
-		case strings.EqualFold(text, "Human"):
+		case "human":
 			return Human, nil
-		case strings.EqualFold(text, "SeaAnemone"):
+		case "seaanemone":
 			return SeaAnemone, nil
 		}
 		return 0, fmt.Errorf("`%s` is not a valid enum of type Creatures", text)
 	}
+}
+
+// EnumParseString calls TypedEnum.ParseString but returns the result
+// in the Enum interface. Which is useful when you are only able to work with
+// the un-typed interface.
+func (e Creatures) EnumParseString(text string) (genum.Enum, error) {
+	return e.ParseString(text)
 }
 
 // MarshalJSON implements the json.Marshaler interface for Creatures.
@@ -467,16 +482,23 @@ func (e EnumWithPackageImports) ParseString(text string) (EnumWithPackageImports
 	case "EnumWithPackageImports2":
 		return EnumWithPackageImports2, nil
 	default:
-		switch {
-		case strings.EqualFold(text, "EnumWithPackageImports0"):
+		switch strings.ToLower(text) {
+		case "enumwithpackageimports0":
 			return EnumWithPackageImports0, nil
-		case strings.EqualFold(text, "EnumWithPackageImports1"):
+		case "enumwithpackageimports1":
 			return EnumWithPackageImports1, nil
-		case strings.EqualFold(text, "EnumWithPackageImports2"):
+		case "enumwithpackageimports2":
 			return EnumWithPackageImports2, nil
 		}
 		return 0, fmt.Errorf("`%s` is not a valid enum of type EnumWithPackageImports", text)
 	}
+}
+
+// EnumParseString calls TypedEnum.ParseString but returns the result
+// in the Enum interface. Which is useful when you are only able to work with
+// the un-typed interface.
+func (e EnumWithPackageImports) EnumParseString(text string) (genum.Enum, error) {
+	return e.ParseString(text)
 }
 
 // MarshalJSON implements the json.Marshaler interface for EnumWithPackageImports.

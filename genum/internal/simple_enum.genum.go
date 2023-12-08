@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strconv"
 
+	"github.com/drshriveer/gtools/genum"
 	"gopkg.in/yaml.v3"
 )
 
@@ -86,6 +87,13 @@ func (e MyEnum) ParseString(text string) (MyEnum, error) {
 	default:
 		return 0, fmt.Errorf("`%s` is not a valid enum of type MyEnum", text)
 	}
+}
+
+// EnumParseString calls TypedEnum.ParseString but returns the result
+// in the Enum interface. Which is useful when you are only able to work with
+// the un-typed interface.
+func (e MyEnum) EnumParseString(text string) (genum.Enum, error) {
+	return e.ParseString(text)
 }
 
 // MarshalJSON implements the json.Marshaler interface for MyEnum.
@@ -200,6 +208,13 @@ func (e MyEnum2) ParseString(text string) (MyEnum2, error) {
 	default:
 		return 0, fmt.Errorf("`%s` is not a valid enum of type MyEnum2", text)
 	}
+}
+
+// EnumParseString calls TypedEnum.ParseString but returns the result
+// in the Enum interface. Which is useful when you are only able to work with
+// the un-typed interface.
+func (e MyEnum2) EnumParseString(text string) (genum.Enum, error) {
+	return e.ParseString(text)
 }
 
 // MarshalJSON implements the json.Marshaler interface for MyEnum2.
@@ -394,6 +409,13 @@ func (e MyEnum3) ParseString(text string) (MyEnum3, error) {
 	default:
 		return 0, fmt.Errorf("`%s` is not a valid enum of type MyEnum3", text)
 	}
+}
+
+// EnumParseString calls TypedEnum.ParseString but returns the result
+// in the Enum interface. Which is useful when you are only able to work with
+// the un-typed interface.
+func (e MyEnum3) EnumParseString(text string) (genum.Enum, error) {
+	return e.ParseString(text)
 }
 
 // MarshalJSON implements the json.Marshaler interface for MyEnum3.

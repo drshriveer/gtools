@@ -17,6 +17,7 @@ import (
 	{{$import.Alias}} "{{$import.PkgPath}}"
 	{{- end}}
 	"fmt"
+	"github.com/drshriveer/gtools/genum"
 )
 {{- range $i, $enumTypeName := .Types}}
 {{- $values := (index $.Values $i)}}
@@ -104,6 +105,13 @@ func (e {{$enumTypeName}}) ParseString(text string) ({{$enumTypeName}}, error) {
 		{{- end }}
 		return 0, fmt.Errorf("`%s` is not a valid enum of type {{$enumTypeName}}", text)
 	}
+}
+
+// EnumParseString calls TypedEnum.ParseString but returns the result
+// in the Enum interface. Which is useful when you are only able to work with
+// the un-typed interface.
+func (e {{$enumTypeName}}) EnumParseString(text string) (genum.Enum, error) {
+	return e.ParseString(text)
 }
 {{- if $.GenJSON }}
 

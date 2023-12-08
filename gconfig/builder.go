@@ -16,7 +16,6 @@ import (
 
 	"github.com/drshriveer/gtools/genum"
 	"github.com/drshriveer/gtools/gerror"
-	"github.com/drshriveer/gtools/rutils"
 	"github.com/drshriveer/gtools/set"
 )
 
@@ -54,7 +53,7 @@ func (d *dimension) initFlag() error {
 
 	if s, ok := lookupEnv(d.flagName); ok {
 		var err error
-		d.parsed, err = tryUnmarshalEnum(d.defaultVal, s)
+		d.parsed, err = d.defaultVal.EnumParseString(s)
 		if err != nil {
 			return err
 		}
@@ -72,7 +71,7 @@ func (d *dimension) initFlag() error {
 
 	flag.Func(d.flagName, usage, func(s string) error {
 		var err error
-		d.parsed, err = tryUnmarshalEnum(d.defaultVal, s)
+		d.parsed, err = d.defaultVal.EnumParseString(s)
 		return err
 	})
 
@@ -202,7 +201,7 @@ func reduce(in map[string]any, dimensions []*dimension, dIndex int) (any, error)
 
 	foundDimKey := ""
 	for k := range keys {
-		if foundD, err := tryUnmarshalEnum(dim.defaultVal, k); err == nil {
+		if foundD, err := dim.defaultVal.EnumParseString(k); err == nil {
 			keys.Remove(k)
 			if dim.get() == foundD {
 				foundDimKey = k
@@ -266,25 +265,4 @@ func lookupEnv(key string) (string, bool) {
 		return s, ok
 	}
 	return "", false
-}
-
-func tryUnmarshalEnum(enum genum.Enum, s string) (genum.Enum, error) {
-	eType := reflect.TypeOf(enum)
-	ptrVal, ok := reflect.New(eType).Interface().(encoding.TextUnmarshaler)
-	if !ok {
-		return nil, ErrFailedParsing.Msg(
-			"genum %T does not implement encoding.TextUnmarshaler as required",
-			enum)
-	}
-	if err := ptrVal.UnmarshalText([]byte(s)); err != nil {
-		return nil, err
-	}
-
-	parsed, ok := rutils.Unptr(ptrVal).(genum.Enum)
-	if !ok {
-		return nil, ErrFailedParsing.Msg(
-			"environment variable %s=%s found but is not a valid option: %s",
-			enum, s, enum.StringValues())
-	}
-	return parsed, nil
 }
