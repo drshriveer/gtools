@@ -95,9 +95,9 @@ func (e {{$enumTypeName}}) ParseString(text string) ({{$enumTypeName}}, error) {
 	{{- end }}
 	default:
 		{{- if $.CaseInsensitive }}
-		switch {
+		switch strings.ToLower(text) {
 		{{- range $val := $values}}
-		case strings.EqualFold(text, "{{$val.Name}}"):
+		case "{{$val.LowerCaseName}}":
 			return {{$val.Name}}, nil
 		{{- end }}
 		}

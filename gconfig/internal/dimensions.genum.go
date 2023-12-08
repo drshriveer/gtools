@@ -4,9 +4,11 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"slices"
 	"strconv"
+	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 var _DimensionOneValues = []DimensionOne{
@@ -71,6 +73,16 @@ func (e DimensionOne) ParseString(text string) (DimensionOne, error) {
 	case "D1d":
 		return D1d, nil
 	default:
+		switch strings.ToLower(text) {
+		case "d1a":
+			return D1a, nil
+		case "d1b":
+			return D1b, nil
+		case "d1c":
+			return D1c, nil
+		case "d1d":
+			return D1d, nil
+		}
 		return 0, fmt.Errorf("`%s` is not a valid enum of type DimensionOne", text)
 	}
 }
@@ -203,6 +215,18 @@ func (e DimensionTwo) ParseString(text string) (DimensionTwo, error) {
 	case "D2e":
 		return D2e, nil
 	default:
+		switch strings.ToLower(text) {
+		case "d2a":
+			return D2a, nil
+		case "d2b":
+			return D2b, nil
+		case "d2c":
+			return D2c, nil
+		case "d2d":
+			return D2d, nil
+		case "d2e":
+			return D2e, nil
+		}
 		return 0, fmt.Errorf("`%s` is not a valid enum of type DimensionTwo", text)
 	}
 }
@@ -323,6 +347,14 @@ func (e DimensionThree) ParseString(text string) (DimensionThree, error) {
 	case "D3c":
 		return D3c, nil
 	default:
+		switch strings.ToLower(text) {
+		case "d3a":
+			return D3a, nil
+		case "d3b":
+			return D3b, nil
+		case "d3c":
+			return D3c, nil
+		}
 		return 0, fmt.Errorf("`%s` is not a valid enum of type DimensionThree", text)
 	}
 }

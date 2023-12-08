@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/puzpuzpuz/xsync/v2"
+	"github.com/puzpuzpuz/xsync/v3"
 	"gopkg.in/yaml.v3"
 
 	"github.com/drshriveer/gtools/genum"

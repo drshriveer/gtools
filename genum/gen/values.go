@@ -2,6 +2,7 @@ package gen
 
 import (
 	"go/ast"
+	"strings"
 )
 
 // Values implements sort.Interface. Values must be consistently sorted to
@@ -96,4 +97,9 @@ func (v Value) Less(vIn Value) bool {
 		return v.Name < vIn.Name
 	}
 	return v1 < v2
+}
+
+// LowerCaseName lowercase value of the name.
+func (v Value) LowerCaseName() string {
+	return strings.ToLower(v.Name)
 }

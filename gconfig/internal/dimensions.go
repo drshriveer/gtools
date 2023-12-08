@@ -1,7 +1,7 @@
 //nolint:revive // test only
 package internal
 
-//go:generate genum -types=DimensionOne,DimensionTwo,DimensionThree
+//go:generate genum -types=DimensionOne,DimensionTwo,DimensionThree -caseInsensitive
 type DimensionOne int
 
 const (

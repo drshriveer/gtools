@@ -55,7 +55,7 @@ dimensions:
 
 struct:
   standard:
-    D1a:
+    d1a: # intentionally lowercased
       pi: 3.14159
       e: 2.71828
       duration: 3m

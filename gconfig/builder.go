@@ -12,7 +12,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/puzpuzpuz/xsync/v2"
+	"github.com/puzpuzpuz/xsync/v3"
 
 	"github.com/drshriveer/gtools/genum"
 	"github.com/drshriveer/gtools/gerror"
@@ -46,23 +46,17 @@ type dimension struct {
 func (d *dimension) initFlag() error {
 	d.parsed = d.defaultVal
 
-	eType := reflect.TypeOf(d.defaultVal)
-	ptrVal, ok := reflect.New(eType).Interface().(encoding.TextUnmarshaler)
-	if !ok {
+	if _, ok := d.defaultVal.(encoding.TextMarshaler); !ok {
 		return ErrFailedParsing.Msg(
 			"genum %T does not implement encoding.TextUnmarshaler as required",
 			d.defaultVal)
 	}
 
 	if s, ok := lookupEnv(d.flagName); ok {
-		if err := ptrVal.UnmarshalText([]byte(s)); err != nil {
+		var err error
+		d.parsed, err = tryUnmarshalEnum(d.defaultVal, s)
+		if err != nil {
 			return err
-		}
-		d.parsed, ok = rutils.Unptr(ptrVal).(genum.Enum)
-		if !ok {
-			return ErrFailedParsing.Msg(
-				"environment variable %s=%s found but is not a valid option: %s",
-				d.parsed, s, d.defaultVal.StringValues())
 		}
 	}
 
@@ -77,14 +71,9 @@ func (d *dimension) initFlag() error {
 		d.flagName, d.defaultVal, d.defaultVal.StringValues())
 
 	flag.Func(d.flagName, usage, func(s string) error {
-		if err := ptrVal.UnmarshalText([]byte(s)); err != nil {
-			return err
-		}
-		d.parsed, ok = rutils.Unptr(ptrVal).(genum.Enum)
-		if !ok {
-			return ErrFailedParsing.Stack()
-		}
-		return nil
+		var err error
+		d.parsed, err = tryUnmarshalEnum(d.defaultVal, s)
+		return err
 	})
 
 	return nil
@@ -161,7 +150,7 @@ func (b *Builder) FromBytes(bytes []byte) (*Config, error) {
 
 	cfg := &Config{
 		dimensions: dims,
-		cached:     xsync.NewMapOf[any](),
+		cached:     xsync.NewMapOf[string, any](),
 		data:       result,
 	}
 	return cfg, nil
@@ -210,7 +199,16 @@ func reduce(in map[string]any, dimensions []*dimension, dIndex int) (any, error)
 	// check if this a valid dim to reduce.
 	// if it is, grab the correct one and reduce the rest.
 	keys, hasDefault := keySet(in)
-	keys.Remove(dim.defaultVal.StringValues()...)
+
+	foundDimKey := ""
+	for k := range keys {
+		if foundD, err := tryUnmarshalEnum(dim.defaultVal, k); err == nil {
+			keys.Remove(k)
+			if dim.get() == foundD {
+				foundDimKey = k
+			}
+		}
+	}
 	if len(keys) != 0 {
 		for k, v := range in {
 			var err error
@@ -224,7 +222,7 @@ func reduce(in map[string]any, dimensions []*dimension, dIndex int) (any, error)
 	}
 	// otherwise this is reducable.
 	// case 1: we have the dim's key. Simply follow it.
-	if v, ok := in[dim.get().String()]; ok {
+	if v, ok := in[foundDimKey]; ok {
 		return reduceAny(v, dimensions, dIndex+1)
 	}
 	// case 2: we have default
@@ -268,4 +266,25 @@ func lookupEnv(key string) (string, bool) {
 		return s, ok
 	}
 	return "", false
+}
+
+func tryUnmarshalEnum(enum genum.Enum, s string) (genum.Enum, error) {
+	eType := reflect.TypeOf(enum)
+	ptrVal, ok := reflect.New(eType).Interface().(encoding.TextUnmarshaler)
+	if !ok {
+		return nil, ErrFailedParsing.Msg(
+			"genum %T does not implement encoding.TextUnmarshaler as required",
+			enum)
+	}
+	if err := ptrVal.UnmarshalText([]byte(s)); err != nil {
+		return nil, err
+	}
+
+	parsed, ok := rutils.Unptr(ptrVal).(genum.Enum)
+	if !ok {
+		return nil, ErrFailedParsing.Msg(
+			"environment variable %s=%s found but is not a valid option: %s",
+			enum, s, enum.StringValues())
+	}
+	return parsed, nil
 }
