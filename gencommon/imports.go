@@ -73,7 +73,11 @@ func (ih *ImportHandler) ExtractTypeRef(typ types.Type) string {
 		// recurse to register relevant method imports-> then we only need the signature.
 		m := MethodFromSignature(ih, t)
 		return m.Signature()
-
+	case *types.Map:
+		// recurse to register types.
+		key := ih.ExtractTypeRef(t.Key())
+		value := ih.ExtractTypeRef(t.Elem())
+		return "map[" + key + "]" + value
 	case *types.Named:
 		pkg := t.Obj().Pkg()
 		typeName := t.Obj().Name()
