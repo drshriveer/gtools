@@ -107,6 +107,20 @@ func (e {{$enumTypeName}}) ParseString(text string) ({{$enumTypeName}}, error) {
 	}
 }
 
+{{- range $trait := (index $.ParsableTraits $i)}}
+// ParseTrait allows you to parse an enum from a value
+func (e {{$enumTypeName}}) Parse{{$trait.Name}}(input {{$trait.TypeRef}}) ({{$enumTypeName}}, error) {
+	switch input {
+	{{- range $instance := $trait.Traits}}
+	case {{$instance.Value}}:
+		return {{$instance.OwningValue.Name}}, nil
+	{{- end }}
+	default:
+		return 0, fmt.Errorf("`%+v` is not a valid {{$trait.Name}} of type {{$enumTypeName}}", input)
+	}
+}
+{{- end }}
+
 // ParseStringGeneric calls TypedEnum.ParseString but returns the result
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
