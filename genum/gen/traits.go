@@ -17,9 +17,10 @@ func (s TraitDescs) Less(i, j int) bool {
 
 // TraitDesc define a trait-- this is exposed for template use.
 type TraitDesc struct {
-	Name    string
-	TypeRef string
-	Traits  TraitInstances
+	Name     string
+	TypeRef  string
+	Parsable bool
+	Traits   TraitInstances
 }
 
 // TraitInstances are a sortable slice of `TraitInstance`s.

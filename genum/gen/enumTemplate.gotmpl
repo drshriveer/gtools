@@ -87,45 +87,35 @@ func (e {{$enumTypeName}}) String() string {
 	}
 }
 
-// ParseString will return a value as defined in string form.
-func (e {{$enumTypeName}}) ParseString(text string) ({{$enumTypeName}}, error) {
-	switch text {
-	{{- range $val := $values}}
-	case "{{$val.Name}}":
+// Parse will attempt to parse the value of an enum from either its string form
+// or any value of a trait flagged with the --parsableByTrait flag
+func (e {{$enumTypeName}}) Parse(input any) ({{$enumTypeName}}, error) {
+	switch input {
+	{{- range $j, $val := $values }}
+	case "{{$val.Name}}"
+	{{- if $.CaseInsensitive -}}
+	, "{{$val.LowerCaseName}}"
+	{{- end -}}
+	{{- range $trait := (index $.Traits $i) -}}
+	{{- if $trait.Parsable -}}
+	{{- $instance := (index $trait.Traits $j) -}}
+	, {{$instance.Value}}
+	{{- end -}}
+	{{- end }}:
 		return {{$val.Name}}, nil
 	{{- end }}
 	default:
-		{{- if $.CaseInsensitive }}
-		switch strings.ToLower(text) {
-		{{- range $val := $values}}
-		case "{{$val.LowerCaseName}}":
-			return {{$val.Name}}, nil
-		{{- end }}
-		}
-		{{- end }}
-		return 0, fmt.Errorf("`%s` is not a valid enum of type {{$enumTypeName}}", text)
+		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type {{$enumTypeName}}", input)
 	}
 }
 
-{{- range $trait := (index $.ParsableTraits $i)}}
-// ParseTrait allows you to parse an enum from a value
-func (e {{$enumTypeName}}) Parse{{$trait.Name}}(input {{$trait.TypeRef}}) ({{$enumTypeName}}, error) {
-	switch input {
-	{{- range $instance := $trait.Traits}}
-	case {{$instance.Value}}:
-		return {{$instance.OwningValue.Name}}, nil
-	{{- end }}
-	default:
-		return 0, fmt.Errorf("`%+v` is not a valid {{$trait.Name}} of type {{$enumTypeName}}", input)
-	}
-}
-{{- end }}
 
-// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+
+// ParseGeneric calls TypedEnum.Parse but returns the result
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e {{$enumTypeName}}) ParseStringGeneric(text string) (genum.Enum, error) {
-	return e.ParseString(text)
+func (e {{$enumTypeName}}) ParseGeneric(input any) (genum.Enum, error) {
+	return e.Parse(input)
 }
 {{- if $.GenJSON }}
 
@@ -139,7 +129,7 @@ func (e *{{$enumTypeName}}) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = {{$enumTypeName}}(0).ParseString(s)
+		*e, err = {{$enumTypeName}}(0).Parse(s)
 		return err
 	}
 	var i int
@@ -163,7 +153,7 @@ func (e {{$enumTypeName}}) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for {{$enumTypeName}}.
 func (e *{{$enumTypeName}}) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = {{$enumTypeName}}(0).ParseString(string(text))
+	*e, err = {{$enumTypeName}}(0).Parse(string(text))
 	return err
 }
 {{- end}}
@@ -180,7 +170,7 @@ func (e *{{$enumTypeName}}) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = {{$enumTypeName}}(i)
 	} else {
-		*e, err = {{$enumTypeName}}(0).ParseString(value.Value)
+		*e, err = {{$enumTypeName}}(0).Parse(value.Value)
 	}
 	if err != nil {
 		return err

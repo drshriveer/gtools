@@ -65,9 +65,10 @@ func (e MyEnum) String() string {
 	}
 }
 
-// ParseString will return a value as defined in string form.
-func (e MyEnum) ParseString(text string) (MyEnum, error) {
-	switch text {
+// Parse will attempt to parse the value of an enum from either its string form
+// or any value of a trait flagged with the --parsableByTrait flag
+func (e MyEnum) Parse(input any) (MyEnum, error) {
+	switch input {
 	case "Enum1IntentionallyNegative":
 		return Enum1IntentionallyNegative, nil
 	case "Enum1Value0":
@@ -85,15 +86,15 @@ func (e MyEnum) ParseString(text string) (MyEnum, error) {
 	case "Enum1Value7":
 		return Enum1Value7, nil
 	default:
-		return 0, fmt.Errorf("`%s` is not a valid enum of type MyEnum", text)
+		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type MyEnum", input)
 	}
 }
 
-// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+// ParseGeneric calls TypedEnum.Parse but returns the result
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e MyEnum) ParseStringGeneric(text string) (genum.Enum, error) {
-	return e.ParseString(text)
+func (e MyEnum) ParseGeneric(input any) (genum.Enum, error) {
+	return e.Parse(input)
 }
 
 // MarshalJSON implements the json.Marshaler interface for MyEnum.
@@ -106,7 +107,7 @@ func (e *MyEnum) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = MyEnum(0).ParseString(s)
+		*e, err = MyEnum(0).Parse(s)
 		return err
 	}
 	var i int
@@ -128,7 +129,7 @@ func (e MyEnum) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for MyEnum.
 func (e *MyEnum) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = MyEnum(0).ParseString(string(text))
+	*e, err = MyEnum(0).Parse(string(text))
 	return err
 }
 
@@ -143,7 +144,7 @@ func (e *MyEnum) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = MyEnum(i)
 	} else {
-		*e, err = MyEnum(0).ParseString(value.Value)
+		*e, err = MyEnum(0).Parse(value.Value)
 	}
 	if err != nil {
 		return err
@@ -198,23 +199,24 @@ func (e MyEnum2) String() string {
 	}
 }
 
-// ParseString will return a value as defined in string form.
-func (e MyEnum2) ParseString(text string) (MyEnum2, error) {
-	switch text {
+// Parse will attempt to parse the value of an enum from either its string form
+// or any value of a trait flagged with the --parsableByTrait flag
+func (e MyEnum2) Parse(input any) (MyEnum2, error) {
+	switch input {
 	case "Enum2Value0":
 		return Enum2Value0, nil
 	case "Enum2Value1":
 		return Enum2Value1, nil
 	default:
-		return 0, fmt.Errorf("`%s` is not a valid enum of type MyEnum2", text)
+		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type MyEnum2", input)
 	}
 }
 
-// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+// ParseGeneric calls TypedEnum.Parse but returns the result
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e MyEnum2) ParseStringGeneric(text string) (genum.Enum, error) {
-	return e.ParseString(text)
+func (e MyEnum2) ParseGeneric(input any) (genum.Enum, error) {
+	return e.Parse(input)
 }
 
 // MarshalJSON implements the json.Marshaler interface for MyEnum2.
@@ -227,7 +229,7 @@ func (e *MyEnum2) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = MyEnum2(0).ParseString(s)
+		*e, err = MyEnum2(0).Parse(s)
 		return err
 	}
 	var i int
@@ -249,7 +251,7 @@ func (e MyEnum2) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for MyEnum2.
 func (e *MyEnum2) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = MyEnum2(0).ParseString(string(text))
+	*e, err = MyEnum2(0).Parse(string(text))
 	return err
 }
 
@@ -264,7 +266,7 @@ func (e *MyEnum2) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = MyEnum2(i)
 	} else {
-		*e, err = MyEnum2(0).ParseString(value.Value)
+		*e, err = MyEnum2(0).Parse(value.Value)
 	}
 	if err != nil {
 		return err
@@ -371,9 +373,10 @@ func (e MyEnum3) String() string {
 	}
 }
 
-// ParseString will return a value as defined in string form.
-func (e MyEnum3) ParseString(text string) (MyEnum3, error) {
-	switch text {
+// Parse will attempt to parse the value of an enum from either its string form
+// or any value of a trait flagged with the --parsableByTrait flag
+func (e MyEnum3) Parse(input any) (MyEnum3, error) {
+	switch input {
 	case "Enum3Value0":
 		return Enum3Value0, nil
 	case "Enum3Value1":
@@ -407,15 +410,15 @@ func (e MyEnum3) ParseString(text string) (MyEnum3, error) {
 	case "Enum3Value16":
 		return Enum3Value16, nil
 	default:
-		return 0, fmt.Errorf("`%s` is not a valid enum of type MyEnum3", text)
+		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type MyEnum3", input)
 	}
 }
 
-// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+// ParseGeneric calls TypedEnum.Parse but returns the result
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e MyEnum3) ParseStringGeneric(text string) (genum.Enum, error) {
-	return e.ParseString(text)
+func (e MyEnum3) ParseGeneric(input any) (genum.Enum, error) {
+	return e.Parse(input)
 }
 
 // MarshalJSON implements the json.Marshaler interface for MyEnum3.
@@ -428,7 +431,7 @@ func (e *MyEnum3) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = MyEnum3(0).ParseString(s)
+		*e, err = MyEnum3(0).Parse(s)
 		return err
 	}
 	var i int
@@ -450,7 +453,7 @@ func (e MyEnum3) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for MyEnum3.
 func (e *MyEnum3) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = MyEnum3(0).ParseString(string(text))
+	*e, err = MyEnum3(0).Parse(string(text))
 	return err
 }
 
@@ -465,7 +468,7 @@ func (e *MyEnum3) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = MyEnum3(i)
 	} else {
-		*e, err = MyEnum3(0).ParseString(value.Value)
+		*e, err = MyEnum3(0).Parse(value.Value)
 	}
 	if err != nil {
 		return err

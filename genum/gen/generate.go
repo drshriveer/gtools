@@ -36,11 +36,10 @@ type Generate struct {
 	ParsableByTraits []string `aliases:"parsableByTraits" usage:"Comma separated list of trait names which will generate their own parser. This will throw an error if the values of that trait are not unique or the trait does not exist."`
 
 	// derived, (exposed for template use):
-	Values         []Values                 `flag:""` // ignore these fields
-	Traits         []TraitDescs             `flag:""` // ignore these fields
-	ParsableTraits []TraitDescs             `flag:""` // ignore these fields
-	Imports        *gencommon.ImportHandler `flag:""` // ignore these fields
-	PkgName        string                   `flag:""` // ignore these fields
+	Values  []Values                 `flag:""` // ignore these fields
+	Traits  []TraitDescs             `flag:""` // ignore these fields
+	Imports *gencommon.ImportHandler `flag:""` // ignore these fields
+	PkgName string                   `flag:""` // ignore these fields
 }
 
 // Parse the input file and drives the attributes above.
@@ -55,7 +54,6 @@ func (g *Generate) Parse() error {
 	pkgScope := pkg.Types.Scope()
 	g.Values = make([]Values, len(g.Types))
 	g.Traits = make([]TraitDescs, len(g.Types))
-	g.ParsableTraits = make([]TraitDescs, len(g.Types))
 	for i, enumType := range g.Types {
 		values := make(Values, 0)
 		for _, decl := range fAST.Decls {
@@ -117,13 +115,10 @@ func (g *Generate) Parse() error {
 		}
 
 		processDuplicates(values, traits, enumType) // detect and warn duplicates
-
-		// verify parsable traits if any are defined
-		parsableTraits, err := g.extractParsableTraitDescs(enumType, traits)
+		err = validateParsableTraits(enumType, traits)
 		if err != nil {
 			return err
 		}
-		g.ParsableTraits[i] = parsableTraits
 
 		sort.Sort(traits)
 		g.Traits[i] = traits
@@ -132,36 +127,37 @@ func (g *Generate) Parse() error {
 	return nil
 }
 
-func (g *Generate) extractParsableTraitDescs(enumType string, traits TraitDescs) (TraitDescs, error) {
-	parsableTraitDescs := make(TraitDescs, 0, len(traits))
-
-outer:
-	for _, parsableTraitName := range g.ParsableByTraits {
-		for _, trait := range traits {
-			if trait.Name == parsableTraitName {
-				parsableTraitDescs = append(parsableTraitDescs, trait)
-				// make sure the trait values are unique
-				traitValues := set.Make[string]()
-				for _, instance := range trait.Traits {
-					if traitValues.Has(instance.value) {
-						return nil, fmt.Errorf(
+// validateParsableTraits returns an error if two instances of a value of a parsable trait map to
+// different enums.
+// eg:
+//
+//	type EnumerableWithTraits int
+//	const (
+//		E1, _Trait1 = EnumerableWithTraits(iota), "val"
+//		E2, _ = EnumerableWithTraits(iota), "val"
+//	)
+//
+// This will throw an error because "val" matches E1 and E2
+func validateParsableTraits(enumType string, traits TraitDescs) error {
+	parsableTraitResults := make(map[string]string)
+	for _, trait := range traits {
+		if trait.Parsable {
+			for _, instance := range trait.Traits {
+				if parseTo, ok := parsableTraitResults[instance.value]; ok {
+					if parseTo != instance.OwningValue.Name {
+						return fmt.Errorf(
 							"Enum: %s cannot have parsableTrait %s because trait value %s is "+
-								"not unique and thus the parse result cannot be guaranteed.",
-							enumType, parsableTraitName, instance.value)
+								"found in %s and %s. parsableByTrait values must be unique with the enum.",
+							enumType, trait.Name, instance.value, parseTo, instance.OwningValue.Name)
 					}
-					traitValues.Add(instance.value)
+
 				}
-				// break out of the loop after the match
-				continue outer
+				parsableTraitResults[instance.value] = instance.OwningValue.Name
 			}
+
 		}
-		// if we made it here it means our parsable trait wasn't found on the enum
-		// so return an error
-		return nil, fmt.Errorf("Enum: %s cannot be parsed by non-existent trait %s."+
-			" This indicates an error in your --parsableByTraits flag.", enumType, parsableTraitName)
 	}
-	sort.Sort(parsableTraitDescs)
-	return parsableTraitDescs, nil
+	return nil
 }
 
 // extractTraitDescs attempts to extract trait descriptions, and does some (minor) validation in the process.
@@ -195,8 +191,9 @@ func (g *Generate) extractTraitDescs(tName string, pkgScope *types.Scope, values
 			)
 		}
 		tDesc := TraitDesc{
-			Name:    traitName,
-			TypeRef: typeRef,
+			Name:     traitName,
+			TypeRef:  typeRef,
+			Parsable: slices.Contains(g.ParsableByTraits, traitName),
 			Traits: []TraitInstance{
 				{
 					OwningValue:  firstV,

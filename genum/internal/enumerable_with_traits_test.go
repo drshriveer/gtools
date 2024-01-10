@@ -118,6 +118,7 @@ func TestCreatures_Traits(t *testing.T) {
 }
 
 func TestEnumerableWithTraits_Traits(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		enum       internal.EnumerableWithTraits
 		trait      string
@@ -146,6 +147,7 @@ func TestEnumerableWithTraits_Traits(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.enum.String(), func(t *testing.T) {
+			t.Parallel()
 			assert.Implements(t, (*genum.Enum)(nil), test.enum)
 			assert.True(t, test.enum.IsValid())
 			assert.Equal(t, test.trait, test.enum.Trait())
