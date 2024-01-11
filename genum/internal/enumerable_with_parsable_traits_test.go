@@ -96,8 +96,7 @@ func TestEnumerableWithParsableTraits_Parser(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.desc, func(t *testing.T) {
 			t.Parallel()
-			placeholder := new(internal.EnumerableWithParsableTraits)
-			res, err := placeholder.Parse(test.val)
+			res, err := internal.ParseEnumerableWithParsableTraits(test.val)
 			require.NoError(t, err)
 			assert.Equal(t, res, test.expected)
 		})

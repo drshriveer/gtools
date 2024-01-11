@@ -33,8 +33,4 @@ type TypedEnum[T EnumLike] interface {
 
 	// Values returns all valid values of an enum.
 	Values() []T
-
-	// Parse converts the input into a type if valid.
-	// returns true if the enum is valid, and false otherwise.
-	Parse(input any) (T, error)
 }

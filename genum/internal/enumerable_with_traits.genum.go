@@ -104,9 +104,9 @@ func (e EnumerableWithTraits) String() string {
 	}
 }
 
-// Parse will attempt to parse the value of an enum from either its string form
+// ParseEnumerableWithTraits will attempt to parse the value of a EnumerableWithTraits from either its string form
 // or any value of a trait flagged with the --parsableByTrait flag
-func (e EnumerableWithTraits) Parse(input any) (EnumerableWithTraits, error) {
+func ParseEnumerableWithTraits(input any) (EnumerableWithTraits, error) {
 	switch input {
 	case "E1", "e1":
 		return E1, nil
@@ -123,7 +123,7 @@ func (e EnumerableWithTraits) Parse(input any) (EnumerableWithTraits, error) {
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
 func (e EnumerableWithTraits) ParseGeneric(input any) (genum.Enum, error) {
-	return e.Parse(input)
+	return ParseEnumerableWithTraits(input)
 }
 
 // MarshalJSON implements the json.Marshaler interface for EnumerableWithTraits.
@@ -136,7 +136,7 @@ func (e *EnumerableWithTraits) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = EnumerableWithTraits(0).Parse(s)
+		*e, err = ParseEnumerableWithTraits(s)
 		return err
 	}
 	var i int
@@ -158,7 +158,7 @@ func (e EnumerableWithTraits) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for EnumerableWithTraits.
 func (e *EnumerableWithTraits) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = EnumerableWithTraits(0).Parse(string(text))
+	*e, err = ParseEnumerableWithTraits(string(text))
 	return err
 }
 
@@ -173,7 +173,7 @@ func (e *EnumerableWithTraits) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = EnumerableWithTraits(i)
 	} else {
-		*e, err = EnumerableWithTraits(0).Parse(value.Value)
+		*e, err = ParseEnumerableWithTraits(value.Value)
 	}
 	if err != nil {
 		return err
@@ -290,9 +290,9 @@ func (e Creatures) String() string {
 	}
 }
 
-// Parse will attempt to parse the value of an enum from either its string form
+// ParseCreatures will attempt to parse the value of a Creatures from either its string form
 // or any value of a trait flagged with the --parsableByTrait flag
-func (e Creatures) Parse(input any) (Creatures, error) {
+func ParseCreatures(input any) (Creatures, error) {
 	switch input {
 	case "NotCreature", "notcreature":
 		return NotCreature, nil
@@ -321,7 +321,7 @@ func (e Creatures) Parse(input any) (Creatures, error) {
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
 func (e Creatures) ParseGeneric(input any) (genum.Enum, error) {
-	return e.Parse(input)
+	return ParseCreatures(input)
 }
 
 // MarshalJSON implements the json.Marshaler interface for Creatures.
@@ -334,7 +334,7 @@ func (e *Creatures) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = Creatures(0).Parse(s)
+		*e, err = ParseCreatures(s)
 		return err
 	}
 	var i int
@@ -356,7 +356,7 @@ func (e Creatures) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for Creatures.
 func (e *Creatures) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = Creatures(0).Parse(string(text))
+	*e, err = ParseCreatures(string(text))
 	return err
 }
 
@@ -371,7 +371,7 @@ func (e *Creatures) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = Creatures(i)
 	} else {
-		*e, err = Creatures(0).Parse(value.Value)
+		*e, err = ParseCreatures(value.Value)
 	}
 	if err != nil {
 		return err
@@ -445,9 +445,9 @@ func (e EnumWithPackageImports) String() string {
 	}
 }
 
-// Parse will attempt to parse the value of an enum from either its string form
+// ParseEnumWithPackageImports will attempt to parse the value of a EnumWithPackageImports from either its string form
 // or any value of a trait flagged with the --parsableByTrait flag
-func (e EnumWithPackageImports) Parse(input any) (EnumWithPackageImports, error) {
+func ParseEnumWithPackageImports(input any) (EnumWithPackageImports, error) {
 	switch input {
 	case "EnumWithPackageImports0", "enumwithpackageimports0":
 		return EnumWithPackageImports0, nil
@@ -464,7 +464,7 @@ func (e EnumWithPackageImports) Parse(input any) (EnumWithPackageImports, error)
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
 func (e EnumWithPackageImports) ParseGeneric(input any) (genum.Enum, error) {
-	return e.Parse(input)
+	return ParseEnumWithPackageImports(input)
 }
 
 // MarshalJSON implements the json.Marshaler interface for EnumWithPackageImports.
@@ -477,7 +477,7 @@ func (e *EnumWithPackageImports) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = EnumWithPackageImports(0).Parse(s)
+		*e, err = ParseEnumWithPackageImports(s)
 		return err
 	}
 	var i int
@@ -499,7 +499,7 @@ func (e EnumWithPackageImports) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for EnumWithPackageImports.
 func (e *EnumWithPackageImports) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = EnumWithPackageImports(0).Parse(string(text))
+	*e, err = ParseEnumWithPackageImports(string(text))
 	return err
 }
 
@@ -514,7 +514,7 @@ func (e *EnumWithPackageImports) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = EnumWithPackageImports(i)
 	} else {
-		*e, err = EnumWithPackageImports(0).Parse(value.Value)
+		*e, err = ParseEnumWithPackageImports(value.Value)
 	}
 	if err != nil {
 		return err

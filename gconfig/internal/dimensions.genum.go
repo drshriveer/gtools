@@ -61,9 +61,9 @@ func (e DimensionOne) String() string {
 	}
 }
 
-// Parse will attempt to parse the value of an enum from either its string form
+// ParseDimensionOne will attempt to parse the value of a DimensionOne from either its string form
 // or any value of a trait flagged with the --parsableByTrait flag
-func (e DimensionOne) Parse(input any) (DimensionOne, error) {
+func ParseDimensionOne(input any) (DimensionOne, error) {
 	switch input {
 	case "D1a", "d1a":
 		return D1a, nil
@@ -82,7 +82,7 @@ func (e DimensionOne) Parse(input any) (DimensionOne, error) {
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
 func (e DimensionOne) ParseGeneric(input any) (genum.Enum, error) {
-	return e.Parse(input)
+	return ParseDimensionOne(input)
 }
 
 // MarshalJSON implements the json.Marshaler interface for DimensionOne.
@@ -95,7 +95,7 @@ func (e *DimensionOne) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = DimensionOne(0).Parse(s)
+		*e, err = ParseDimensionOne(s)
 		return err
 	}
 	var i int
@@ -117,7 +117,7 @@ func (e DimensionOne) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for DimensionOne.
 func (e *DimensionOne) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = DimensionOne(0).Parse(string(text))
+	*e, err = ParseDimensionOne(string(text))
 	return err
 }
 
@@ -132,7 +132,7 @@ func (e *DimensionOne) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = DimensionOne(i)
 	} else {
-		*e, err = DimensionOne(0).Parse(value.Value)
+		*e, err = ParseDimensionOne(value.Value)
 	}
 	if err != nil {
 		return err
@@ -199,9 +199,9 @@ func (e DimensionTwo) String() string {
 	}
 }
 
-// Parse will attempt to parse the value of an enum from either its string form
+// ParseDimensionTwo will attempt to parse the value of a DimensionTwo from either its string form
 // or any value of a trait flagged with the --parsableByTrait flag
-func (e DimensionTwo) Parse(input any) (DimensionTwo, error) {
+func ParseDimensionTwo(input any) (DimensionTwo, error) {
 	switch input {
 	case "D2a", "d2a":
 		return D2a, nil
@@ -222,7 +222,7 @@ func (e DimensionTwo) Parse(input any) (DimensionTwo, error) {
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
 func (e DimensionTwo) ParseGeneric(input any) (genum.Enum, error) {
-	return e.Parse(input)
+	return ParseDimensionTwo(input)
 }
 
 // MarshalJSON implements the json.Marshaler interface for DimensionTwo.
@@ -235,7 +235,7 @@ func (e *DimensionTwo) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = DimensionTwo(0).Parse(s)
+		*e, err = ParseDimensionTwo(s)
 		return err
 	}
 	var i int
@@ -257,7 +257,7 @@ func (e DimensionTwo) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for DimensionTwo.
 func (e *DimensionTwo) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = DimensionTwo(0).Parse(string(text))
+	*e, err = ParseDimensionTwo(string(text))
 	return err
 }
 
@@ -272,7 +272,7 @@ func (e *DimensionTwo) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = DimensionTwo(i)
 	} else {
-		*e, err = DimensionTwo(0).Parse(value.Value)
+		*e, err = ParseDimensionTwo(value.Value)
 	}
 	if err != nil {
 		return err
@@ -331,9 +331,9 @@ func (e DimensionThree) String() string {
 	}
 }
 
-// Parse will attempt to parse the value of an enum from either its string form
+// ParseDimensionThree will attempt to parse the value of a DimensionThree from either its string form
 // or any value of a trait flagged with the --parsableByTrait flag
-func (e DimensionThree) Parse(input any) (DimensionThree, error) {
+func ParseDimensionThree(input any) (DimensionThree, error) {
 	switch input {
 	case "D3a", "d3a":
 		return D3a, nil
@@ -350,7 +350,7 @@ func (e DimensionThree) Parse(input any) (DimensionThree, error) {
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
 func (e DimensionThree) ParseGeneric(input any) (genum.Enum, error) {
-	return e.Parse(input)
+	return ParseDimensionThree(input)
 }
 
 // MarshalJSON implements the json.Marshaler interface for DimensionThree.
@@ -363,7 +363,7 @@ func (e *DimensionThree) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = DimensionThree(0).Parse(s)
+		*e, err = ParseDimensionThree(s)
 		return err
 	}
 	var i int
@@ -385,7 +385,7 @@ func (e DimensionThree) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for DimensionThree.
 func (e *DimensionThree) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = DimensionThree(0).Parse(string(text))
+	*e, err = ParseDimensionThree(string(text))
 	return err
 }
 
@@ -400,7 +400,7 @@ func (e *DimensionThree) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = DimensionThree(i)
 	} else {
-		*e, err = DimensionThree(0).Parse(value.Value)
+		*e, err = ParseDimensionThree(value.Value)
 	}
 	if err != nil {
 		return err

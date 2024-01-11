@@ -117,9 +117,9 @@ func (e EnumerableWithParsableTraits) String() string {
 	}
 }
 
-// Parse will attempt to parse the value of an enum from either its string form
+// ParseEnumerableWithParsableTraits will attempt to parse the value of a EnumerableWithParsableTraits from either its string form
 // or any value of a trait flagged with the --parsableByTrait flag
-func (e EnumerableWithParsableTraits) Parse(input any) (EnumerableWithParsableTraits, error) {
+func ParseEnumerableWithParsableTraits(input any) (EnumerableWithParsableTraits, error) {
 	switch input {
 	case "P1", _AlsoSometimesNonParsable, _Parsable:
 		return P1, nil
@@ -136,7 +136,7 @@ func (e EnumerableWithParsableTraits) Parse(input any) (EnumerableWithParsableTr
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
 func (e EnumerableWithParsableTraits) ParseGeneric(input any) (genum.Enum, error) {
-	return e.Parse(input)
+	return ParseEnumerableWithParsableTraits(input)
 }
 
 // MarshalJSON implements the json.Marshaler interface for EnumerableWithParsableTraits.
@@ -149,7 +149,7 @@ func (e *EnumerableWithParsableTraits) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = EnumerableWithParsableTraits(0).Parse(s)
+		*e, err = ParseEnumerableWithParsableTraits(s)
 		return err
 	}
 	var i int
@@ -171,7 +171,7 @@ func (e EnumerableWithParsableTraits) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for EnumerableWithParsableTraits.
 func (e *EnumerableWithParsableTraits) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = EnumerableWithParsableTraits(0).Parse(string(text))
+	*e, err = ParseEnumerableWithParsableTraits(string(text))
 	return err
 }
 
@@ -186,7 +186,7 @@ func (e *EnumerableWithParsableTraits) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		*e = EnumerableWithParsableTraits(i)
 	} else {
-		*e, err = EnumerableWithParsableTraits(0).Parse(value.Value)
+		*e, err = ParseEnumerableWithParsableTraits(value.Value)
 	}
 	if err != nil {
 		return err
