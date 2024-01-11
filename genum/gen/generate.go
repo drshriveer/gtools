@@ -147,7 +147,7 @@ func validateParsableTraits(enumType string, traits TraitDescs) error {
 					if parseTo != instance.OwningValue.Name {
 						return fmt.Errorf(
 							"Enum: %s cannot have parsableTrait %s because trait value %s is "+
-								"found in %s and %s. parsableByTrait values must be unique with the enum.",
+								"found in %s and %s. parsableByTrait values must be unique within the enum.",
 							enumType, trait.Name, instance.value, parseTo, instance.OwningValue.Name)
 					}
 
