@@ -126,6 +126,9 @@ func (e EnumerableWithTraits) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseEnumerableWithTraits(input)
 }
 
+// ParseEnumerableWithTraitsInt attempts to parse an EnumerableWithTraits from an int value.
+// If any parsable traits can be converted to an int then they will be parsed if the
+// initial int parsing fails.
 func ParseEnumerableWithTraitsInt(i int) (EnumerableWithTraits, error) {
 	e := EnumerableWithTraits(i)
 	if e.IsValid() {
@@ -134,6 +137,9 @@ func ParseEnumerableWithTraitsInt(i int) (EnumerableWithTraits, error) {
 	return e, fmt.Errorf("unable to unmarshal EnumerableWithTraits from `%d`", i)
 }
 
+// ParseEnumerableWithTraitsString attempts to parse an EnumerableWithTraits from a string value.
+// If any parsable traits can be converted to a string then they will be parsed if the
+// initial string parsing fails.
 func ParseEnumerableWithTraitsString(s string) (EnumerableWithTraits, error) {
 	e, err := ParseEnumerableWithTraits(s)
 	if err == nil {
@@ -343,6 +349,9 @@ func (e Creatures) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseCreatures(input)
 }
 
+// ParseCreaturesInt attempts to parse an Creatures from an int value.
+// If any parsable traits can be converted to an int then they will be parsed if the
+// initial int parsing fails.
 func ParseCreaturesInt(i int) (Creatures, error) {
 	e := Creatures(i)
 	if e.IsValid() {
@@ -351,6 +360,9 @@ func ParseCreaturesInt(i int) (Creatures, error) {
 	return e, fmt.Errorf("unable to unmarshal Creatures from `%d`", i)
 }
 
+// ParseCreaturesString attempts to parse an Creatures from a string value.
+// If any parsable traits can be converted to a string then they will be parsed if the
+// initial string parsing fails.
 func ParseCreaturesString(s string) (Creatures, error) {
 	e, err := ParseCreatures(s)
 	if err == nil {
@@ -505,6 +517,9 @@ func (e EnumWithPackageImports) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseEnumWithPackageImports(input)
 }
 
+// ParseEnumWithPackageImportsInt attempts to parse an EnumWithPackageImports from an int value.
+// If any parsable traits can be converted to an int then they will be parsed if the
+// initial int parsing fails.
 func ParseEnumWithPackageImportsInt(i int) (EnumWithPackageImports, error) {
 	e := EnumWithPackageImports(i)
 	if e.IsValid() {
@@ -513,6 +528,9 @@ func ParseEnumWithPackageImportsInt(i int) (EnumWithPackageImports, error) {
 	return e, fmt.Errorf("unable to unmarshal EnumWithPackageImports from `%d`", i)
 }
 
+// ParseEnumWithPackageImportsString attempts to parse an EnumWithPackageImports from a string value.
+// If any parsable traits can be converted to a string then they will be parsed if the
+// initial string parsing fails.
 func ParseEnumWithPackageImportsString(s string) (EnumWithPackageImports, error) {
 	e, err := ParseEnumWithPackageImports(s)
 	if err == nil {

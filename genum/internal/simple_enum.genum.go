@@ -97,6 +97,9 @@ func (e MyEnum) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseMyEnum(input)
 }
 
+// ParseMyEnumInt attempts to parse an MyEnum from an int value.
+// If any parsable traits can be converted to an int then they will be parsed if the
+// initial int parsing fails.
 func ParseMyEnumInt(i int) (MyEnum, error) {
 	e := MyEnum(i)
 	if e.IsValid() {
@@ -105,6 +108,9 @@ func ParseMyEnumInt(i int) (MyEnum, error) {
 	return e, fmt.Errorf("unable to unmarshal MyEnum from `%d`", i)
 }
 
+// ParseMyEnumString attempts to parse an MyEnum from a string value.
+// If any parsable traits can be converted to a string then they will be parsed if the
+// initial string parsing fails.
 func ParseMyEnumString(s string) (MyEnum, error) {
 	e, err := ParseMyEnum(s)
 	if err == nil {
@@ -238,6 +244,9 @@ func (e MyEnum2) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseMyEnum2(input)
 }
 
+// ParseMyEnum2Int attempts to parse an MyEnum2 from an int value.
+// If any parsable traits can be converted to an int then they will be parsed if the
+// initial int parsing fails.
 func ParseMyEnum2Int(i int) (MyEnum2, error) {
 	e := MyEnum2(i)
 	if e.IsValid() {
@@ -246,6 +255,9 @@ func ParseMyEnum2Int(i int) (MyEnum2, error) {
 	return e, fmt.Errorf("unable to unmarshal MyEnum2 from `%d`", i)
 }
 
+// ParseMyEnum2String attempts to parse an MyEnum2 from a string value.
+// If any parsable traits can be converted to a string then they will be parsed if the
+// initial string parsing fails.
 func ParseMyEnum2String(s string) (MyEnum2, error) {
 	e, err := ParseMyEnum2(s)
 	if err == nil {
@@ -459,6 +471,9 @@ func (e MyEnum3) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseMyEnum3(input)
 }
 
+// ParseMyEnum3Int attempts to parse an MyEnum3 from an int value.
+// If any parsable traits can be converted to an int then they will be parsed if the
+// initial int parsing fails.
 func ParseMyEnum3Int(i int) (MyEnum3, error) {
 	e := MyEnum3(i)
 	if e.IsValid() {
@@ -467,6 +482,9 @@ func ParseMyEnum3Int(i int) (MyEnum3, error) {
 	return e, fmt.Errorf("unable to unmarshal MyEnum3 from `%d`", i)
 }
 
+// ParseMyEnum3String attempts to parse an MyEnum3 from a string value.
+// If any parsable traits can be converted to a string then they will be parsed if the
+// initial string parsing fails.
 func ParseMyEnum3String(s string) (MyEnum3, error) {
 	e, err := ParseMyEnum3(s)
 	if err == nil {

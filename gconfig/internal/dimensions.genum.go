@@ -85,6 +85,9 @@ func (e DimensionOne) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseDimensionOne(input)
 }
 
+// ParseDimensionOneInt attempts to parse an DimensionOne from an int value.
+// If any parsable traits can be converted to an int then they will be parsed if the
+// initial int parsing fails.
 func ParseDimensionOneInt(i int) (DimensionOne, error) {
 	e := DimensionOne(i)
 	if e.IsValid() {
@@ -93,6 +96,9 @@ func ParseDimensionOneInt(i int) (DimensionOne, error) {
 	return e, fmt.Errorf("unable to unmarshal DimensionOne from `%d`", i)
 }
 
+// ParseDimensionOneString attempts to parse an DimensionOne from a string value.
+// If any parsable traits can be converted to a string then they will be parsed if the
+// initial string parsing fails.
 func ParseDimensionOneString(s string) (DimensionOne, error) {
 	e, err := ParseDimensionOne(s)
 	if err == nil {
@@ -244,6 +250,9 @@ func (e DimensionTwo) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseDimensionTwo(input)
 }
 
+// ParseDimensionTwoInt attempts to parse an DimensionTwo from an int value.
+// If any parsable traits can be converted to an int then they will be parsed if the
+// initial int parsing fails.
 func ParseDimensionTwoInt(i int) (DimensionTwo, error) {
 	e := DimensionTwo(i)
 	if e.IsValid() {
@@ -252,6 +261,9 @@ func ParseDimensionTwoInt(i int) (DimensionTwo, error) {
 	return e, fmt.Errorf("unable to unmarshal DimensionTwo from `%d`", i)
 }
 
+// ParseDimensionTwoString attempts to parse an DimensionTwo from a string value.
+// If any parsable traits can be converted to a string then they will be parsed if the
+// initial string parsing fails.
 func ParseDimensionTwoString(s string) (DimensionTwo, error) {
 	e, err := ParseDimensionTwo(s)
 	if err == nil {
@@ -391,6 +403,9 @@ func (e DimensionThree) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseDimensionThree(input)
 }
 
+// ParseDimensionThreeInt attempts to parse an DimensionThree from an int value.
+// If any parsable traits can be converted to an int then they will be parsed if the
+// initial int parsing fails.
 func ParseDimensionThreeInt(i int) (DimensionThree, error) {
 	e := DimensionThree(i)
 	if e.IsValid() {
@@ -399,6 +414,9 @@ func ParseDimensionThreeInt(i int) (DimensionThree, error) {
 	return e, fmt.Errorf("unable to unmarshal DimensionThree from `%d`", i)
 }
 
+// ParseDimensionThreeString attempts to parse an DimensionThree from a string value.
+// If any parsable traits can be converted to a string then they will be parsed if the
+// initial string parsing fails.
 func ParseDimensionThreeString(s string) (DimensionThree, error) {
 	e, err := ParseDimensionThree(s)
 	if err == nil {

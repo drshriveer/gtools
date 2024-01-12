@@ -154,6 +154,9 @@ func (e EnumerableWithParsableTraits) ParseGeneric(input any) (genum.Enum, error
 	return ParseEnumerableWithParsableTraits(input)
 }
 
+// ParseEnumerableWithParsableTraitsInt attempts to parse an EnumerableWithParsableTraits from an int value.
+// If any parsable traits can be converted to an int then they will be parsed if the
+// initial int parsing fails.
 func ParseEnumerableWithParsableTraitsInt(i int) (EnumerableWithParsableTraits, error) {
 	e := EnumerableWithParsableTraits(i)
 	if e.IsValid() {
@@ -166,6 +169,9 @@ func ParseEnumerableWithParsableTraitsInt(i int) (EnumerableWithParsableTraits, 
 	return e, fmt.Errorf("unable to unmarshal EnumerableWithParsableTraits from `%d`", i)
 }
 
+// ParseEnumerableWithParsableTraitsString attempts to parse an EnumerableWithParsableTraits from a string value.
+// If any parsable traits can be converted to a string then they will be parsed if the
+// initial string parsing fails.
 func ParseEnumerableWithParsableTraitsString(s string) (EnumerableWithParsableTraits, error) {
 	e, err := ParseEnumerableWithParsableTraits(s)
 	if err == nil {

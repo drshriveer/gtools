@@ -116,7 +116,9 @@ func (e {{$enumTypeName}}) ParseGeneric(input any) (genum.Enum, error) {
 	return Parse{{$enumTypeName}}(input)
 }
 
-
+// Parse{{$enumTypeName}}Int attempts to parse an {{$enumTypeName}} from an int value.
+// If any parsable traits can be converted to an int then they will be parsed if the
+// initial int parsing fails.
 func Parse{{$enumTypeName}}Int(i int) ({{$enumTypeName}}, error) {
 		e := {{$enumTypeName}}(i)
 		if e.IsValid() {
@@ -133,6 +135,9 @@ func Parse{{$enumTypeName}}Int(i int) ({{$enumTypeName}}, error) {
 		return e, fmt.Errorf("unable to unmarshal {{$enumTypeName}} from `%d`", i)
 }
 
+// Parse{{$enumTypeName}}String attempts to parse an {{$enumTypeName}} from a string value.
+// If any parsable traits can be converted to a string then they will be parsed if the
+// initial string parsing fails.
 func Parse{{$enumTypeName}}String(s string) ({{$enumTypeName}}, error) {
 	e, err := Parse{{$enumTypeName}}(s)
 	if err == nil {
