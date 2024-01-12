@@ -109,14 +109,47 @@ func Parse{{$enumTypeName}}(input any) ({{$enumTypeName}}, error) {
 	}
 }
 
-
-
 // ParseGeneric calls TypedEnum.Parse but returns the result
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
 func (e {{$enumTypeName}}) ParseGeneric(input any) (genum.Enum, error) {
 	return Parse{{$enumTypeName}}(input)
 }
+
+
+func Parse{{$enumTypeName}}Int(i int) ({{$enumTypeName}}, error) {
+		e := {{$enumTypeName}}(i)
+		if e.IsValid() {
+			return e, nil
+		}
+		{{- range $trait := (index $.Traits $i) }}
+		{{- if and $trait.Parsable ($.ConvertibleToInt $trait.Type) }}
+		e, err := Parse{{$enumTypeName}}({{$trait.TypeRef}}(i))
+		if err == nil {
+			return e, nil
+		}
+		{{- end }}
+		{{- end }}
+		return e, fmt.Errorf("unable to unmarshal {{$enumTypeName}} from `%d`", i)
+}
+
+func Parse{{$enumTypeName}}String(s string) ({{$enumTypeName}}, error) {
+	e, err := Parse{{$enumTypeName}}(s)
+	if err == nil {
+		return e, nil
+	}
+	{{- range $trait := (index $.Traits $i) }}
+	{{- if and $trait.Parsable ($.ConvertibleToString $trait.Type) }}
+	e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(s))
+	if err == nil {
+		return e, nil
+	}
+	{{- end }}
+	{{- end }}
+	return e, fmt.Errorf("unable to unmarshal {{$enumTypeName}} from `%s`", s)
+}
+
+
 {{- if $.GenJSON }}
 
 // MarshalJSON implements the json.Marshaler interface for {{$enumTypeName}}.
@@ -128,14 +161,15 @@ func (e {{$enumTypeName}}) MarshalJSON() ([]byte, error) {
 func (e *{{$enumTypeName}}) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		var err error
-		*e, err = Parse{{$enumTypeName}}(s)
-		return err
+		*e, err = Parse{{$enumTypeName}}String(s)
+		if err == nil {
+			return nil
+		}
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-		*e = {{$enumTypeName}}(i)
-		if e.IsValid() {
+		*e, err = Parse{{$enumTypeName}}Int(i)
+		if err == nil {
 			return nil
 		}
 	}
@@ -153,7 +187,7 @@ func (e {{$enumTypeName}}) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for {{$enumTypeName}}.
 func (e *{{$enumTypeName}}) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = Parse{{$enumTypeName}}(string(text))
+	*e, err = Parse{{$enumTypeName}}String(string(text))
 	return err
 }
 {{- end}}
@@ -168,15 +202,17 @@ func (e {{$enumTypeName}}) MarshalYAML() (any, error) {
 func (e *{{$enumTypeName}}) UnmarshalYAML(value *yaml.Node) error {
 	i, err := strconv.ParseInt(value.Value, 10, 64)
 	if err == nil {
-		*e = {{$enumTypeName}}(i)
+		*e, err = Parse{{$enumTypeName}}Int(int(i))
+		if err == nil {
+			return nil
+		}
 	} else {
-		*e, err = Parse{{$enumTypeName}}(value.Value)
+		*e, err = Parse{{$enumTypeName}}String(value.Value)
+		if err == nil {
+			return nil
+		}
 	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
-		return nil
-	}
+
 	return fmt.Errorf("unable to unmarshal {{$enumTypeName}} from yaml `%s`", value.Value)
 }
 

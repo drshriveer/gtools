@@ -47,6 +47,21 @@ func (e EnumerableWithParsableTraits) NonParsable() string {
 	return *new(string)
 }
 
+// OtherEnum returns the enum's associated trait of the same name.
+// If no trait exists for the enumeration a default value will be returned.
+func (e EnumerableWithParsableTraits) OtherEnum() MyEnum {
+	switch e {
+	case P1:
+		return _OtherEnum
+	case P2:
+		return Enum1Value1
+	case P3:
+		return Enum1Value2
+	}
+
+	return *new(MyEnum)
+}
+
 // Parsable returns the enum's associated trait of the same name.
 // If no trait exists for the enumeration a default value will be returned.
 func (e EnumerableWithParsableTraits) Parsable() string {
@@ -121,11 +136,11 @@ func (e EnumerableWithParsableTraits) String() string {
 // or any value of a trait flagged with the --parsableByTrait flag
 func ParseEnumerableWithParsableTraits(input any) (EnumerableWithParsableTraits, error) {
 	switch input {
-	case "P1", _AlsoSometimesNonParsable, _Parsable:
+	case "P1", _AlsoSometimesNonParsable, _OtherEnum, _Parsable:
 		return P1, nil
-	case "P2", 2, "2":
+	case "P2", 2, Enum1Value1, "2":
 		return P2, nil
-	case "P3", 3, "3":
+	case "P3", 3, Enum1Value2, "3":
 		return P3, nil
 	default:
 		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type EnumerableWithParsableTraits", input)
@@ -139,6 +154,26 @@ func (e EnumerableWithParsableTraits) ParseGeneric(input any) (genum.Enum, error
 	return ParseEnumerableWithParsableTraits(input)
 }
 
+func ParseEnumerableWithParsableTraitsInt(i int) (EnumerableWithParsableTraits, error) {
+	e := EnumerableWithParsableTraits(i)
+	if e.IsValid() {
+		return e, nil
+	}
+	e, err := ParseEnumerableWithParsableTraits(MyEnum(i))
+	if err == nil {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal EnumerableWithParsableTraits from `%d`", i)
+}
+
+func ParseEnumerableWithParsableTraitsString(s string) (EnumerableWithParsableTraits, error) {
+	e, err := ParseEnumerableWithParsableTraits(s)
+	if err == nil {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal EnumerableWithParsableTraits from `%s`", s)
+}
+
 // MarshalJSON implements the json.Marshaler interface for EnumerableWithParsableTraits.
 func (e EnumerableWithParsableTraits) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
@@ -148,14 +183,15 @@ func (e EnumerableWithParsableTraits) MarshalJSON() ([]byte, error) {
 func (e *EnumerableWithParsableTraits) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		var err error
-		*e, err = ParseEnumerableWithParsableTraits(s)
-		return err
+		*e, err = ParseEnumerableWithParsableTraitsString(s)
+		if err == nil {
+			return nil
+		}
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-		*e = EnumerableWithParsableTraits(i)
-		if e.IsValid() {
+		*e, err = ParseEnumerableWithParsableTraitsInt(i)
+		if err == nil {
 			return nil
 		}
 	}
@@ -171,7 +207,7 @@ func (e EnumerableWithParsableTraits) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for EnumerableWithParsableTraits.
 func (e *EnumerableWithParsableTraits) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = ParseEnumerableWithParsableTraits(string(text))
+	*e, err = ParseEnumerableWithParsableTraitsString(string(text))
 	return err
 }
 
@@ -184,15 +220,17 @@ func (e EnumerableWithParsableTraits) MarshalYAML() (any, error) {
 func (e *EnumerableWithParsableTraits) UnmarshalYAML(value *yaml.Node) error {
 	i, err := strconv.ParseInt(value.Value, 10, 64)
 	if err == nil {
-		*e = EnumerableWithParsableTraits(i)
+		*e, err = ParseEnumerableWithParsableTraitsInt(int(i))
+		if err == nil {
+			return nil
+		}
 	} else {
-		*e, err = ParseEnumerableWithParsableTraits(value.Value)
+		*e, err = ParseEnumerableWithParsableTraitsString(value.Value)
+		if err == nil {
+			return nil
+		}
 	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
-		return nil
-	}
+
 	return fmt.Errorf("unable to unmarshal EnumerableWithParsableTraits from yaml `%s`", value.Value)
 }
 

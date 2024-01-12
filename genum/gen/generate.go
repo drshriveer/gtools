@@ -19,6 +19,9 @@ import (
 //go:embed enumTemplate.gotmpl
 var tmpl string
 
+var intType = types.Universe.Lookup("int").Type()
+var stringType = types.Universe.Lookup("string").Type()
+
 // enumTemplate is the base template for an enum.
 var enumTemplate = template.Must(template.New("genum").Parse(tmpl))
 
@@ -192,6 +195,7 @@ func (g *Generate) extractTraitDescs(tName string, pkgScope *types.Scope, values
 		}
 		tDesc := TraitDesc{
 			Name:     traitName,
+			Type:     v.Type(),
 			TypeRef:  typeRef,
 			Parsable: slices.Contains(g.ParsableByTraits, traitName),
 			Traits: []TraitInstance{
@@ -302,4 +306,17 @@ func isDeprecated(fAST *ast.File, name string) bool {
 		}
 	}
 	return false
+}
+
+func (g *Generate) ConvertibleToString(inputType types.Type) bool {
+	return types.ConvertibleTo(stringType, inputType)
+}
+
+func (g *Generate) ConvertibleToInt(inputType types.Type) bool {
+	if basicType, ok := inputType.(*types.Basic); ok {
+		if basicType.Kind() == types.UntypedInt || basicType.Kind() == types.UntypedString {
+			return false
+		}
+	}
+	return types.ConvertibleTo(intType, inputType)
 }

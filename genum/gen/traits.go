@@ -1,5 +1,7 @@
 package gen
 
+import "go/types"
+
 // TraitDescs is a sortable slice of TraitDesc.
 type TraitDescs []TraitDesc
 
@@ -18,6 +20,7 @@ func (s TraitDescs) Less(i, j int) bool {
 // TraitDesc define a trait-- this is exposed for template use.
 type TraitDesc struct {
 	Name     string
+	Type     types.Type
 	TypeRef  string
 	Parsable bool
 	Traits   TraitInstances

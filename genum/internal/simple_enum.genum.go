@@ -97,6 +97,22 @@ func (e MyEnum) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseMyEnum(input)
 }
 
+func ParseMyEnumInt(i int) (MyEnum, error) {
+	e := MyEnum(i)
+	if e.IsValid() {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal MyEnum from `%d`", i)
+}
+
+func ParseMyEnumString(s string) (MyEnum, error) {
+	e, err := ParseMyEnum(s)
+	if err == nil {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal MyEnum from `%s`", s)
+}
+
 // MarshalJSON implements the json.Marshaler interface for MyEnum.
 func (e MyEnum) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
@@ -106,14 +122,15 @@ func (e MyEnum) MarshalJSON() ([]byte, error) {
 func (e *MyEnum) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		var err error
-		*e, err = ParseMyEnum(s)
-		return err
+		*e, err = ParseMyEnumString(s)
+		if err == nil {
+			return nil
+		}
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-		*e = MyEnum(i)
-		if e.IsValid() {
+		*e, err = ParseMyEnumInt(i)
+		if err == nil {
 			return nil
 		}
 	}
@@ -129,7 +146,7 @@ func (e MyEnum) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for MyEnum.
 func (e *MyEnum) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = ParseMyEnum(string(text))
+	*e, err = ParseMyEnumString(string(text))
 	return err
 }
 
@@ -142,15 +159,17 @@ func (e MyEnum) MarshalYAML() (any, error) {
 func (e *MyEnum) UnmarshalYAML(value *yaml.Node) error {
 	i, err := strconv.ParseInt(value.Value, 10, 64)
 	if err == nil {
-		*e = MyEnum(i)
+		*e, err = ParseMyEnumInt(int(i))
+		if err == nil {
+			return nil
+		}
 	} else {
-		*e, err = ParseMyEnum(value.Value)
+		*e, err = ParseMyEnumString(value.Value)
+		if err == nil {
+			return nil
+		}
 	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
-		return nil
-	}
+
 	return fmt.Errorf("unable to unmarshal MyEnum from yaml `%s`", value.Value)
 }
 
@@ -219,6 +238,22 @@ func (e MyEnum2) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseMyEnum2(input)
 }
 
+func ParseMyEnum2Int(i int) (MyEnum2, error) {
+	e := MyEnum2(i)
+	if e.IsValid() {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal MyEnum2 from `%d`", i)
+}
+
+func ParseMyEnum2String(s string) (MyEnum2, error) {
+	e, err := ParseMyEnum2(s)
+	if err == nil {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal MyEnum2 from `%s`", s)
+}
+
 // MarshalJSON implements the json.Marshaler interface for MyEnum2.
 func (e MyEnum2) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
@@ -228,14 +263,15 @@ func (e MyEnum2) MarshalJSON() ([]byte, error) {
 func (e *MyEnum2) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		var err error
-		*e, err = ParseMyEnum2(s)
-		return err
+		*e, err = ParseMyEnum2String(s)
+		if err == nil {
+			return nil
+		}
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-		*e = MyEnum2(i)
-		if e.IsValid() {
+		*e, err = ParseMyEnum2Int(i)
+		if err == nil {
 			return nil
 		}
 	}
@@ -251,7 +287,7 @@ func (e MyEnum2) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for MyEnum2.
 func (e *MyEnum2) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = ParseMyEnum2(string(text))
+	*e, err = ParseMyEnum2String(string(text))
 	return err
 }
 
@@ -264,15 +300,17 @@ func (e MyEnum2) MarshalYAML() (any, error) {
 func (e *MyEnum2) UnmarshalYAML(value *yaml.Node) error {
 	i, err := strconv.ParseInt(value.Value, 10, 64)
 	if err == nil {
-		*e = MyEnum2(i)
+		*e, err = ParseMyEnum2Int(int(i))
+		if err == nil {
+			return nil
+		}
 	} else {
-		*e, err = ParseMyEnum2(value.Value)
+		*e, err = ParseMyEnum2String(value.Value)
+		if err == nil {
+			return nil
+		}
 	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
-		return nil
-	}
+
 	return fmt.Errorf("unable to unmarshal MyEnum2 from yaml `%s`", value.Value)
 }
 
@@ -421,6 +459,22 @@ func (e MyEnum3) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseMyEnum3(input)
 }
 
+func ParseMyEnum3Int(i int) (MyEnum3, error) {
+	e := MyEnum3(i)
+	if e.IsValid() {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal MyEnum3 from `%d`", i)
+}
+
+func ParseMyEnum3String(s string) (MyEnum3, error) {
+	e, err := ParseMyEnum3(s)
+	if err == nil {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal MyEnum3 from `%s`", s)
+}
+
 // MarshalJSON implements the json.Marshaler interface for MyEnum3.
 func (e MyEnum3) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
@@ -430,14 +484,15 @@ func (e MyEnum3) MarshalJSON() ([]byte, error) {
 func (e *MyEnum3) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		var err error
-		*e, err = ParseMyEnum3(s)
-		return err
+		*e, err = ParseMyEnum3String(s)
+		if err == nil {
+			return nil
+		}
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-		*e = MyEnum3(i)
-		if e.IsValid() {
+		*e, err = ParseMyEnum3Int(i)
+		if err == nil {
 			return nil
 		}
 	}
@@ -453,7 +508,7 @@ func (e MyEnum3) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for MyEnum3.
 func (e *MyEnum3) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = ParseMyEnum3(string(text))
+	*e, err = ParseMyEnum3String(string(text))
 	return err
 }
 
@@ -466,15 +521,17 @@ func (e MyEnum3) MarshalYAML() (any, error) {
 func (e *MyEnum3) UnmarshalYAML(value *yaml.Node) error {
 	i, err := strconv.ParseInt(value.Value, 10, 64)
 	if err == nil {
-		*e = MyEnum3(i)
+		*e, err = ParseMyEnum3Int(int(i))
+		if err == nil {
+			return nil
+		}
 	} else {
-		*e, err = ParseMyEnum3(value.Value)
+		*e, err = ParseMyEnum3String(value.Value)
+		if err == nil {
+			return nil
+		}
 	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
-		return nil
-	}
+
 	return fmt.Errorf("unable to unmarshal MyEnum3 from yaml `%s`", value.Value)
 }
 

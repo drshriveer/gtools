@@ -126,6 +126,22 @@ func (e EnumerableWithTraits) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseEnumerableWithTraits(input)
 }
 
+func ParseEnumerableWithTraitsInt(i int) (EnumerableWithTraits, error) {
+	e := EnumerableWithTraits(i)
+	if e.IsValid() {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal EnumerableWithTraits from `%d`", i)
+}
+
+func ParseEnumerableWithTraitsString(s string) (EnumerableWithTraits, error) {
+	e, err := ParseEnumerableWithTraits(s)
+	if err == nil {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal EnumerableWithTraits from `%s`", s)
+}
+
 // MarshalJSON implements the json.Marshaler interface for EnumerableWithTraits.
 func (e EnumerableWithTraits) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
@@ -135,14 +151,15 @@ func (e EnumerableWithTraits) MarshalJSON() ([]byte, error) {
 func (e *EnumerableWithTraits) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		var err error
-		*e, err = ParseEnumerableWithTraits(s)
-		return err
+		*e, err = ParseEnumerableWithTraitsString(s)
+		if err == nil {
+			return nil
+		}
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-		*e = EnumerableWithTraits(i)
-		if e.IsValid() {
+		*e, err = ParseEnumerableWithTraitsInt(i)
+		if err == nil {
 			return nil
 		}
 	}
@@ -158,7 +175,7 @@ func (e EnumerableWithTraits) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for EnumerableWithTraits.
 func (e *EnumerableWithTraits) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = ParseEnumerableWithTraits(string(text))
+	*e, err = ParseEnumerableWithTraitsString(string(text))
 	return err
 }
 
@@ -171,15 +188,17 @@ func (e EnumerableWithTraits) MarshalYAML() (any, error) {
 func (e *EnumerableWithTraits) UnmarshalYAML(value *yaml.Node) error {
 	i, err := strconv.ParseInt(value.Value, 10, 64)
 	if err == nil {
-		*e = EnumerableWithTraits(i)
+		*e, err = ParseEnumerableWithTraitsInt(int(i))
+		if err == nil {
+			return nil
+		}
 	} else {
-		*e, err = ParseEnumerableWithTraits(value.Value)
+		*e, err = ParseEnumerableWithTraitsString(value.Value)
+		if err == nil {
+			return nil
+		}
 	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
-		return nil
-	}
+
 	return fmt.Errorf("unable to unmarshal EnumerableWithTraits from yaml `%s`", value.Value)
 }
 
@@ -324,6 +343,22 @@ func (e Creatures) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseCreatures(input)
 }
 
+func ParseCreaturesInt(i int) (Creatures, error) {
+	e := Creatures(i)
+	if e.IsValid() {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal Creatures from `%d`", i)
+}
+
+func ParseCreaturesString(s string) (Creatures, error) {
+	e, err := ParseCreatures(s)
+	if err == nil {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal Creatures from `%s`", s)
+}
+
 // MarshalJSON implements the json.Marshaler interface for Creatures.
 func (e Creatures) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
@@ -333,14 +368,15 @@ func (e Creatures) MarshalJSON() ([]byte, error) {
 func (e *Creatures) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		var err error
-		*e, err = ParseCreatures(s)
-		return err
+		*e, err = ParseCreaturesString(s)
+		if err == nil {
+			return nil
+		}
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-		*e = Creatures(i)
-		if e.IsValid() {
+		*e, err = ParseCreaturesInt(i)
+		if err == nil {
 			return nil
 		}
 	}
@@ -356,7 +392,7 @@ func (e Creatures) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for Creatures.
 func (e *Creatures) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = ParseCreatures(string(text))
+	*e, err = ParseCreaturesString(string(text))
 	return err
 }
 
@@ -369,15 +405,17 @@ func (e Creatures) MarshalYAML() (any, error) {
 func (e *Creatures) UnmarshalYAML(value *yaml.Node) error {
 	i, err := strconv.ParseInt(value.Value, 10, 64)
 	if err == nil {
-		*e = Creatures(i)
+		*e, err = ParseCreaturesInt(int(i))
+		if err == nil {
+			return nil
+		}
 	} else {
-		*e, err = ParseCreatures(value.Value)
+		*e, err = ParseCreaturesString(value.Value)
+		if err == nil {
+			return nil
+		}
 	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
-		return nil
-	}
+
 	return fmt.Errorf("unable to unmarshal Creatures from yaml `%s`", value.Value)
 }
 
@@ -467,6 +505,22 @@ func (e EnumWithPackageImports) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseEnumWithPackageImports(input)
 }
 
+func ParseEnumWithPackageImportsInt(i int) (EnumWithPackageImports, error) {
+	e := EnumWithPackageImports(i)
+	if e.IsValid() {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal EnumWithPackageImports from `%d`", i)
+}
+
+func ParseEnumWithPackageImportsString(s string) (EnumWithPackageImports, error) {
+	e, err := ParseEnumWithPackageImports(s)
+	if err == nil {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal EnumWithPackageImports from `%s`", s)
+}
+
 // MarshalJSON implements the json.Marshaler interface for EnumWithPackageImports.
 func (e EnumWithPackageImports) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
@@ -476,14 +530,15 @@ func (e EnumWithPackageImports) MarshalJSON() ([]byte, error) {
 func (e *EnumWithPackageImports) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		var err error
-		*e, err = ParseEnumWithPackageImports(s)
-		return err
+		*e, err = ParseEnumWithPackageImportsString(s)
+		if err == nil {
+			return nil
+		}
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-		*e = EnumWithPackageImports(i)
-		if e.IsValid() {
+		*e, err = ParseEnumWithPackageImportsInt(i)
+		if err == nil {
 			return nil
 		}
 	}
@@ -499,7 +554,7 @@ func (e EnumWithPackageImports) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for EnumWithPackageImports.
 func (e *EnumWithPackageImports) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = ParseEnumWithPackageImports(string(text))
+	*e, err = ParseEnumWithPackageImportsString(string(text))
 	return err
 }
 
@@ -512,15 +567,17 @@ func (e EnumWithPackageImports) MarshalYAML() (any, error) {
 func (e *EnumWithPackageImports) UnmarshalYAML(value *yaml.Node) error {
 	i, err := strconv.ParseInt(value.Value, 10, 64)
 	if err == nil {
-		*e = EnumWithPackageImports(i)
+		*e, err = ParseEnumWithPackageImportsInt(int(i))
+		if err == nil {
+			return nil
+		}
 	} else {
-		*e, err = ParseEnumWithPackageImports(value.Value)
+		*e, err = ParseEnumWithPackageImportsString(value.Value)
+		if err == nil {
+			return nil
+		}
 	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
-		return nil
-	}
+
 	return fmt.Errorf("unable to unmarshal EnumWithPackageImports from yaml `%s`", value.Value)
 }
 

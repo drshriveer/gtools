@@ -85,6 +85,22 @@ func (e DimensionOne) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseDimensionOne(input)
 }
 
+func ParseDimensionOneInt(i int) (DimensionOne, error) {
+	e := DimensionOne(i)
+	if e.IsValid() {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal DimensionOne from `%d`", i)
+}
+
+func ParseDimensionOneString(s string) (DimensionOne, error) {
+	e, err := ParseDimensionOne(s)
+	if err == nil {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal DimensionOne from `%s`", s)
+}
+
 // MarshalJSON implements the json.Marshaler interface for DimensionOne.
 func (e DimensionOne) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
@@ -94,14 +110,15 @@ func (e DimensionOne) MarshalJSON() ([]byte, error) {
 func (e *DimensionOne) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		var err error
-		*e, err = ParseDimensionOne(s)
-		return err
+		*e, err = ParseDimensionOneString(s)
+		if err == nil {
+			return nil
+		}
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-		*e = DimensionOne(i)
-		if e.IsValid() {
+		*e, err = ParseDimensionOneInt(i)
+		if err == nil {
 			return nil
 		}
 	}
@@ -117,7 +134,7 @@ func (e DimensionOne) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for DimensionOne.
 func (e *DimensionOne) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = ParseDimensionOne(string(text))
+	*e, err = ParseDimensionOneString(string(text))
 	return err
 }
 
@@ -130,15 +147,17 @@ func (e DimensionOne) MarshalYAML() (any, error) {
 func (e *DimensionOne) UnmarshalYAML(value *yaml.Node) error {
 	i, err := strconv.ParseInt(value.Value, 10, 64)
 	if err == nil {
-		*e = DimensionOne(i)
+		*e, err = ParseDimensionOneInt(int(i))
+		if err == nil {
+			return nil
+		}
 	} else {
-		*e, err = ParseDimensionOne(value.Value)
+		*e, err = ParseDimensionOneString(value.Value)
+		if err == nil {
+			return nil
+		}
 	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
-		return nil
-	}
+
 	return fmt.Errorf("unable to unmarshal DimensionOne from yaml `%s`", value.Value)
 }
 
@@ -225,6 +244,22 @@ func (e DimensionTwo) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseDimensionTwo(input)
 }
 
+func ParseDimensionTwoInt(i int) (DimensionTwo, error) {
+	e := DimensionTwo(i)
+	if e.IsValid() {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal DimensionTwo from `%d`", i)
+}
+
+func ParseDimensionTwoString(s string) (DimensionTwo, error) {
+	e, err := ParseDimensionTwo(s)
+	if err == nil {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal DimensionTwo from `%s`", s)
+}
+
 // MarshalJSON implements the json.Marshaler interface for DimensionTwo.
 func (e DimensionTwo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
@@ -234,14 +269,15 @@ func (e DimensionTwo) MarshalJSON() ([]byte, error) {
 func (e *DimensionTwo) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		var err error
-		*e, err = ParseDimensionTwo(s)
-		return err
+		*e, err = ParseDimensionTwoString(s)
+		if err == nil {
+			return nil
+		}
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-		*e = DimensionTwo(i)
-		if e.IsValid() {
+		*e, err = ParseDimensionTwoInt(i)
+		if err == nil {
 			return nil
 		}
 	}
@@ -257,7 +293,7 @@ func (e DimensionTwo) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for DimensionTwo.
 func (e *DimensionTwo) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = ParseDimensionTwo(string(text))
+	*e, err = ParseDimensionTwoString(string(text))
 	return err
 }
 
@@ -270,15 +306,17 @@ func (e DimensionTwo) MarshalYAML() (any, error) {
 func (e *DimensionTwo) UnmarshalYAML(value *yaml.Node) error {
 	i, err := strconv.ParseInt(value.Value, 10, 64)
 	if err == nil {
-		*e = DimensionTwo(i)
+		*e, err = ParseDimensionTwoInt(int(i))
+		if err == nil {
+			return nil
+		}
 	} else {
-		*e, err = ParseDimensionTwo(value.Value)
+		*e, err = ParseDimensionTwoString(value.Value)
+		if err == nil {
+			return nil
+		}
 	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
-		return nil
-	}
+
 	return fmt.Errorf("unable to unmarshal DimensionTwo from yaml `%s`", value.Value)
 }
 
@@ -353,6 +391,22 @@ func (e DimensionThree) ParseGeneric(input any) (genum.Enum, error) {
 	return ParseDimensionThree(input)
 }
 
+func ParseDimensionThreeInt(i int) (DimensionThree, error) {
+	e := DimensionThree(i)
+	if e.IsValid() {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal DimensionThree from `%d`", i)
+}
+
+func ParseDimensionThreeString(s string) (DimensionThree, error) {
+	e, err := ParseDimensionThree(s)
+	if err == nil {
+		return e, nil
+	}
+	return e, fmt.Errorf("unable to unmarshal DimensionThree from `%s`", s)
+}
+
 // MarshalJSON implements the json.Marshaler interface for DimensionThree.
 func (e DimensionThree) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
@@ -362,14 +416,15 @@ func (e DimensionThree) MarshalJSON() ([]byte, error) {
 func (e *DimensionThree) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		var err error
-		*e, err = ParseDimensionThree(s)
-		return err
+		*e, err = ParseDimensionThreeString(s)
+		if err == nil {
+			return nil
+		}
 	}
 	var i int
 	if err := json.Unmarshal(data, &i); err == nil {
-		*e = DimensionThree(i)
-		if e.IsValid() {
+		*e, err = ParseDimensionThreeInt(i)
+		if err == nil {
 			return nil
 		}
 	}
@@ -385,7 +440,7 @@ func (e DimensionThree) MarshalText() ([]byte, error) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface for DimensionThree.
 func (e *DimensionThree) UnmarshalText(text []byte) error {
 	var err error
-	*e, err = ParseDimensionThree(string(text))
+	*e, err = ParseDimensionThreeString(string(text))
 	return err
 }
 
@@ -398,15 +453,17 @@ func (e DimensionThree) MarshalYAML() (any, error) {
 func (e *DimensionThree) UnmarshalYAML(value *yaml.Node) error {
 	i, err := strconv.ParseInt(value.Value, 10, 64)
 	if err == nil {
-		*e = DimensionThree(i)
+		*e, err = ParseDimensionThreeInt(int(i))
+		if err == nil {
+			return nil
+		}
 	} else {
-		*e, err = ParseDimensionThree(value.Value)
+		*e, err = ParseDimensionThreeString(value.Value)
+		if err == nil {
+			return nil
+		}
 	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
-		return nil
-	}
+
 	return fmt.Errorf("unable to unmarshal DimensionThree from yaml `%s`", value.Value)
 }
 
