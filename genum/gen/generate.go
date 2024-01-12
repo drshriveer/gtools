@@ -308,11 +308,13 @@ func isDeprecated(fAST *ast.File, name string) bool {
 	return false
 }
 
-func (g *Generate) ConvertibleToString(inputType types.Type) bool {
+func (g *Generate) ConvertibleFromString(inputType types.Type) bool {
 	return types.ConvertibleTo(stringType, inputType)
 }
 
-func (g *Generate) ConvertibleToInt(inputType types.Type) bool {
+func (g *Generate) ConvertibleFromInt(inputType types.Type) bool {
+	// you can get an int from an untyped int and an untyped string
+	// but we don't want them to return true because
 	if basicType, ok := inputType.(*types.Basic); ok {
 		if basicType.Kind() == types.UntypedInt || basicType.Kind() == types.UntypedString {
 			return false

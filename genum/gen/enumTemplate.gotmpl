@@ -120,13 +120,17 @@ func (e {{$enumTypeName}}) ParseGeneric(input any) (genum.Enum, error) {
 // If any parsable traits can be converted to an int then they will be parsed if the
 // initial int parsing fails.
 func Parse{{$enumTypeName}}Int(i int) ({{$enumTypeName}}, error) {
+		var err error
 		e := {{$enumTypeName}}(i)
 		if e.IsValid() {
-			return e, nil
+			// still return the nil error
+			// here so the compiler doesnt blow up
+			// if we dont have any parsable int type traits
+			return e, err
 		}
 		{{- range $trait := (index $.Traits $i) }}
-		{{- if and $trait.Parsable ($.ConvertibleToInt $trait.Type) }}
-		e, err := Parse{{$enumTypeName}}({{$trait.TypeRef}}(i))
+		{{- if and $trait.Parsable ($.ConvertibleFromInt $trait.Type) }}
+		e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(i))
 		if err == nil {
 			return e, nil
 		}
@@ -144,7 +148,7 @@ func Parse{{$enumTypeName}}String(s string) ({{$enumTypeName}}, error) {
 		return e, nil
 	}
 	{{- range $trait := (index $.Traits $i) }}
-	{{- if and $trait.Parsable ($.ConvertibleToString $trait.Type) }}
+	{{- if and $trait.Parsable ($.ConvertibleFromString $trait.Type) }}
 	e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(s))
 	if err == nil {
 		return e, nil

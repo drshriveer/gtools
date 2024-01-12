@@ -101,9 +101,13 @@ func (e MyEnum) ParseGeneric(input any) (genum.Enum, error) {
 // If any parsable traits can be converted to an int then they will be parsed if the
 // initial int parsing fails.
 func ParseMyEnumInt(i int) (MyEnum, error) {
+	var err error
 	e := MyEnum(i)
 	if e.IsValid() {
-		return e, nil
+		// still return the nil error
+		// here so the compiler doesnt blow up
+		// if we dont have any parsable int type traits
+		return e, err
 	}
 	return e, fmt.Errorf("unable to unmarshal MyEnum from `%d`", i)
 }
@@ -248,9 +252,13 @@ func (e MyEnum2) ParseGeneric(input any) (genum.Enum, error) {
 // If any parsable traits can be converted to an int then they will be parsed if the
 // initial int parsing fails.
 func ParseMyEnum2Int(i int) (MyEnum2, error) {
+	var err error
 	e := MyEnum2(i)
 	if e.IsValid() {
-		return e, nil
+		// still return the nil error
+		// here so the compiler doesnt blow up
+		// if we dont have any parsable int type traits
+		return e, err
 	}
 	return e, fmt.Errorf("unable to unmarshal MyEnum2 from `%d`", i)
 }
@@ -475,9 +483,13 @@ func (e MyEnum3) ParseGeneric(input any) (genum.Enum, error) {
 // If any parsable traits can be converted to an int then they will be parsed if the
 // initial int parsing fails.
 func ParseMyEnum3Int(i int) (MyEnum3, error) {
+	var err error
 	e := MyEnum3(i)
 	if e.IsValid() {
-		return e, nil
+		// still return the nil error
+		// here so the compiler doesnt blow up
+		// if we dont have any parsable int type traits
+		return e, err
 	}
 	return e, fmt.Errorf("unable to unmarshal MyEnum3 from `%d`", i)
 }

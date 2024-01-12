@@ -89,9 +89,13 @@ func (e DimensionOne) ParseGeneric(input any) (genum.Enum, error) {
 // If any parsable traits can be converted to an int then they will be parsed if the
 // initial int parsing fails.
 func ParseDimensionOneInt(i int) (DimensionOne, error) {
+	var err error
 	e := DimensionOne(i)
 	if e.IsValid() {
-		return e, nil
+		// still return the nil error
+		// here so the compiler doesnt blow up
+		// if we dont have any parsable int type traits
+		return e, err
 	}
 	return e, fmt.Errorf("unable to unmarshal DimensionOne from `%d`", i)
 }
@@ -254,9 +258,13 @@ func (e DimensionTwo) ParseGeneric(input any) (genum.Enum, error) {
 // If any parsable traits can be converted to an int then they will be parsed if the
 // initial int parsing fails.
 func ParseDimensionTwoInt(i int) (DimensionTwo, error) {
+	var err error
 	e := DimensionTwo(i)
 	if e.IsValid() {
-		return e, nil
+		// still return the nil error
+		// here so the compiler doesnt blow up
+		// if we dont have any parsable int type traits
+		return e, err
 	}
 	return e, fmt.Errorf("unable to unmarshal DimensionTwo from `%d`", i)
 }
@@ -407,9 +415,13 @@ func (e DimensionThree) ParseGeneric(input any) (genum.Enum, error) {
 // If any parsable traits can be converted to an int then they will be parsed if the
 // initial int parsing fails.
 func ParseDimensionThreeInt(i int) (DimensionThree, error) {
+	var err error
 	e := DimensionThree(i)
 	if e.IsValid() {
-		return e, nil
+		// still return the nil error
+		// here so the compiler doesnt blow up
+		// if we dont have any parsable int type traits
+		return e, err
 	}
 	return e, fmt.Errorf("unable to unmarshal DimensionThree from `%d`", i)
 }

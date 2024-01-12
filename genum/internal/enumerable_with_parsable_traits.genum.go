@@ -158,11 +158,15 @@ func (e EnumerableWithParsableTraits) ParseGeneric(input any) (genum.Enum, error
 // If any parsable traits can be converted to an int then they will be parsed if the
 // initial int parsing fails.
 func ParseEnumerableWithParsableTraitsInt(i int) (EnumerableWithParsableTraits, error) {
+	var err error
 	e := EnumerableWithParsableTraits(i)
 	if e.IsValid() {
-		return e, nil
+		// still return the nil error
+		// here so the compiler doesnt blow up
+		// if we dont have any parsable int type traits
+		return e, err
 	}
-	e, err := ParseEnumerableWithParsableTraits(MyEnum(i))
+	e, err = ParseEnumerableWithParsableTraits(MyEnum(i))
 	if err == nil {
 		return e, nil
 	}
