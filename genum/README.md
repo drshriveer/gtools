@@ -116,6 +116,10 @@ Usage of ./bin/genum:
         [Required] comma-separated names of types to generate enum code for
   -yaml
         generate yaml marshal methods (default true) (default true)
+  -caseInsensitive
+        string parsing of enum names will be case insensitive (default false)
+  -parsableByTraits string
+        comma-separated list of trait names which will generate their own parser
 ```
 
 ###### Limitations

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	reflect "reflect"
 	"slices"
+	"strings"
 	stupidTime "time"
 
 	"github.com/drshriveer/gtools/genum"
@@ -112,13 +113,23 @@ func (e EnumerableWithTraits) ParseString(text string) (EnumerableWithTraits, er
 // or any value of a trait flagged with the --parsableByTrait flag
 func ParseEnumerableWithTraits(input any) (EnumerableWithTraits, error) {
 	switch input {
-	case "E1", "e1":
+	case "E1":
 		return E1, nil
-	case "E2", "e2":
+	case "E2":
 		return E2, nil
-	case "E3", "e3":
+	case "E3":
 		return E3, nil
 	default:
+		if text, ok := input.(string); ok {
+			switch strings.ToLower(text) {
+			case "e1":
+				return E1, nil
+			case "e2":
+				return E2, nil
+			case "e3":
+				return E3, nil
+			}
+		}
 		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type EnumerableWithTraits", input)
 	}
 }
@@ -307,25 +318,47 @@ func (e Creatures) ParseString(text string) (Creatures, error) {
 // or any value of a trait flagged with the --parsableByTrait flag
 func ParseCreatures(input any) (Creatures, error) {
 	switch input {
-	case "NotCreature", "notcreature":
+	case "NotCreature":
 		return NotCreature, nil
-	case "Cat", "cat":
+	case "Cat":
 		return Cat, nil
-	case "Feline", "feline":
+	case "Feline":
 		return Feline, nil
-	case "Feline2", "feline2":
+	case "Feline2":
 		return Feline2, nil
-	case "Dog", "dog":
+	case "Dog":
 		return Dog, nil
-	case "Ant", "ant":
+	case "Ant":
 		return Ant, nil
-	case "Spider", "spider":
+	case "Spider":
 		return Spider, nil
-	case "Human", "human":
+	case "Human":
 		return Human, nil
-	case "SeaAnemone", "seaanemone":
+	case "SeaAnemone":
 		return SeaAnemone, nil
 	default:
+		if text, ok := input.(string); ok {
+			switch strings.ToLower(text) {
+			case "notcreature":
+				return NotCreature, nil
+			case "cat":
+				return Cat, nil
+			case "feline":
+				return Feline, nil
+			case "feline2":
+				return Feline2, nil
+			case "dog":
+				return Dog, nil
+			case "ant":
+				return Ant, nil
+			case "spider":
+				return Spider, nil
+			case "human":
+				return Human, nil
+			case "seaanemone":
+				return SeaAnemone, nil
+			}
+		}
 		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type Creatures", input)
 	}
 }
@@ -471,13 +504,23 @@ func (e EnumWithPackageImports) ParseString(text string) (EnumWithPackageImports
 // or any value of a trait flagged with the --parsableByTrait flag
 func ParseEnumWithPackageImports(input any) (EnumWithPackageImports, error) {
 	switch input {
-	case "EnumWithPackageImports0", "enumwithpackageimports0":
+	case "EnumWithPackageImports0":
 		return EnumWithPackageImports0, nil
-	case "EnumWithPackageImports1", "enumwithpackageimports1":
+	case "EnumWithPackageImports1":
 		return EnumWithPackageImports1, nil
-	case "EnumWithPackageImports2", "enumwithpackageimports2":
+	case "EnumWithPackageImports2":
 		return EnumWithPackageImports2, nil
 	default:
+		if text, ok := input.(string); ok {
+			switch strings.ToLower(text) {
+			case "enumwithpackageimports0":
+				return EnumWithPackageImports0, nil
+			case "enumwithpackageimports1":
+				return EnumWithPackageImports1, nil
+			case "enumwithpackageimports2":
+				return EnumWithPackageImports2, nil
+			}
+		}
 		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type EnumWithPackageImports", input)
 	}
 }

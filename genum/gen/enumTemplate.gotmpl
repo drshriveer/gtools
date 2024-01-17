@@ -98,9 +98,6 @@ func Parse{{$enumTypeName}}(input any) ({{$enumTypeName}}, error) {
 	switch input {
 	{{- range $j, $val := $values }}
 	case "{{$val.Name}}"
-	{{- if $.CaseInsensitive -}}
-	, "{{$val.LowerCaseName}}"
-	{{- end -}}
 	{{- range $trait := (index $.Traits $i) -}}
 	{{- if $trait.Parsable -}}
 	{{- $instance := (index $trait.Traits $j) -}}
@@ -110,6 +107,16 @@ func Parse{{$enumTypeName}}(input any) ({{$enumTypeName}}, error) {
 		return {{$val.Name}}, nil
 	{{- end }}
 	default:
+		{{- if $.CaseInsensitive }}
+		if text, ok := input.(string); ok {
+			switch strings.ToLower(text) {
+			{{- range $val := $values}}
+			case "{{$val.LowerCaseName}}":
+				return {{$val.Name}}, nil
+			{{- end }}
+			}
+		}
+		{{- end }}
 		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type {{$enumTypeName}}", input)
 	}
 }

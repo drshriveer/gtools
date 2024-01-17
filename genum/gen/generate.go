@@ -19,9 +19,6 @@ import (
 //go:embed enumTemplate.gotmpl
 var tmpl string
 
-var intType = types.Universe.Lookup("int").Type()
-var stringType = types.Universe.Lookup("string").Type()
-
 // enumTemplate is the base template for an enum.
 var enumTemplate = template.Must(template.New("genum").Parse(tmpl))
 

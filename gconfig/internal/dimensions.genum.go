@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/drshriveer/gtools/genum"
 	"gopkg.in/yaml.v3"
@@ -69,15 +70,27 @@ func (e DimensionOne) ParseString(text string) (DimensionOne, error) {
 // or any value of a trait flagged with the --parsableByTrait flag
 func ParseDimensionOne(input any) (DimensionOne, error) {
 	switch input {
-	case "D1a", "d1a":
+	case "D1a":
 		return D1a, nil
-	case "D1b", "d1b":
+	case "D1b":
 		return D1b, nil
-	case "D1c", "d1c":
+	case "D1c":
 		return D1c, nil
-	case "D1d", "d1d":
+	case "D1d":
 		return D1d, nil
 	default:
+		if text, ok := input.(string); ok {
+			switch strings.ToLower(text) {
+			case "d1a":
+				return D1a, nil
+			case "d1b":
+				return D1b, nil
+			case "d1c":
+				return D1c, nil
+			case "d1d":
+				return D1d, nil
+			}
+		}
 		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type DimensionOne", input)
 	}
 }
@@ -216,17 +229,31 @@ func (e DimensionTwo) ParseString(text string) (DimensionTwo, error) {
 // or any value of a trait flagged with the --parsableByTrait flag
 func ParseDimensionTwo(input any) (DimensionTwo, error) {
 	switch input {
-	case "D2a", "d2a":
+	case "D2a":
 		return D2a, nil
-	case "D2b", "d2b":
+	case "D2b":
 		return D2b, nil
-	case "D2c", "d2c":
+	case "D2c":
 		return D2c, nil
-	case "D2d", "d2d":
+	case "D2d":
 		return D2d, nil
-	case "D2e", "d2e":
+	case "D2e":
 		return D2e, nil
 	default:
+		if text, ok := input.(string); ok {
+			switch strings.ToLower(text) {
+			case "d2a":
+				return D2a, nil
+			case "d2b":
+				return D2b, nil
+			case "d2c":
+				return D2c, nil
+			case "d2d":
+				return D2d, nil
+			case "d2e":
+				return D2e, nil
+			}
+		}
 		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type DimensionTwo", input)
 	}
 }
@@ -357,13 +384,23 @@ func (e DimensionThree) ParseString(text string) (DimensionThree, error) {
 // or any value of a trait flagged with the --parsableByTrait flag
 func ParseDimensionThree(input any) (DimensionThree, error) {
 	switch input {
-	case "D3a", "d3a":
+	case "D3a":
 		return D3a, nil
-	case "D3b", "d3b":
+	case "D3b":
 		return D3b, nil
-	case "D3c", "d3c":
+	case "D3c":
 		return D3c, nil
 	default:
+		if text, ok := input.(string); ok {
+			switch strings.ToLower(text) {
+			case "d3a":
+				return D3a, nil
+			case "d3b":
+				return D3b, nil
+			case "d3c":
+				return D3c, nil
+			}
+		}
 		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type DimensionThree", input)
 	}
 }
