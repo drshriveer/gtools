@@ -21,4 +21,6 @@ func TestFindIFaceDef(t *testing.T) {
 	iFace, err := FindIFaceDef("builtin", "error")
 	assert.NoError(t, err)
 	assert.True(t, types.Implements(iFace, validErrInterface))
+	// check the cache
+	assert.Equal(t, iFaceCache["builtin.error"], iFace)
 }
