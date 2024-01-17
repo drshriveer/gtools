@@ -132,6 +132,11 @@ func (e EnumerableWithParsableTraits) String() string {
 	}
 }
 
+// ParseString will return a value as defined in string form.
+func (e EnumerableWithParsableTraits) ParseString(text string) (EnumerableWithParsableTraits, error) {
+	return ParseEnumerableWithParsableTraits(text)
+}
+
 // ParseEnumerableWithParsableTraits will attempt to parse the value of a EnumerableWithParsableTraits from either its string form
 // or any value of a trait flagged with the --parsableByTrait flag
 func ParseEnumerableWithParsableTraits(input any) (EnumerableWithParsableTraits, error) {
@@ -154,36 +159,6 @@ func (e EnumerableWithParsableTraits) ParseGeneric(input any) (genum.Enum, error
 	return ParseEnumerableWithParsableTraits(input)
 }
 
-// ParseEnumerableWithParsableTraitsInt attempts to parse an EnumerableWithParsableTraits from an int value.
-// If any parsable traits can be converted to an int then they will be parsed if the
-// initial int parsing fails.
-func ParseEnumerableWithParsableTraitsInt(i int) (EnumerableWithParsableTraits, error) {
-	var err error
-	e := EnumerableWithParsableTraits(i)
-	if e.IsValid() {
-		// still return the nil error
-		// here so the compiler doesnt blow up
-		// if we dont have any parsable int type traits
-		return e, err
-	}
-	e, err = ParseEnumerableWithParsableTraits(MyEnum(i))
-	if err == nil {
-		return e, nil
-	}
-	return e, fmt.Errorf("unable to unmarshal EnumerableWithParsableTraits from `%d`", i)
-}
-
-// ParseEnumerableWithParsableTraitsString attempts to parse an EnumerableWithParsableTraits from a string value.
-// If any parsable traits can be converted to a string then they will be parsed if the
-// initial string parsing fails.
-func ParseEnumerableWithParsableTraitsString(s string) (EnumerableWithParsableTraits, error) {
-	e, err := ParseEnumerableWithParsableTraits(s)
-	if err == nil {
-		return e, nil
-	}
-	return e, fmt.Errorf("unable to unmarshal EnumerableWithParsableTraits from `%s`", s)
-}
-
 // MarshalJSON implements the json.Marshaler interface for EnumerableWithParsableTraits.
 func (e EnumerableWithParsableTraits) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.String())
@@ -191,20 +166,25 @@ func (e EnumerableWithParsableTraits) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements the json.Unmarshaler interface for EnumerableWithParsableTraits.
 func (e *EnumerableWithParsableTraits) UnmarshalJSON(data []byte) error {
+	// We always support strings.
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		*e, err = ParseEnumerableWithParsableTraitsString(s)
+		var err error
+		*e, err = ParseEnumerableWithParsableTraits(s)
 		if err == nil {
 			return nil
 		}
 	}
-	var i int
-	if err := json.Unmarshal(data, &i); err == nil {
-		*e, err = ParseEnumerableWithParsableTraitsInt(i)
+	// ints:
+	var sint64 int64
+	if err := json.Unmarshal(data, &s); err == nil {
+		*e, err = ParseEnumerableWithParsableTraits(MyEnum(sint64))
 		if err == nil {
 			return nil
 		}
 	}
+
+	// native parsing
 
 	return fmt.Errorf("unable to unmarshal EnumerableWithParsableTraits from `%v`", data)
 }
@@ -216,9 +196,14 @@ func (e EnumerableWithParsableTraits) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for EnumerableWithParsableTraits.
 func (e *EnumerableWithParsableTraits) UnmarshalText(text []byte) error {
+	s := string(text)
 	var err error
-	*e, err = ParseEnumerableWithParsableTraitsString(string(text))
-	return err
+	*e, err = ParseEnumerableWithParsableTraits(s)
+	if err == nil {
+		return nil
+	}
+
+	return fmt.Errorf("unable to unmarshal EnumerableWithParsableTraits from `%s`", s)
 }
 
 // MarshalYAML implements a YAML Marshaler for EnumerableWithParsableTraits.
@@ -228,18 +213,24 @@ func (e EnumerableWithParsableTraits) MarshalYAML() (any, error) {
 
 // UnmarshalYAML implements a YAML Unmarshaler for EnumerableWithParsableTraits.
 func (e *EnumerableWithParsableTraits) UnmarshalYAML(value *yaml.Node) error {
-	i, err := strconv.ParseInt(value.Value, 10, 64)
+	var err error
+
+	// first try and parse as a string
+	*e, err = ParseEnumerableWithParsableTraits(value.Value)
 	if err == nil {
-		*e, err = ParseEnumerableWithParsableTraitsInt(int(i))
-		if err == nil {
-			return nil
-		}
-	} else {
-		*e, err = ParseEnumerableWithParsableTraitsString(value.Value)
+		return nil
+	}
+
+	// then try and parse for any string-like traits
+	// ints:
+	if sint64, err := strconv.ParseInt(value.Value, 10, 64); err != nil {
+		*e, err = ParseEnumerableWithParsableTraits(MyEnum(sint64))
 		if err == nil {
 			return nil
 		}
 	}
+
+	// native parsing
 
 	return fmt.Errorf("unable to unmarshal EnumerableWithParsableTraits from yaml `%s`", value.Value)
 }

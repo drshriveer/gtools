@@ -1,6 +1,21 @@
 package gen
 
-import "go/types"
+import (
+	"go/types"
+
+	"github.com/drshriveer/gtools/gencommon"
+)
+
+type Underlying int
+
+const (
+	Unknown Underlying = iota
+	String
+	Uint64
+	Int64
+	Float64
+	Float32
+)
 
 // TraitDescs is a sortable slice of TraitDesc.
 type TraitDescs []TraitDesc
@@ -17,6 +32,36 @@ func (s TraitDescs) Less(i, j int) bool {
 	return s[i].Name < s[j].Name
 }
 
+func (s TraitDescs) getParsableUnderlying(u Underlying) TraitDescs {
+	out := make([]TraitDesc, 0, len(s))
+	for _, t := range s {
+		if t.Parsable && t.hasUnderlying(u) {
+			out = append(out, t)
+		}
+	}
+	return out
+}
+
+func (s TraitDescs) GetParsableUnderlyingString() TraitDescs {
+	return s.getParsableUnderlying(String)
+}
+
+func (s TraitDescs) GetParsableUnderlyingFloat64() TraitDescs {
+	return s.getParsableUnderlying(Float64)
+}
+
+func (s TraitDescs) GetParsableUnderlyingFloat32() TraitDescs {
+	return s.getParsableUnderlying(Float32)
+}
+
+func (s TraitDescs) GetParsableUnderlyingInt64() TraitDescs {
+	return s.getParsableUnderlying(Int64)
+}
+
+func (s TraitDescs) GetParsableUnderlyingUint64() TraitDescs {
+	return s.getParsableUnderlying(String)
+}
+
 // TraitDesc define a trait-- this is exposed for template use.
 type TraitDesc struct {
 	Name     string
@@ -24,6 +69,66 @@ type TraitDesc struct {
 	TypeRef  string
 	Parsable bool
 	Traits   TraitInstances
+}
+
+func (td *TraitDesc) extractUnderlying() (Underlying, bool) {
+	v, ok := td.Type.Underlying().(*types.Basic)
+	if !ok {
+		return Unknown, false
+	}
+	switch v.Kind() {
+	case
+		// types.UntypedInt,
+		types.Int,
+		types.Int8,
+		types.Int16,
+		types.Int32,
+		types.Int64:
+		return Int64, true
+	case
+		types.Uint,
+		types.Uint8,
+		types.Uint16,
+		types.Uint32,
+		types.Uint64:
+		return Uint64, true
+	case
+		types.Float32:
+		return Float32, true
+	case
+		types.UntypedFloat,
+		types.Float64:
+		return Float64, true
+	case
+		// types.UntypedString,
+		types.String:
+		return String, true
+	}
+	return Unknown, true
+}
+
+func (td *TraitDesc) hasUnderlying(u Underlying) bool {
+	underlying, ok := td.extractUnderlying()
+	if !ok {
+		return false
+	}
+	return underlying == u
+}
+
+func (td *TraitDesc) ImplementsJSONUnmarshaller() bool {
+	iFace, err := gencommon.FindIFaceDef("encoding/json", "Unmarshaler")
+	if err != nil || iFace == nil {
+		panic("Failed to find encoding/json.Unmarshaler")
+	}
+	return types.Implements(td.Type, iFace)
+}
+
+func (td *TraitDesc) ImplementsYAMLUnmarshaller() bool {
+	iFace, err := gencommon.FindIFaceDef("gopkg.in/yaml.v3", "Unmarshaler")
+	if err != nil || iFace == nil {
+		panic("Failed to find gopkg.in/yaml.v3.Unmarshaler")
+	}
+	return types.Implements(td.Type, iFace)
 }
 
 // TraitInstances are a sortable slice of `TraitInstance`s.

@@ -78,7 +78,7 @@ func (e *enumTest[T]) roundTripText(t *testing.T) {
 	assert.Equal(t, e.enum, rutils.Unptr(ptrVal))
 }
 
-func testRunner[T genum.EnumLike](t *testing.T, parser func(any) (T, error), tests []enumTest[T]) {
+func testRunner[T genum.EnumLike](t *testing.T, tests []enumTest[T]) {
 	t.Run("general type test", func(t *testing.T) {
 		t.Parallel()
 		validValues := make([]genum.Enum, 0, len(tests))
@@ -112,7 +112,8 @@ func testRunner[T genum.EnumLike](t *testing.T, parser func(any) (T, error), tes
 
 			assert.True(t, test.enum.IsValid())
 			assert.Equal(t, test.sName, test.enum.String())
-			r, err := parser(test.sName)
+			v := rutils.Unptr(reflect.New(reflect.TypeOf(*new(T))).Interface()).(genum.TypedEnum[T])
+			r, err := v.ParseString(test.sName)
 			require.NoError(t, err)
 			assert.Equal(t, test.enum, r)
 
@@ -147,7 +148,7 @@ func TestMyEnum3(t *testing.T) {
 		{enum: internal.MyEnum3(99), invalid: true},
 	}
 
-	testRunner[internal.MyEnum3](t, internal.ParseMyEnum3, tests)
+	testRunner[internal.MyEnum3](t, tests)
 }
 
 func TestMyEnum2(t *testing.T) {
@@ -167,7 +168,7 @@ func TestMyEnum2(t *testing.T) {
 		},
 	}
 
-	testRunner[internal.MyEnum2](t, internal.ParseMyEnum2, tests)
+	testRunner[internal.MyEnum2](t, tests)
 }
 
 func TestMyEnum(t *testing.T) {
@@ -218,5 +219,5 @@ func TestMyEnum(t *testing.T) {
 		},
 	}
 
-	testRunner[internal.MyEnum](t, internal.ParseMyEnum, tests)
+	testRunner[internal.MyEnum](t, tests)
 }
