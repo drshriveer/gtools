@@ -208,9 +208,9 @@ func (e *{{$enumTypeName}}) UnmarshalJSON(data []byte) error {
 	}
 	{{- end }}
 
+	{{- if (len ((index $.Traits $i).GetParsableJSONUnmarshalable)) }}
 	// native parsing
-	{{- range $trait := (index $.Traits $i) }}
-	{{- if (and $trait.Parsable $trait.ImplementsJSONUnmarshaller) }}
+	{{- range $trait := (index $.Traits $i).GetParsableJSONUnmarshalable }}
 	var v{{$i}} {{$trait.TypeRef}}
 	if err := json.Unmarshal(data, &s); err == nil {
 		*e, err = Parse{{$enumTypeName}}(v{{$i}})
@@ -326,9 +326,9 @@ func (e *{{$enumTypeName}}) UnmarshalYAML(value *yaml.Node) error {
 	}
 	{{- end }}
 
+	{{- if (len ((index $.Traits $i).GetParsableYAMLUnmarshalable)) }}
 	// native parsing
-	{{- range $trait := (index $.Traits $i) }}
-	{{- if (and $trait.Parsable $trait.ImplementsYAMLUnmarshaller) }}
+	{{- range $trait := (index $.Traits $i).GetParsableYAMLUnmarshalable }}
 	var v{{$i}} {{$trait.TypeRef}}
 	if err := v{{$i}}.UnmarshalYAML(value); err == nil {
 		*e, err = Parse{{$enumTypeName}}(v{{$i}})

@@ -118,8 +118,6 @@ func (e *MyEnum) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	// native parsing
-
 	return fmt.Errorf("unable to unmarshal MyEnum from `%v`", data)
 }
 
@@ -156,8 +154,6 @@ func (e *MyEnum) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	// then try and parse for any string-like traits
-
-	// native parsing
 
 	return fmt.Errorf("unable to unmarshal MyEnum from yaml `%s`", value.Value)
 }
@@ -249,8 +245,6 @@ func (e *MyEnum2) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	// native parsing
-
 	return fmt.Errorf("unable to unmarshal MyEnum2 from `%v`", data)
 }
 
@@ -287,8 +281,6 @@ func (e *MyEnum2) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	// then try and parse for any string-like traits
-
-	// native parsing
 
 	return fmt.Errorf("unable to unmarshal MyEnum2 from yaml `%s`", value.Value)
 }
@@ -460,8 +452,6 @@ func (e *MyEnum3) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	// native parsing
-
 	return fmt.Errorf("unable to unmarshal MyEnum3 from `%v`", data)
 }
 
@@ -498,8 +488,6 @@ func (e *MyEnum3) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	// then try and parse for any string-like traits
-
-	// native parsing
 
 	return fmt.Errorf("unable to unmarshal MyEnum3 from yaml `%s`", value.Value)
 }

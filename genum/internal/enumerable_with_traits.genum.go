@@ -158,8 +158,6 @@ func (e *EnumerableWithTraits) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	// native parsing
-
 	return fmt.Errorf("unable to unmarshal EnumerableWithTraits from `%v`", data)
 }
 
@@ -196,8 +194,6 @@ func (e *EnumerableWithTraits) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	// then try and parse for any string-like traits
-
-	// native parsing
 
 	return fmt.Errorf("unable to unmarshal EnumerableWithTraits from yaml `%s`", value.Value)
 }
@@ -387,8 +383,6 @@ func (e *Creatures) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	// native parsing
-
 	return fmt.Errorf("unable to unmarshal Creatures from `%v`", data)
 }
 
@@ -425,8 +419,6 @@ func (e *Creatures) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	// then try and parse for any string-like traits
-
-	// native parsing
 
 	return fmt.Errorf("unable to unmarshal Creatures from yaml `%s`", value.Value)
 }
@@ -549,8 +541,6 @@ func (e *EnumWithPackageImports) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	// native parsing
-
 	return fmt.Errorf("unable to unmarshal EnumWithPackageImports from `%v`", data)
 }
 
@@ -587,8 +577,6 @@ func (e *EnumWithPackageImports) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	// then try and parse for any string-like traits
-
-	// native parsing
 
 	return fmt.Errorf("unable to unmarshal EnumWithPackageImports from yaml `%s`", value.Value)
 }

@@ -62,6 +62,26 @@ func (s TraitDescs) GetParsableUnderlyingUint64() TraitDescs {
 	return s.getParsableUnderlying(String)
 }
 
+func (s TraitDescs) GetParsableJSONUnmarshalable() TraitDescs {
+	out := make([]TraitDesc, 0, len(s))
+	for _, t := range s {
+		if t.Parsable && t.implementsJSONUnmarshaler() {
+			out = append(out, t)
+		}
+	}
+	return out
+}
+
+func (s TraitDescs) GetParsableYAMLUnmarshalable() TraitDescs {
+	out := make([]TraitDesc, 0, len(s))
+	for _, t := range s {
+		if t.Parsable && t.implementsYAMLUnmarshaler() {
+			out = append(out, t)
+		}
+	}
+	return out
+}
+
 // TraitDesc define a trait-- this is exposed for template use.
 type TraitDesc struct {
 	Name     string
@@ -115,7 +135,7 @@ func (td *TraitDesc) hasUnderlying(u Underlying) bool {
 	return underlying == u
 }
 
-func (td *TraitDesc) ImplementsJSONUnmarshaller() bool {
+func (td *TraitDesc) implementsJSONUnmarshaler() bool {
 	iFace, err := gencommon.FindIFaceDef("encoding/json", "Unmarshaler")
 	if err != nil || iFace == nil {
 		panic("Failed to find encoding/json.Unmarshaler")
@@ -123,7 +143,7 @@ func (td *TraitDesc) ImplementsJSONUnmarshaller() bool {
 	return types.Implements(td.Type, iFace)
 }
 
-func (td *TraitDesc) ImplementsYAMLUnmarshaller() bool {
+func (td *TraitDesc) implementsYAMLUnmarshaler() bool {
 	iFace, err := gencommon.FindIFaceDef("gopkg.in/yaml.v3", "Unmarshaler")
 	if err != nil || iFace == nil {
 		panic("Failed to find gopkg.in/yaml.v3.Unmarshaler")

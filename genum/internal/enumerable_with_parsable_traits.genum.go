@@ -184,8 +184,6 @@ func (e *EnumerableWithParsableTraits) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	// native parsing
-
 	return fmt.Errorf("unable to unmarshal EnumerableWithParsableTraits from `%v`", data)
 }
 
@@ -229,8 +227,6 @@ func (e *EnumerableWithParsableTraits) UnmarshalYAML(value *yaml.Node) error {
 			return nil
 		}
 	}
-
-	// native parsing
 
 	return fmt.Errorf("unable to unmarshal EnumerableWithParsableTraits from yaml `%s`", value.Value)
 }

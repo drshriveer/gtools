@@ -119,8 +119,6 @@ func (e *DimensionOne) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	// native parsing
-
 	return fmt.Errorf("unable to unmarshal DimensionOne from `%v`", data)
 }
 
@@ -157,8 +155,6 @@ func (e *DimensionOne) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	// then try and parse for any string-like traits
-
-	// native parsing
 
 	return fmt.Errorf("unable to unmarshal DimensionOne from yaml `%s`", value.Value)
 }
@@ -282,8 +278,6 @@ func (e *DimensionTwo) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	// native parsing
-
 	return fmt.Errorf("unable to unmarshal DimensionTwo from `%v`", data)
 }
 
@@ -320,8 +314,6 @@ func (e *DimensionTwo) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	// then try and parse for any string-like traits
-
-	// native parsing
 
 	return fmt.Errorf("unable to unmarshal DimensionTwo from yaml `%s`", value.Value)
 }
@@ -429,8 +421,6 @@ func (e *DimensionThree) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	// native parsing
-
 	return fmt.Errorf("unable to unmarshal DimensionThree from `%v`", data)
 }
 
@@ -467,8 +457,6 @@ func (e *DimensionThree) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	// then try and parse for any string-like traits
-
-	// native parsing
 
 	return fmt.Errorf("unable to unmarshal DimensionThree from yaml `%s`", value.Value)
 }
