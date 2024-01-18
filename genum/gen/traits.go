@@ -9,12 +9,12 @@ import (
 type underlying int
 
 const (
-	Unknown underlying = iota
-	String
-	Uint64
-	Int64
-	Float64
-	Float32
+	unknown underlying = iota
+	stringUnderlying
+	uint64Underlying
+	int64Underlying
+	float64Underlying
+	float32Underlying
 )
 
 // TraitDescs is a sortable slice of TraitDesc.
@@ -42,50 +42,74 @@ func (s TraitDescs) getParsableUnderlying(u underlying, excluding func(*TraitDes
 	return out
 }
 
+// GetParsableUnderlyingStringForJSON returns trait descriptions for types that resolve to strings
+// AND do not implement their own JSON marshaller.
 func (s TraitDescs) GetParsableUnderlyingStringForJSON() TraitDescs {
-	return s.getParsableUnderlying(String, implementsJSONUnmarshaler)
+	return s.getParsableUnderlying(stringUnderlying, implementsJSONUnmarshaler)
 }
 
+// GetParsableUnderlyingFloat64ForJSON returns trait descriptions for types that resolve to float64s
+// AND do not implement their own JSON marshaller.
 func (s TraitDescs) GetParsableUnderlyingFloat64ForJSON() TraitDescs {
-	return s.getParsableUnderlying(Float64, implementsJSONUnmarshaler)
+	return s.getParsableUnderlying(float64Underlying, implementsJSONUnmarshaler)
 }
 
+// GetParsableUnderlyingFloat32ForJSON returns trait descriptions for types that resolve to float32s
+// AND do not implement their own JSON marshaller.
 func (s TraitDescs) GetParsableUnderlyingFloat32ForJSON() TraitDescs {
-	return s.getParsableUnderlying(Float32, implementsJSONUnmarshaler)
+	return s.getParsableUnderlying(float32Underlying, implementsJSONUnmarshaler)
 }
 
+// GetParsableUnderlyingInt64ForJSON returns trait descriptions for types that resolve to int64s
+// AND do not implement their own JSON marshaller.
 func (s TraitDescs) GetParsableUnderlyingInt64ForJSON() TraitDescs {
-	return s.getParsableUnderlying(Int64, implementsJSONUnmarshaler)
+	return s.getParsableUnderlying(int64Underlying, implementsJSONUnmarshaler)
 }
 
+// GetParsableUnderlyingUint64ForJSON returns trait descriptions for types that resolve to uint64s
+// AND do not implement their own JSON marshaller.
 func (s TraitDescs) GetParsableUnderlyingUint64ForJSON() TraitDescs {
-	return s.getParsableUnderlying(Uint64, implementsJSONUnmarshaler)
+	return s.getParsableUnderlying(uint64Underlying, implementsJSONUnmarshaler)
 }
 
+// GetParsableUnderlyingStringForYAML returns trait descriptions for types that resolve to strings
+// AND do not implement their own YAML marshaller.
 func (s TraitDescs) GetParsableUnderlyingStringForYAML() TraitDescs {
-	return s.getParsableUnderlying(String, implementsYAMLUnmarshaler)
+	return s.getParsableUnderlying(stringUnderlying, implementsYAMLUnmarshaler)
 }
 
+// GetParsableUnderlyingFloat64ForYAML returns trait descriptions for types that resolve to float64s
+// AND do not implement their own YAML marshaller.
 func (s TraitDescs) GetParsableUnderlyingFloat64ForYAML() TraitDescs {
-	return s.getParsableUnderlying(Float64, implementsYAMLUnmarshaler)
+	return s.getParsableUnderlying(float64Underlying, implementsYAMLUnmarshaler)
 }
 
+// GetParsableUnderlyingFloat32ForYAML returns trait descriptions for types that resolve to float32s
+// AND do not implement their own YAML marshaller.
 func (s TraitDescs) GetParsableUnderlyingFloat32ForYAML() TraitDescs {
-	return s.getParsableUnderlying(Float32, implementsYAMLUnmarshaler)
+	return s.getParsableUnderlying(float32Underlying, implementsYAMLUnmarshaler)
 }
 
+// GetParsableUnderlyingInt64ForYAML returns trait descriptions for types that resolve to int64s
+// AND do not implement their own YAML marshaller.
 func (s TraitDescs) GetParsableUnderlyingInt64ForYAML() TraitDescs {
-	return s.getParsableUnderlying(Int64, implementsYAMLUnmarshaler)
+	return s.getParsableUnderlying(int64Underlying, implementsYAMLUnmarshaler)
 }
 
+// GetParsableUnderlyingUint64ForYAML returns trait descriptions for types that resolve to uint64s
+// AND do not implement their own YAML marshaller.
 func (s TraitDescs) GetParsableUnderlyingUint64ForYAML() TraitDescs {
-	return s.getParsableUnderlying(Uint64, implementsYAMLUnmarshaler)
+	return s.getParsableUnderlying(uint64Underlying, implementsYAMLUnmarshaler)
 }
 
+// GetParsableUnderlyingStringForText returns trait descriptions for types that resolve to strings
+// AND do not implement their own Text marshaller.
 func (s TraitDescs) GetParsableUnderlyingStringForText() TraitDescs {
-	return s.getParsableUnderlying(String, implementsTextUnmarshaler)
+	return s.getParsableUnderlying(stringUnderlying, implementsTextUnmarshaler)
 }
 
+// GetParsableJSONUnmarshalable returns the subset of traits that implement their own JSON
+// marshaling and are flagged as parsable traits.
 func (s TraitDescs) GetParsableJSONUnmarshalable() TraitDescs {
 	out := make([]TraitDesc, 0, len(s))
 	for _, t := range s {
@@ -96,6 +120,8 @@ func (s TraitDescs) GetParsableJSONUnmarshalable() TraitDescs {
 	return out
 }
 
+// GetParsableYAMLUnmarshalable returns the subset of traits that implement their own YAML
+// marshaling and are flagged as parsable traits.
 func (s TraitDescs) GetParsableYAMLUnmarshalable() TraitDescs {
 	out := make([]TraitDesc, 0, len(s))
 	for _, t := range s {
@@ -106,6 +132,8 @@ func (s TraitDescs) GetParsableYAMLUnmarshalable() TraitDescs {
 	return out
 }
 
+// GetParsableTextUnmarshalable returns the subset of traits that implement their own text
+// marshaling and are flagged as parsable traits.
 func (s TraitDescs) GetParsableTextUnmarshalable() TraitDescs {
 	out := make([]TraitDesc, 0, len(s))
 	for _, t := range s {
@@ -128,7 +156,7 @@ type TraitDesc struct {
 func (td *TraitDesc) extractUnderlying() (underlying, bool) {
 	v, ok := td.Type.Underlying().(*types.Basic)
 	if !ok {
-		return Unknown, false
+		return unknown, false
 	}
 	switch v.Kind() {
 	case
@@ -138,29 +166,29 @@ func (td *TraitDesc) extractUnderlying() (underlying, bool) {
 		types.Int16,
 		types.Int32,
 		types.Int64:
-		return Int64, true
+		return int64Underlying, true
 	case
 		types.Uint,
 		types.Uint8,
 		types.Uint16,
 		types.Uint32,
 		types.Uint64:
-		return Uint64, true
+		return uint64Underlying, true
 	case
 		types.Float32:
-		return Float32, true
+		return float32Underlying, true
 	case
 		types.UntypedFloat,
 		types.Float64:
-		return Float64, true
+		return float64Underlying, true
 	case
 		// untyped strings dont need casting
 		// so we can skip them here
 		// types.UntypedString,
 		types.String:
-		return String, true
+		return stringUnderlying, true
 	}
-	return Unknown, true
+	return unknown, true
 }
 
 func (td *TraitDesc) hasUnderlying(u underlying) bool {

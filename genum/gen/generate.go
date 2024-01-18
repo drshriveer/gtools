@@ -137,7 +137,7 @@ func (g *Generate) Parse() error {
 //		E2, _ = EnumerableWithTraits(iota), "val"
 //	)
 //
-// This will throw an error because "val" matches E1 and E2
+// This will throw an error because "val" matches E1 and E2.
 func validateParsableTraits(enumType string, traits TraitDescs) error {
 	parsableTraitResults := make(map[string]string)
 	for _, trait := range traits {

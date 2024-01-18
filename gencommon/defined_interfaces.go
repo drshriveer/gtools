@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
+	"sync"
 
-	"github.com/puzpuzpuz/xsync/v3"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -17,8 +17,9 @@ var (
 	// ContextInterface defines the error interface as a type for comparison.
 	ContextInterface *types.Interface
 
-	// cache of interfaces so we don't repeatedly perform expensive lookups
-	iFaceCache = xsync.NewMapOf[string, *types.Interface]()
+	// cache of interfaces so we don't repeatedly perform expensive lookups.
+	iFaceCacheMu = sync.Mutex{}
+	iFaceCache   = make(map[string]*types.Interface, 2)
 )
 
 func init() {
@@ -36,9 +37,11 @@ func init() {
 // FindIFaceDef finds an interface definition of the given package and type.
 // Which can be used in type matching.
 func FindIFaceDef(pkgName, typeName string) (*types.Interface, error) {
+	iFaceCacheMu.Lock()
+	defer iFaceCacheMu.Unlock()
 	// first check the cache
 	key := pkgName + "." + typeName
-	iFace, ok := iFaceCache.Load(key)
+	iFace, ok := iFaceCache[key]
 	if ok {
 		return iFace, nil
 	}
@@ -47,7 +50,7 @@ func FindIFaceDef(pkgName, typeName string) (*types.Interface, error) {
 	res, err := findIFaceDefImpl(pkgName, typeName)
 	if err == nil {
 		// cache the value if there was no error
-		iFaceCache.Store(key, res)
+		iFaceCache[key] = res
 	}
 
 	// passthrough the result
