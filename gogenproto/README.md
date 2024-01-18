@@ -56,10 +56,12 @@ package models
 ##### Options
 
 ```bash
- → ./path/to/bin/gogenproto --help
+→ ./path/to/bin/gogenproto --help
 Usage of ./bin/gogenproto:
   -grpc
         also generate grpc service definitions (experimental)
+  -include value
+        comma-separated paths to additional packages to include
   -input-dir string
         path to root directory for proto generation (env PWD)
   -inputDir string
@@ -71,10 +73,10 @@ Usage of ./bin/gogenproto:
   -recurse
         generate protos recursively
   -vt-proto
-        also generate vtproto (experimental)
-
+        also generate vtproto
 ```
 
 ### TODO:
 
--	add support for proto validation
+-	add (native!) support for proto validation
+-   add flags for other languages
