@@ -24,7 +24,8 @@ type Generate struct {
 	GRPC    bool     `default:"false" usage:"also generate grpc service definitions (experimental)"`
 	Include []string `usage:"comma-separated paths to additional packages to include"`
 
-	// TODO: add flags for other languages, TS, etc,
+	// TODO: add flags for other languages, TS, etc.
+	// TODO: add NATIVE validation support.
 }
 
 // Run runs the generate command.

@@ -79,4 +79,4 @@ Usage of ./bin/gogenproto:
 ### TODO:
 
 -	add (native!) support for proto validation
--   add flags for other languages
+-	add flags for other languages
