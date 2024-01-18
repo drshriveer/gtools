@@ -280,7 +280,6 @@ func (e *{{$enumTypeName}}) UnmarshalYAML(value *yaml.Node) error {
 		return nil
 	}
 
-	// then try and parse for any string-like traits
 	{{- range $trait := (index $.Traits $i).GetParsableUnderlyingString }}
 	*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(value.Value))
 	if err == nil {
