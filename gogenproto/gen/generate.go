@@ -19,11 +19,13 @@ type Generate struct {
 	InputDir  string `aliases:"inputDir" env:"PWD" usage:"path to root directory for proto generation"`
 	OutputDir string `aliases:"outputDir" default:"../" usage:"relative output path for generated files"`
 
-	Recurse bool `default:"false" usage:"generate protos recursively"`
-	VTProto bool `default:"false" usage:"also generate vtproto (experimental)"`
-	GRPC    bool `default:"false" usage:"also generate grpc service definitions (experimental)"`
+	Recurse bool     `default:"false" usage:"generate protos recursively"`
+	VTProto bool     `default:"false" usage:"also generate vtproto"`
+	GRPC    bool     `default:"false" usage:"also generate grpc service definitions (experimental)"`
+	Include []string `usage:"comma-separated paths to additional packages to include"`
 
-	// TODO: other flags, like VTProto, GRPC, TS, etc,
+	// TODO: add flags for other languages, TS, etc.
+	// TODO: add NATIVE validation support.
 }
 
 // Run runs the generate command.
@@ -48,6 +50,9 @@ func (g Generate) Run() error {
 			"--go-grpc_out="+g.OutputDir,
 			"--go-grpc_opt=paths=source_relative",
 		)
+	}
+	for _, include := range g.Include {
+		args = append(args, "-I="+filepath.Join(g.InputDir, include))
 	}
 	args = append(args, paths...)
 	cmd := exec.Command("protoc", args...)
