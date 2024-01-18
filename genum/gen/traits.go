@@ -150,7 +150,7 @@ func (td *TraitDesc) implementsJSONUnmarshaler() bool {
 	if err != nil || iFace == nil {
 		panic("Failed to find encoding/json.Unmarshaler")
 	}
-	return types.Implements(td.Type, iFace)
+	return gencommon.TypeImplements(td.Type, iFace)
 }
 
 func (td *TraitDesc) implementsYAMLUnmarshaler() bool {
