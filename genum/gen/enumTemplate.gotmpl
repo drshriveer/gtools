@@ -183,7 +183,7 @@ func (e *{{$enumTypeName}}) UnmarshalJSON(data []byte) error {
 
 
 	{{- if (len ((index $.Traits $i).GetParsableUnderlyingFloat64)) }}
-	// floats64: ( i hate floats)..
+	// floats64: (must treat differently than float32- I hate floats.)
 	var floater64 float64
 	if err := json.Unmarshal(data, &s); err == nil {
 		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingFloat64 }}
