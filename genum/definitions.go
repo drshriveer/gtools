@@ -20,10 +20,10 @@ type Enum interface {
 	// IsEnum does nothing but help define the interface.
 	IsEnum()
 
-	// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+	// ParseGeneric calls TypedEnum.Parse but returns the result
 	// in the generic Enum interface. Which is useful when you are only able to work with
-	// the un-typed interface..
-	ParseStringGeneric(text string) (Enum, error)
+	// the un-typed interface.
+	ParseGeneric(input any) (Enum, error)
 }
 
 // TypedEnum is extended, generic interface that enums extend.

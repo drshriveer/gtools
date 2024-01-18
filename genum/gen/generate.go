@@ -25,14 +25,15 @@ var enumTemplate = template.Must(template.New("genum").Parse(tmpl))
 // Generate is the parser and writer of enums and their generated code.
 // It seems to double as its own 'options' holder.
 type Generate struct {
-	InFile          string   `aliases:"in" env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
-	OutFile         string   `aliases:"out" usage:"name of output file (defaults to go:generate context filename.enum.go)"`
-	Types           []string `usage:"[required] comma-separated names of types to generate enum code for"`
-	GenJSON         bool     `aliases:"json" default:"true" usage:"generate json marshal methods"`
-	GenYAML         bool     `aliases:"yaml" default:"true" usage:"generate yaml marshal methods"`
-	GenText         bool     `aliases:"text" default:"true" usage:"generate text marshal methods"`
-	DisableTraits   bool     `aliases:"disableTraits" default:"false" usage:"disable trait syntax inspection"`
-	CaseInsensitive bool     `aliases:"caseInsensitive" default:"false" usage:"parsing will be case insensitive"`
+	InFile           string   `aliases:"in" env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
+	OutFile          string   `aliases:"out" usage:"name of output file (defaults to go:generate context filename.enum.go)"`
+	Types            []string `usage:"[required] comma-separated names of types to generate enum code for"`
+	GenJSON          bool     `aliases:"json" default:"true" usage:"generate json marshal methods"`
+	GenYAML          bool     `aliases:"yaml" default:"true" usage:"generate yaml marshal methods"`
+	GenText          bool     `aliases:"text" default:"true" usage:"generate text marshal methods"`
+	DisableTraits    bool     `aliases:"disableTraits" default:"false" usage:"disable trait syntax inspection"`
+	CaseInsensitive  bool     `aliases:"caseInsensitive" default:"false" usage:"parsing will be case insensitive"`
+	ParsableByTraits []string `aliases:"parsableByTraits" usage:"Comma separated list of trait names which will generate their own parser. This will throw an error if the values of that trait are not unique or the trait does not exist."`
 
 	// derived, (exposed for template use):
 	Values  []Values                 `flag:""` // ignore these fields
@@ -114,10 +115,48 @@ func (g *Generate) Parse() error {
 		}
 
 		processDuplicates(values, traits, enumType) // detect and warn duplicates
+		err = validateParsableTraits(enumType, traits)
+		if err != nil {
+			return err
+		}
+
 		sort.Sort(traits)
 		g.Traits[i] = traits
 	}
 
+	return nil
+}
+
+// validateParsableTraits returns an error if two instances of a value of a parsable trait map to
+// different enums.
+// eg:
+//
+//	type EnumerableWithTraits int
+//	const (
+//		E1, _Trait1 = EnumerableWithTraits(iota), "val"
+//		E2, _ = EnumerableWithTraits(iota), "val"
+//	)
+//
+// This will throw an error because "val" matches E1 and E2.
+func validateParsableTraits(enumType string, traits TraitDescs) error {
+	parsableTraitResults := make(map[string]string)
+	for _, trait := range traits {
+		if trait.Parsable {
+			for _, instance := range trait.Traits {
+				if parseTo, ok := parsableTraitResults[instance.value]; ok {
+					if parseTo != instance.OwningValue.Name {
+						return fmt.Errorf(
+							"Enum: %s cannot have parsableTrait %s because trait value %s is "+
+								"found in %s and %s. parsableByTrait values must be unique within the enum.",
+							enumType, trait.Name, instance.value, parseTo, instance.OwningValue.Name)
+					}
+
+				}
+				parsableTraitResults[instance.value] = instance.OwningValue.Name
+			}
+
+		}
+	}
 	return nil
 }
 
@@ -147,13 +186,15 @@ func (g *Generate) extractTraitDescs(tName string, pkgScope *types.Scope, values
 				"Enum: %s, value: %s (%d) trait %d has no name that can be converted "+
 					"into a trait function; this is a violation of the genum contract for "+
 					"traits which expects the first enum (by number) to define trait names. "+
-					"If this is unexpected, consider setting the DisableTraits falg.",
+					"If this is unexpected, consider setting the DisableTraits flag.",
 				tName, firstV.Name, firstV.Value, j,
 			)
 		}
 		tDesc := TraitDesc{
-			Name:    traitName,
-			TypeRef: typeRef,
+			Name:     traitName,
+			Type:     v.Type(),
+			TypeRef:  typeRef,
+			Parsable: slices.Contains(g.ParsableByTraits, traitName),
 			Traits: []TraitInstance{
 				{
 					OwningValue:  firstV,
@@ -182,7 +223,7 @@ func (g *Generate) extractTraitDescs(tName string, pkgScope *types.Scope, values
 				return nil, fmt.Errorf(
 					"Enum: %s. value: %s (%d) has invalid trait defintions; were trait names defined?. "+
 						"Expected %d traits, found %d without well-defined duplicated value "+
-						"witth expected number of traits.",
+						"with expected number of traits.",
 					tName, v.Name, v.Value, len(traits), len(v.astLine.Values)-1)
 			}
 			return nil, fmt.Errorf(

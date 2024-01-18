@@ -89,30 +89,46 @@ func (e {{$enumTypeName}}) String() string {
 
 // ParseString will return a value as defined in string form.
 func (e {{$enumTypeName}}) ParseString(text string) ({{$enumTypeName}}, error) {
-	switch text {
-	{{- range $val := $values}}
-	case "{{$val.Name}}":
+	return Parse{{$enumTypeName}}(text)
+}
+
+// Parse{{$enumTypeName}} will attempt to parse the value of a {{$enumTypeName}} from either its string form
+// or any value of a trait flagged with the --parsableByTrait flag.
+func Parse{{$enumTypeName}}(input any) ({{$enumTypeName}}, error) {
+	switch input {
+	{{- range $j, $val := $values }}
+	case "{{$val.Name}}"
+	{{- range $trait := (index $.Traits $i) -}}
+	{{- if $trait.Parsable -}}
+	{{- $instance := (index $trait.Traits $j) -}}
+	, {{$instance.Value}}
+	{{- end -}}
+	{{- end }}:
 		return {{$val.Name}}, nil
 	{{- end }}
 	default:
 		{{- if $.CaseInsensitive }}
-		switch strings.ToLower(text) {
-		{{- range $val := $values}}
-		case "{{$val.LowerCaseName}}":
-			return {{$val.Name}}, nil
-		{{- end }}
+		if text, ok := input.(string); ok {
+			switch strings.ToLower(text) {
+			{{- range $val := $values}}
+			case "{{$val.LowerCaseName}}":
+				return {{$val.Name}}, nil
+			{{- end }}
+			}
 		}
 		{{- end }}
-		return 0, fmt.Errorf("`%s` is not a valid enum of type {{$enumTypeName}}", text)
+		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type {{$enumTypeName}}", input)
 	}
 }
 
-// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+// ParseGeneric calls TypedEnum.Parse but returns the result
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e {{$enumTypeName}}) ParseStringGeneric(text string) (genum.Enum, error) {
-	return e.ParseString(text)
+func (e {{$enumTypeName}}) ParseGeneric(input any) (genum.Enum, error) {
+	return Parse{{$enumTypeName}}(input)
 }
+
+
 {{- if $.GenJSON }}
 
 // MarshalJSON implements the json.Marshaler interface for {{$enumTypeName}}.
@@ -122,19 +138,88 @@ func (e {{$enumTypeName}}) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements the json.Unmarshaler interface for {{$enumTypeName}}.
 func (e *{{$enumTypeName}}) UnmarshalJSON(data []byte) error {
+	// We always support strings.
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = {{$enumTypeName}}(0).ParseString(s)
-		return err
+		*e, err = Parse{{$enumTypeName}}(s)
+		if err == nil {
+			return nil
+		}
+
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingStringForJSON }}
+		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(s))
+		if err == nil {
+			return nil
+		}
+		{{- end }}
 	}
-	var i int
-	if err := json.Unmarshal(data, &i); err == nil {
-		*e = {{$enumTypeName}}(i)
-		if e.IsValid() {
+
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingUint64ForJSON)) }}
+	// uints:
+	var uinter64 uint64
+	if err := json.Unmarshal(data, &uinter64); err == nil {
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingUint64ForJSON }}
+		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(uinter64))
+		if err == nil {
+			return nil
+		}
+		{{- end }}
+	}
+	{{- end }}
+
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingInt64ForJSON)) }}
+	// ints:
+	var sint64 int64
+	if err := json.Unmarshal(data, &sint64); err == nil {
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingInt64ForJSON }}
+		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(sint64))
+		if err == nil {
+			return nil
+		}
+		{{- end }}
+	}
+	{{- end }}
+
+
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingFloat64ForJSON)) }}
+	// floats64: (must treat differently than float32- I hate floats.)
+	var floater64 float64
+	if err := json.Unmarshal(data, &floater64); err == nil {
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingFloat64ForJSON }}
+		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(floater64))
+		if err == nil {
+			return nil
+		}
+		{{- end }}
+	}
+	{{- end }}
+
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingFloat32ForJSON)) }}
+	// float32:
+	var floater32 float32
+	if err := json.Unmarshal(data, &floater32); err == nil {
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingFloat32ForJSON }}
+		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(floater32))
+		if err == nil {
+			return nil
+		}
+		{{- end }}
+	}
+	{{- end }}
+
+	{{- if (len ((index $.Traits $i).GetParsableJSONUnmarshalable)) }}
+	// native parsing
+	{{- range $trait := (index $.Traits $i).GetParsableJSONUnmarshalable }}
+	v{{$i}} := *new({{$trait.TypeRef}})
+	if err := json.Unmarshal(data, &v{{$i}}); err == nil {
+		*e, err = Parse{{$enumTypeName}}(v{{$i}})
+		if err == nil {
 			return nil
 		}
 	}
+	{{- end }}
+	{{- end }}
 
 	return fmt.Errorf("unable to unmarshal {{$enumTypeName}} from `%v`", data)
 }
@@ -148,9 +233,34 @@ func (e {{$enumTypeName}}) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for {{$enumTypeName}}.
 func (e *{{$enumTypeName}}) UnmarshalText(text []byte) error {
+	s := string(text)
 	var err error
-	*e, err = {{$enumTypeName}}(0).ParseString(string(text))
-	return err
+	*e, err = Parse{{$enumTypeName}}(s)
+	if err == nil {
+		return nil
+	}
+
+	{{- range $trait := (index $.Traits $i).GetParsableUnderlyingStringForText }}
+	*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(s))
+	if err == nil {
+		return nil
+	}
+	{{- end }}
+
+	{{- if (len ((index $.Traits $i).GetParsableTextUnmarshalable)) }}
+ 	// native parsing
+ 	{{- range $trait := (index $.Traits $i).GetParsableTextUnmarshalable }}
+ 	v{{$i}} := *new({{$trait.TypeRef}})
+ 	if err := v{{$i}}.UnmarshalText(text); err == nil {
+ 		*e, err = Parse{{$enumTypeName}}(v{{$i}})
+ 		if err == nil {
+ 			return nil
+ 		}
+ 	}
+ 	{{- end }}
+ 	{{- end }}
+
+	return fmt.Errorf("unable to unmarshal {{$enumTypeName}} from `%s`", s)
 }
 {{- end}}
 {{- if $.GenYAML }}
@@ -162,17 +272,85 @@ func (e {{$enumTypeName}}) MarshalYAML() (any, error) {
 
 // UnmarshalYAML implements a YAML Unmarshaler for {{$enumTypeName}}.
 func (e *{{$enumTypeName}}) UnmarshalYAML(value *yaml.Node) error {
-	i, err := strconv.ParseInt(value.Value, 10, 64)
+	var err error
+
+	// first try and parse as a string
+	*e, err = Parse{{$enumTypeName}}(value.Value)
 	if err == nil {
-		*e = {{$enumTypeName}}(i)
-	} else {
-		*e, err = {{$enumTypeName}}(0).ParseString(value.Value)
-	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
 		return nil
 	}
+
+	{{- range $trait := (index $.Traits $i).GetParsableUnderlyingStringForYAML }}
+	*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(value.Value))
+	if err == nil {
+		return nil
+	}
+	{{- end }}
+
+
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingUint64ForYAML)) }}
+	// uints:
+	if uinter64, err := strconv.ParseUint(value.Value, 10, 64); err != nil {
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingUint64ForYAML }}
+		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(uinter64))
+		if err == nil {
+			return nil
+		}
+		{{- end }}
+	}
+	{{- end }}
+
+
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingInt64ForYAML)) }}
+	// ints:
+	if sint64, err := strconv.ParseInt(value.Value, 10, 64); err != nil {
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingInt64ForYAML }}
+		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(sint64))
+		if err == nil {
+			return nil
+		}
+		{{- end }}
+	}
+	{{- end }}
+
+
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingFloat64ForYAML)) }}
+	// floats64: (must treat differently than float32- I hate floats.)
+	if floater64, err := strconv.ParseFloat(value.Value, 64); err != nil  {
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingFloat64ForYAML }}
+		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(floater64))
+		if err == nil {
+			return nil
+		}
+		{{- end }}
+	}
+	{{- end }}
+
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingFloat32ForYAML)) }}
+	// float32:
+	if floater32, err := strconv.ParseFloat(value.Value, 32); err != nil {
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingFloat32ForYAML }}
+		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(float32(floater32)))
+		if err == nil {
+			return nil
+		}
+		{{- end }}
+	}
+	{{- end }}
+
+	{{- if (len ((index $.Traits $i).GetParsableYAMLUnmarshalable)) }}
+	// native parsing
+	{{- range $trait := (index $.Traits $i).GetParsableYAMLUnmarshalable }}
+	var v{{$i}} {{$trait.TypeRef}}
+	if err := v{{$i}}.UnmarshalYAML(value); err == nil {
+		*e, err = Parse{{$enumTypeName}}(v{{$i}})
+		if err == nil {
+			return nil
+		}
+	}
+	{{- end }}
+	{{- end }}
+
 	return fmt.Errorf("unable to unmarshal {{$enumTypeName}} from yaml `%s`", value.Value)
 }
 

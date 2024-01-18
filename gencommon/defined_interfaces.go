@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
+	"sync"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -15,6 +16,10 @@ var (
 
 	// ContextInterface defines the error interface as a type for comparison.
 	ContextInterface *types.Interface
+
+	// cache of interfaces so we don't repeatedly perform expensive lookups.
+	iFaceCacheMu = sync.Mutex{}
+	iFaceCache   = make(map[string]*types.Interface, 2)
 )
 
 func init() {
@@ -32,6 +37,27 @@ func init() {
 // FindIFaceDef finds an interface definition of the given package and type.
 // Which can be used in type matching.
 func FindIFaceDef(pkgName, typeName string) (*types.Interface, error) {
+	iFaceCacheMu.Lock()
+	defer iFaceCacheMu.Unlock()
+	// first check the cache
+	key := pkgName + "." + typeName
+	iFace, ok := iFaceCache[key]
+	if ok {
+		return iFace, nil
+	}
+
+	// otherwise do the expensive lookup
+	res, err := findIFaceDefImpl(pkgName, typeName)
+	if err == nil {
+		// cache the value if there was no error
+		iFaceCache[key] = res
+	}
+
+	// passthrough the result
+	return res, err
+}
+
+func findIFaceDefImpl(pkgName, typeName string) (*types.Interface, error) {
 	cfg := &packages.Config{
 		Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles |
 			packages.NeedImports | packages.NeedDeps | packages.NeedTypesInfo | packages.NeedTypes |

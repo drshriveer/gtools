@@ -6,7 +6,6 @@ import (
 	"fmt"
 	reflect "reflect"
 	"slices"
-	"strconv"
 	"strings"
 	stupidTime "time"
 
@@ -107,7 +106,13 @@ func (e EnumerableWithTraits) String() string {
 
 // ParseString will return a value as defined in string form.
 func (e EnumerableWithTraits) ParseString(text string) (EnumerableWithTraits, error) {
-	switch text {
+	return ParseEnumerableWithTraits(text)
+}
+
+// ParseEnumerableWithTraits will attempt to parse the value of a EnumerableWithTraits from either its string form
+// or any value of a trait flagged with the --parsableByTrait flag.
+func ParseEnumerableWithTraits(input any) (EnumerableWithTraits, error) {
+	switch input {
 	case "E1":
 		return E1, nil
 	case "E2":
@@ -115,23 +120,25 @@ func (e EnumerableWithTraits) ParseString(text string) (EnumerableWithTraits, er
 	case "E3":
 		return E3, nil
 	default:
-		switch strings.ToLower(text) {
-		case "e1":
-			return E1, nil
-		case "e2":
-			return E2, nil
-		case "e3":
-			return E3, nil
+		if text, ok := input.(string); ok {
+			switch strings.ToLower(text) {
+			case "e1":
+				return E1, nil
+			case "e2":
+				return E2, nil
+			case "e3":
+				return E3, nil
+			}
 		}
-		return 0, fmt.Errorf("`%s` is not a valid enum of type EnumerableWithTraits", text)
+		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type EnumerableWithTraits", input)
 	}
 }
 
-// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+// ParseGeneric calls TypedEnum.Parse but returns the result
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e EnumerableWithTraits) ParseStringGeneric(text string) (genum.Enum, error) {
-	return e.ParseString(text)
+func (e EnumerableWithTraits) ParseGeneric(input any) (genum.Enum, error) {
+	return ParseEnumerableWithTraits(input)
 }
 
 // MarshalJSON implements the json.Marshaler interface for EnumerableWithTraits.
@@ -141,16 +148,12 @@ func (e EnumerableWithTraits) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements the json.Unmarshaler interface for EnumerableWithTraits.
 func (e *EnumerableWithTraits) UnmarshalJSON(data []byte) error {
+	// We always support strings.
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = EnumerableWithTraits(0).ParseString(s)
-		return err
-	}
-	var i int
-	if err := json.Unmarshal(data, &i); err == nil {
-		*e = EnumerableWithTraits(i)
-		if e.IsValid() {
+		*e, err = ParseEnumerableWithTraits(s)
+		if err == nil {
 			return nil
 		}
 	}
@@ -165,9 +168,14 @@ func (e EnumerableWithTraits) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for EnumerableWithTraits.
 func (e *EnumerableWithTraits) UnmarshalText(text []byte) error {
+	s := string(text)
 	var err error
-	*e, err = EnumerableWithTraits(0).ParseString(string(text))
-	return err
+	*e, err = ParseEnumerableWithTraits(s)
+	if err == nil {
+		return nil
+	}
+
+	return fmt.Errorf("unable to unmarshal EnumerableWithTraits from `%s`", s)
 }
 
 // MarshalYAML implements a YAML Marshaler for EnumerableWithTraits.
@@ -177,17 +185,14 @@ func (e EnumerableWithTraits) MarshalYAML() (any, error) {
 
 // UnmarshalYAML implements a YAML Unmarshaler for EnumerableWithTraits.
 func (e *EnumerableWithTraits) UnmarshalYAML(value *yaml.Node) error {
-	i, err := strconv.ParseInt(value.Value, 10, 64)
+	var err error
+
+	// first try and parse as a string
+	*e, err = ParseEnumerableWithTraits(value.Value)
 	if err == nil {
-		*e = EnumerableWithTraits(i)
-	} else {
-		*e, err = EnumerableWithTraits(0).ParseString(value.Value)
-	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
 		return nil
 	}
+
 	return fmt.Errorf("unable to unmarshal EnumerableWithTraits from yaml `%s`", value.Value)
 }
 
@@ -300,7 +305,13 @@ func (e Creatures) String() string {
 
 // ParseString will return a value as defined in string form.
 func (e Creatures) ParseString(text string) (Creatures, error) {
-	switch text {
+	return ParseCreatures(text)
+}
+
+// ParseCreatures will attempt to parse the value of a Creatures from either its string form
+// or any value of a trait flagged with the --parsableByTrait flag.
+func ParseCreatures(input any) (Creatures, error) {
+	switch input {
 	case "NotCreature":
 		return NotCreature, nil
 	case "Cat":
@@ -320,35 +331,37 @@ func (e Creatures) ParseString(text string) (Creatures, error) {
 	case "SeaAnemone":
 		return SeaAnemone, nil
 	default:
-		switch strings.ToLower(text) {
-		case "notcreature":
-			return NotCreature, nil
-		case "cat":
-			return Cat, nil
-		case "feline":
-			return Feline, nil
-		case "feline2":
-			return Feline2, nil
-		case "dog":
-			return Dog, nil
-		case "ant":
-			return Ant, nil
-		case "spider":
-			return Spider, nil
-		case "human":
-			return Human, nil
-		case "seaanemone":
-			return SeaAnemone, nil
+		if text, ok := input.(string); ok {
+			switch strings.ToLower(text) {
+			case "notcreature":
+				return NotCreature, nil
+			case "cat":
+				return Cat, nil
+			case "feline":
+				return Feline, nil
+			case "feline2":
+				return Feline2, nil
+			case "dog":
+				return Dog, nil
+			case "ant":
+				return Ant, nil
+			case "spider":
+				return Spider, nil
+			case "human":
+				return Human, nil
+			case "seaanemone":
+				return SeaAnemone, nil
+			}
 		}
-		return 0, fmt.Errorf("`%s` is not a valid enum of type Creatures", text)
+		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type Creatures", input)
 	}
 }
 
-// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+// ParseGeneric calls TypedEnum.Parse but returns the result
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e Creatures) ParseStringGeneric(text string) (genum.Enum, error) {
-	return e.ParseString(text)
+func (e Creatures) ParseGeneric(input any) (genum.Enum, error) {
+	return ParseCreatures(input)
 }
 
 // MarshalJSON implements the json.Marshaler interface for Creatures.
@@ -358,16 +371,12 @@ func (e Creatures) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements the json.Unmarshaler interface for Creatures.
 func (e *Creatures) UnmarshalJSON(data []byte) error {
+	// We always support strings.
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = Creatures(0).ParseString(s)
-		return err
-	}
-	var i int
-	if err := json.Unmarshal(data, &i); err == nil {
-		*e = Creatures(i)
-		if e.IsValid() {
+		*e, err = ParseCreatures(s)
+		if err == nil {
 			return nil
 		}
 	}
@@ -382,9 +391,14 @@ func (e Creatures) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for Creatures.
 func (e *Creatures) UnmarshalText(text []byte) error {
+	s := string(text)
 	var err error
-	*e, err = Creatures(0).ParseString(string(text))
-	return err
+	*e, err = ParseCreatures(s)
+	if err == nil {
+		return nil
+	}
+
+	return fmt.Errorf("unable to unmarshal Creatures from `%s`", s)
 }
 
 // MarshalYAML implements a YAML Marshaler for Creatures.
@@ -394,17 +408,14 @@ func (e Creatures) MarshalYAML() (any, error) {
 
 // UnmarshalYAML implements a YAML Unmarshaler for Creatures.
 func (e *Creatures) UnmarshalYAML(value *yaml.Node) error {
-	i, err := strconv.ParseInt(value.Value, 10, 64)
+	var err error
+
+	// first try and parse as a string
+	*e, err = ParseCreatures(value.Value)
 	if err == nil {
-		*e = Creatures(i)
-	} else {
-		*e, err = Creatures(0).ParseString(value.Value)
-	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
 		return nil
 	}
+
 	return fmt.Errorf("unable to unmarshal Creatures from yaml `%s`", value.Value)
 }
 
@@ -474,7 +485,13 @@ func (e EnumWithPackageImports) String() string {
 
 // ParseString will return a value as defined in string form.
 func (e EnumWithPackageImports) ParseString(text string) (EnumWithPackageImports, error) {
-	switch text {
+	return ParseEnumWithPackageImports(text)
+}
+
+// ParseEnumWithPackageImports will attempt to parse the value of a EnumWithPackageImports from either its string form
+// or any value of a trait flagged with the --parsableByTrait flag.
+func ParseEnumWithPackageImports(input any) (EnumWithPackageImports, error) {
+	switch input {
 	case "EnumWithPackageImports0":
 		return EnumWithPackageImports0, nil
 	case "EnumWithPackageImports1":
@@ -482,23 +499,25 @@ func (e EnumWithPackageImports) ParseString(text string) (EnumWithPackageImports
 	case "EnumWithPackageImports2":
 		return EnumWithPackageImports2, nil
 	default:
-		switch strings.ToLower(text) {
-		case "enumwithpackageimports0":
-			return EnumWithPackageImports0, nil
-		case "enumwithpackageimports1":
-			return EnumWithPackageImports1, nil
-		case "enumwithpackageimports2":
-			return EnumWithPackageImports2, nil
+		if text, ok := input.(string); ok {
+			switch strings.ToLower(text) {
+			case "enumwithpackageimports0":
+				return EnumWithPackageImports0, nil
+			case "enumwithpackageimports1":
+				return EnumWithPackageImports1, nil
+			case "enumwithpackageimports2":
+				return EnumWithPackageImports2, nil
+			}
 		}
-		return 0, fmt.Errorf("`%s` is not a valid enum of type EnumWithPackageImports", text)
+		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type EnumWithPackageImports", input)
 	}
 }
 
-// ParseStringGeneric calls TypedEnum.ParseString but returns the result
+// ParseGeneric calls TypedEnum.Parse but returns the result
 // in the generic genum.Enum interface. Which is useful when you are only able to work with
 // the un-typed interface.
-func (e EnumWithPackageImports) ParseStringGeneric(text string) (genum.Enum, error) {
-	return e.ParseString(text)
+func (e EnumWithPackageImports) ParseGeneric(input any) (genum.Enum, error) {
+	return ParseEnumWithPackageImports(input)
 }
 
 // MarshalJSON implements the json.Marshaler interface for EnumWithPackageImports.
@@ -508,16 +527,12 @@ func (e EnumWithPackageImports) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements the json.Unmarshaler interface for EnumWithPackageImports.
 func (e *EnumWithPackageImports) UnmarshalJSON(data []byte) error {
+	// We always support strings.
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
-		*e, err = EnumWithPackageImports(0).ParseString(s)
-		return err
-	}
-	var i int
-	if err := json.Unmarshal(data, &i); err == nil {
-		*e = EnumWithPackageImports(i)
-		if e.IsValid() {
+		*e, err = ParseEnumWithPackageImports(s)
+		if err == nil {
 			return nil
 		}
 	}
@@ -532,9 +547,14 @@ func (e EnumWithPackageImports) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface for EnumWithPackageImports.
 func (e *EnumWithPackageImports) UnmarshalText(text []byte) error {
+	s := string(text)
 	var err error
-	*e, err = EnumWithPackageImports(0).ParseString(string(text))
-	return err
+	*e, err = ParseEnumWithPackageImports(s)
+	if err == nil {
+		return nil
+	}
+
+	return fmt.Errorf("unable to unmarshal EnumWithPackageImports from `%s`", s)
 }
 
 // MarshalYAML implements a YAML Marshaler for EnumWithPackageImports.
@@ -544,17 +564,14 @@ func (e EnumWithPackageImports) MarshalYAML() (any, error) {
 
 // UnmarshalYAML implements a YAML Unmarshaler for EnumWithPackageImports.
 func (e *EnumWithPackageImports) UnmarshalYAML(value *yaml.Node) error {
-	i, err := strconv.ParseInt(value.Value, 10, 64)
+	var err error
+
+	// first try and parse as a string
+	*e, err = ParseEnumWithPackageImports(value.Value)
 	if err == nil {
-		*e = EnumWithPackageImports(i)
-	} else {
-		*e, err = EnumWithPackageImports(0).ParseString(value.Value)
-	}
-	if err != nil {
-		return err
-	} else if e.IsValid() {
 		return nil
 	}
+
 	return fmt.Errorf("unable to unmarshal EnumWithPackageImports from yaml `%s`", value.Value)
 }
 

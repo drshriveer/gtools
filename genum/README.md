@@ -93,6 +93,8 @@ func (c Creatures) NumLegs() int { ... }
 func (c Creatures) IsMammal() bool { ... }
 ```
 
+Genums can also be parsed by their traits by using the `--parsableByTraits=TraitName1,TraitName2` flag. When using this flag code generation will fail if trait values can be parsed into multiple enums; uniqueness is required. Furthermore, there may be edge cases where traits do not parse consistently between various parsers... Durations for example. We will try to fix these in subsequent updates; if you discover any, please file an issue asap.
+
 ###### Duplicate Values
 
 Duplicated enum values present a small challenge to code; it is not always possible to distinguish between identical values. For example, when turning an enum into string form. In such cases the generator will consistently choose one value as the "primary" value. To force a primary value, mark all others as `Deprecated:`.
@@ -116,6 +118,10 @@ Usage of ./bin/genum:
         [Required] comma-separated names of types to generate enum code for
   -yaml
         generate yaml marshal methods (default true) (default true)
+  -caseInsensitive
+        string parsing of enum names will be case insensitive (default false)
+  -parsableByTraits string
+        comma-separated list of trait names which will generate their own parser
 ```
 
 ###### Limitations
@@ -123,8 +129,8 @@ Usage of ./bin/genum:
 1.	Enum definitions must be in a single file.
 2.	Currently no string transformation support.
 3.	[Duplicate Values](#duplicate-values) can cause some issues; prefer not to use them.
+4.	In some cases parsing by traits may have unexpected behaviors. Durations, for example.  
 
 ### TODO:
 
--	consider making traits explicitly defined in comments or as input value.
--	uniqueness constraint and reverse mapping from traits
+-	generate tests for parsing traits to prevent unintentional bugs and to flag issues that may arise

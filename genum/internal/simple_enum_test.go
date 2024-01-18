@@ -18,6 +18,7 @@ import (
 )
 
 func TestSimpleEnumGeneration(t *testing.T) {
+	t.Parallel()
 	generator := gen.Generate{
 		InFile:  "./simple_enum.go",
 		OutFile: "./simple_enum.genum.go",
@@ -31,6 +32,7 @@ func TestSimpleEnumGeneration(t *testing.T) {
 }
 
 func TestImplementsEnumInterface(t *testing.T) {
+	t.Parallel()
 	assert.Implements(t, (*genum.Enum)(nil), internal.Enum1Value0)
 	assert.Implements(t, (*genum.Enum)(nil), internal.Enum2Value0)
 	assert.Implements(t, (*genum.Enum)(nil), internal.Enum3Value0)
@@ -78,6 +80,7 @@ func (e *enumTest[T]) roundTripText(t *testing.T) {
 
 func testRunner[T genum.EnumLike](t *testing.T, tests []enumTest[T]) {
 	t.Run("general type test", func(t *testing.T) {
+		t.Parallel()
 		validValues := make([]genum.Enum, 0, len(tests))
 		validValueStrings := make([]string, 0, len(tests))
 		for _, test := range tests {
@@ -101,6 +104,7 @@ func testRunner[T genum.EnumLike](t *testing.T, tests []enumTest[T]) {
 
 	for _, test := range tests {
 		t.Run(test.enum.String(), func(t *testing.T) {
+			t.Parallel()
 			if test.invalid {
 				assert.False(t, test.enum.IsValid())
 				return
@@ -122,6 +126,7 @@ func testRunner[T genum.EnumLike](t *testing.T, tests []enumTest[T]) {
 }
 
 func TestMyEnum3(t *testing.T) {
+	t.Parallel()
 	tests := []enumTest[internal.MyEnum3]{
 		{enum: internal.Enum3Value0, sName: "Enum3Value0"},
 		{enum: internal.Enum3Value1, sName: "Enum3Value1"},
@@ -147,6 +152,7 @@ func TestMyEnum3(t *testing.T) {
 }
 
 func TestMyEnum2(t *testing.T) {
+	t.Parallel()
 	tests := []enumTest[internal.MyEnum2]{
 		{
 			enum:  internal.Enum2Value0,
@@ -166,6 +172,7 @@ func TestMyEnum2(t *testing.T) {
 }
 
 func TestMyEnum(t *testing.T) {
+	t.Parallel()
 	tests := []enumTest[internal.MyEnum]{
 		{
 			enum:  internal.Enum1Value0,
