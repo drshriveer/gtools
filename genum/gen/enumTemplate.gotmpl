@@ -171,7 +171,7 @@ func (e *{{$enumTypeName}}) UnmarshalJSON(data []byte) error {
 	{{- if (len ((index $.Traits $i).GetParsableUnderlyingInt64)) }}
 	// ints:
 	var sint64 int64
-	if err := json.Unmarshal(data, &s); err == nil {
+	if err := json.Unmarshal(data, &sint64); err == nil {
 		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingInt64 }}
 		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(sint64))
 		if err == nil {
