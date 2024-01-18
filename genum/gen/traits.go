@@ -6,10 +6,10 @@ import (
 	"github.com/drshriveer/gtools/gencommon"
 )
 
-type Underlying int
+type underlying int
 
 const (
-	Unknown Underlying = iota
+	Unknown underlying = iota
 	String
 	Uint64
 	Int64
@@ -32,7 +32,7 @@ func (s TraitDescs) Less(i, j int) bool {
 	return s[i].Name < s[j].Name
 }
 
-func (s TraitDescs) getParsableUnderlying(u Underlying) TraitDescs {
+func (s TraitDescs) getParsableUnderlying(u underlying) TraitDescs {
 	out := make([]TraitDesc, 0, len(s))
 	for _, t := range s {
 		if t.Parsable && t.hasUnderlying(u) {
@@ -59,7 +59,7 @@ func (s TraitDescs) GetParsableUnderlyingInt64() TraitDescs {
 }
 
 func (s TraitDescs) GetParsableUnderlyingUint64() TraitDescs {
-	return s.getParsableUnderlying(String)
+	return s.getParsableUnderlying(Uint64)
 }
 
 func (s TraitDescs) GetParsableJSONUnmarshalable() TraitDescs {
@@ -82,6 +82,16 @@ func (s TraitDescs) GetParsableYAMLUnmarshalable() TraitDescs {
 	return out
 }
 
+func (s TraitDescs) GetParsableTextUnmarshalable() TraitDescs {
+	out := make([]TraitDesc, 0, len(s))
+	for _, t := range s {
+		if t.Parsable && t.implementsTextUnmarshaler() {
+			out = append(out, t)
+		}
+	}
+	return out
+}
+
 // TraitDesc define a trait-- this is exposed for template use.
 type TraitDesc struct {
 	Name     string
@@ -91,7 +101,7 @@ type TraitDesc struct {
 	Traits   TraitInstances
 }
 
-func (td *TraitDesc) extractUnderlying() (Underlying, bool) {
+func (td *TraitDesc) extractUnderlying() (underlying, bool) {
 	v, ok := td.Type.Underlying().(*types.Basic)
 	if !ok {
 		return Unknown, false
@@ -127,7 +137,7 @@ func (td *TraitDesc) extractUnderlying() (Underlying, bool) {
 	return Unknown, true
 }
 
-func (td *TraitDesc) hasUnderlying(u Underlying) bool {
+func (td *TraitDesc) hasUnderlying(u underlying) bool {
 	underlying, ok := td.extractUnderlying()
 	if !ok {
 		return false
@@ -147,6 +157,14 @@ func (td *TraitDesc) implementsYAMLUnmarshaler() bool {
 	iFace, err := gencommon.FindIFaceDef("gopkg.in/yaml.v3", "Unmarshaler")
 	if err != nil || iFace == nil {
 		panic("Failed to find gopkg.in/yaml.v3.Unmarshaler")
+	}
+	return types.Implements(td.Type, iFace)
+}
+
+func (td *TraitDesc) implementsTextUnmarshaler() bool {
+	iFace, err := gencommon.FindIFaceDef("encoding", "TextUnmarshaler")
+	if err != nil || iFace == nil {
+		panic("Failed to find encoding.TextUnmarshaler")
 	}
 	return types.Implements(td.Type, iFace)
 }

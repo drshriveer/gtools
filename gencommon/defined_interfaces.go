@@ -6,6 +6,7 @@ import (
 	"go/ast"
 	"go/types"
 
+	"github.com/puzpuzpuz/xsync/v3"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -17,7 +18,7 @@ var (
 	ContextInterface *types.Interface
 
 	// cache of interfaces so we don't repeatedly perform expensive lookups
-	iFaceCache = make(map[string]*types.Interface)
+	iFaceCache = xsync.NewMapOf[string, *types.Interface]()
 )
 
 func init() {
@@ -37,7 +38,7 @@ func init() {
 func FindIFaceDef(pkgName, typeName string) (*types.Interface, error) {
 	// first check the cache
 	key := pkgName + "." + typeName
-	iFace, ok := iFaceCache[key]
+	iFace, ok := iFaceCache.Load(key)
 	if ok {
 		return iFace, nil
 	}
@@ -46,7 +47,7 @@ func FindIFaceDef(pkgName, typeName string) (*types.Interface, error) {
 	res, err := findIFaceDefImpl(pkgName, typeName)
 	if err == nil {
 		// cache the value if there was no error
-		iFaceCache[key] = res
+		iFaceCache.Store(key, res)
 	}
 
 	// passthrough the result

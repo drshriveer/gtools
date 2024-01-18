@@ -102,3 +102,14 @@ func TestEnumerableWithParsableTraits_Parser(t *testing.T) {
 		})
 	}
 }
+
+func TestEnumerableWithParsableTraits_MarshalJSON(t *testing.T) {
+	for _, test := range internal.EnumerableWithParsableTraits.Values(0) {
+		t.Run("json unmarshal "+test.String(), func(t *testing.T) {
+			marshalInput := []byte(`"` + string(test.TypedString()) + `"`)
+			result := *new(internal.EnumerableWithParsableTraits)
+			require.NoError(t, result.UnmarshalJSON(marshalInput))
+			assert.Equal(t, test.String(), result.String())
+		})
+	}
+}

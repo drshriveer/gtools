@@ -17,21 +17,6 @@ var _EnumerableWithParsableTraitsValues = []EnumerableWithParsableTraits{
 	P3,
 }
 
-// AlsoSometimesNonParsable returns the enum's associated trait of the same name.
-// If no trait exists for the enumeration a default value will be returned.
-func (e EnumerableWithParsableTraits) AlsoSometimesNonParsable() int {
-	switch e {
-	case P1:
-		return _AlsoSometimesNonParsable
-	case P2:
-		return 2
-	case P3:
-		return 3
-	}
-
-	return *new(int)
-}
-
 // NonParsable returns the enum's associated trait of the same name.
 // If no trait exists for the enumeration a default value will be returned.
 func (e EnumerableWithParsableTraits) NonParsable() string {
@@ -62,12 +47,27 @@ func (e EnumerableWithParsableTraits) OtherEnum() MyEnum {
 	return *new(MyEnum)
 }
 
-// Parsable returns the enum's associated trait of the same name.
+// Parsable1 returns the enum's associated trait of the same name.
 // If no trait exists for the enumeration a default value will be returned.
-func (e EnumerableWithParsableTraits) Parsable() string {
+func (e EnumerableWithParsableTraits) Parsable1() int {
 	switch e {
 	case P1:
-		return _Parsable
+		return _Parsable1
+	case P2:
+		return 2
+	case P3:
+		return 3
+	}
+
+	return *new(int)
+}
+
+// Parsable2 returns the enum's associated trait of the same name.
+// If no trait exists for the enumeration a default value will be returned.
+func (e EnumerableWithParsableTraits) Parsable2() string {
+	switch e {
+	case P1:
+		return _Parsable2
 	case P2:
 		return "2"
 	case P3:
@@ -77,19 +77,19 @@ func (e EnumerableWithParsableTraits) Parsable() string {
 	return *new(string)
 }
 
-// SometimesNonParsable returns the enum's associated trait of the same name.
+// TypedString returns the enum's associated trait of the same name.
 // If no trait exists for the enumeration a default value will be returned.
-func (e EnumerableWithParsableTraits) SometimesNonParsable() int {
+func (e EnumerableWithParsableTraits) TypedString() OtherType {
 	switch e {
 	case P1:
-		return _SometimesNonParsable
+		return _TypedString
 	case P2:
-		return 2
+		return OtherType("typedStr2")
 	case P3:
-		return 1
+		return OtherType("typedStr3")
 	}
 
-	return *new(int)
+	return *new(OtherType)
 }
 
 // IsValid returns true if the enum value is, in fact, valid.
@@ -141,11 +141,11 @@ func (e EnumerableWithParsableTraits) ParseString(text string) (EnumerableWithPa
 // or any value of a trait flagged with the --parsableByTrait flag
 func ParseEnumerableWithParsableTraits(input any) (EnumerableWithParsableTraits, error) {
 	switch input {
-	case "P1", _AlsoSometimesNonParsable, _OtherEnum, _Parsable:
+	case "P1", _OtherEnum, _Parsable1, _Parsable2, _TypedString:
 		return P1, nil
-	case "P2", 2, Enum1Value1, "2":
+	case "P2", Enum1Value1, 2, "2", OtherType("typedStr2"):
 		return P2, nil
-	case "P3", 3, Enum1Value2, "3":
+	case "P3", Enum1Value2, 3, "3", OtherType("typedStr3"):
 		return P3, nil
 	default:
 		return 0, fmt.Errorf("`%+v` could not be parsed to enum of type EnumerableWithParsableTraits", input)
@@ -171,6 +171,10 @@ func (e *EnumerableWithParsableTraits) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &s); err == nil {
 		var err error
 		*e, err = ParseEnumerableWithParsableTraits(s)
+		if err == nil {
+			return nil
+		}
+		*e, err = ParseEnumerableWithParsableTraits(OtherType(s))
 		if err == nil {
 			return nil
 		}
@@ -200,6 +204,10 @@ func (e *EnumerableWithParsableTraits) UnmarshalText(text []byte) error {
 	if err == nil {
 		return nil
 	}
+	*e, err = ParseEnumerableWithParsableTraits(OtherType(s))
+	if err == nil {
+		return nil
+	}
 
 	return fmt.Errorf("unable to unmarshal EnumerableWithParsableTraits from `%s`", s)
 }
@@ -220,6 +228,10 @@ func (e *EnumerableWithParsableTraits) UnmarshalYAML(value *yaml.Node) error {
 	}
 
 	// then try and parse for any string-like traits
+	*e, err = ParseEnumerableWithParsableTraits(OtherType(value.Value))
+	if err == nil {
+		return nil
+	}
 	// ints:
 	if sint64, err := strconv.ParseInt(value.Value, 10, 64); err != nil {
 		*e, err = ParseEnumerableWithParsableTraits(MyEnum(sint64))

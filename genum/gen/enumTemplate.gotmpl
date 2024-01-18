@@ -247,6 +247,19 @@ func (e *{{$enumTypeName}}) UnmarshalText(text []byte) error {
 	}
 	{{- end }}
 
+	{{- if (len ((index $.Traits $i).GetParsableTextUnmarshalable)) }}
+ 	// native parsing
+ 	{{- range $trait := (index $.Traits $i).GetParsableTextUnmarshalable }}
+ 	v{{$i}} := *new({{$trait.TypeRef}})
+ 	if err := v{{$i}}.UnmarshalText(text); err == nil {
+ 		*e, err = Parse{{$enumTypeName}}(v{{$i}})
+ 		if err == nil {
+ 			return nil
+ 		}
+ 	}
+ 	{{- end }}
+ 	{{- end }}
+
 	return fmt.Errorf("unable to unmarshal {{$enumTypeName}} from `%s`", s)
 }
 {{- end}}
