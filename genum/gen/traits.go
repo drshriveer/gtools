@@ -59,7 +59,7 @@ func (s TraitDescs) GetParsableUnderlyingInt64() TraitDescs {
 }
 
 func (s TraitDescs) GetParsableUnderlyingUint64() TraitDescs {
-	return s.getParsableUnderlying(String)
+	return s.getParsableUnderlying(Uint64)
 }
 
 func (s TraitDescs) GetParsableJSONUnmarshalable() TraitDescs {
