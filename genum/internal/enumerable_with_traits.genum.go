@@ -110,7 +110,7 @@ func (e EnumerableWithTraits) ParseString(text string) (EnumerableWithTraits, er
 }
 
 // ParseEnumerableWithTraits will attempt to parse the value of a EnumerableWithTraits from either its string form
-// or any value of a trait flagged with the --parsableByTrait flag
+// or any value of a trait flagged with the --parsableByTrait flag.
 func ParseEnumerableWithTraits(input any) (EnumerableWithTraits, error) {
 	switch input {
 	case "E1":
@@ -192,8 +192,6 @@ func (e *EnumerableWithTraits) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		return nil
 	}
-
-	// then try and parse for any string-like traits
 
 	return fmt.Errorf("unable to unmarshal EnumerableWithTraits from yaml `%s`", value.Value)
 }
@@ -311,7 +309,7 @@ func (e Creatures) ParseString(text string) (Creatures, error) {
 }
 
 // ParseCreatures will attempt to parse the value of a Creatures from either its string form
-// or any value of a trait flagged with the --parsableByTrait flag
+// or any value of a trait flagged with the --parsableByTrait flag.
 func ParseCreatures(input any) (Creatures, error) {
 	switch input {
 	case "NotCreature":
@@ -418,8 +416,6 @@ func (e *Creatures) UnmarshalYAML(value *yaml.Node) error {
 		return nil
 	}
 
-	// then try and parse for any string-like traits
-
 	return fmt.Errorf("unable to unmarshal Creatures from yaml `%s`", value.Value)
 }
 
@@ -493,7 +489,7 @@ func (e EnumWithPackageImports) ParseString(text string) (EnumWithPackageImports
 }
 
 // ParseEnumWithPackageImports will attempt to parse the value of a EnumWithPackageImports from either its string form
-// or any value of a trait flagged with the --parsableByTrait flag
+// or any value of a trait flagged with the --parsableByTrait flag.
 func ParseEnumWithPackageImports(input any) (EnumWithPackageImports, error) {
 	switch input {
 	case "EnumWithPackageImports0":
@@ -575,8 +571,6 @@ func (e *EnumWithPackageImports) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		return nil
 	}
-
-	// then try and parse for any string-like traits
 
 	return fmt.Errorf("unable to unmarshal EnumWithPackageImports from yaml `%s`", value.Value)
 }

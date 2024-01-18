@@ -22,15 +22,15 @@ func TestGenerate_EnumerableWithParsableTraits(t *testing.T) {
 		},
 		{
 			desc:           "One parsable trait",
-			parsableTraits: []string{"Parsable"},
+			parsableTraits: []string{"Parsable1"},
 		},
 		{
 			desc:           "Two parsable traits",
-			parsableTraits: []string{"Parsable", "AlsoParsable"},
+			parsableTraits: []string{"Parsable1", "Parsable2"},
 		},
 		{
 			desc:           "Non-existent trait is ignored",
-			parsableTraits: []string{"Parsable", "AlsoParsable", "NotARealTrait"},
+			parsableTraits: []string{"Parsable1", "Parsable2", "NotARealTrait"},
 		},
 		{
 			desc:           "Trait with non-unique values throws an error",
@@ -38,12 +38,12 @@ func TestGenerate_EnumerableWithParsableTraits(t *testing.T) {
 			expectErr:      true,
 		},
 		{
-			desc:           "Sometimes non parsable trait is fine on its own",
-			parsableTraits: []string{"SometimesNonParsable"},
+			desc:           "Parsable3 is fine on its own",
+			parsableTraits: []string{"Parsable3"},
 		},
 		{
-			desc:           "Sometimes non parsable trait throws an error when it overlaps with another trait",
-			parsableTraits: []string{"SometimesNonParsable", "AlsoSometimesNonParsable"},
+			desc:           "Parsable3 throws an error when it overlaps with Parsable1",
+			parsableTraits: []string{"Parsable1", "Parsable3"},
 			expectErr:      true,
 		},
 	}

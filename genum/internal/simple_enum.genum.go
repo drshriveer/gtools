@@ -70,7 +70,7 @@ func (e MyEnum) ParseString(text string) (MyEnum, error) {
 }
 
 // ParseMyEnum will attempt to parse the value of a MyEnum from either its string form
-// or any value of a trait flagged with the --parsableByTrait flag
+// or any value of a trait flagged with the --parsableByTrait flag.
 func ParseMyEnum(input any) (MyEnum, error) {
 	switch input {
 	case "Enum1IntentionallyNegative":
@@ -153,8 +153,6 @@ func (e *MyEnum) UnmarshalYAML(value *yaml.Node) error {
 		return nil
 	}
 
-	// then try and parse for any string-like traits
-
 	return fmt.Errorf("unable to unmarshal MyEnum from yaml `%s`", value.Value)
 }
 
@@ -209,7 +207,7 @@ func (e MyEnum2) ParseString(text string) (MyEnum2, error) {
 }
 
 // ParseMyEnum2 will attempt to parse the value of a MyEnum2 from either its string form
-// or any value of a trait flagged with the --parsableByTrait flag
+// or any value of a trait flagged with the --parsableByTrait flag.
 func ParseMyEnum2(input any) (MyEnum2, error) {
 	switch input {
 	case "Enum2Value0":
@@ -279,8 +277,6 @@ func (e *MyEnum2) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		return nil
 	}
-
-	// then try and parse for any string-like traits
 
 	return fmt.Errorf("unable to unmarshal MyEnum2 from yaml `%s`", value.Value)
 }
@@ -388,7 +384,7 @@ func (e MyEnum3) ParseString(text string) (MyEnum3, error) {
 }
 
 // ParseMyEnum3 will attempt to parse the value of a MyEnum3 from either its string form
-// or any value of a trait flagged with the --parsableByTrait flag
+// or any value of a trait flagged with the --parsableByTrait flag.
 func ParseMyEnum3(input any) (MyEnum3, error) {
 	switch input {
 	case "Enum3Value0":
@@ -486,8 +482,6 @@ func (e *MyEnum3) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		return nil
 	}
-
-	// then try and parse for any string-like traits
 
 	return fmt.Errorf("unable to unmarshal MyEnum3 from yaml `%s`", value.Value)
 }

@@ -77,6 +77,21 @@ func (e EnumerableWithParsableTraits) Parsable2() string {
 	return *new(string)
 }
 
+// Parsable3 returns the enum's associated trait of the same name.
+// If no trait exists for the enumeration a default value will be returned.
+func (e EnumerableWithParsableTraits) Parsable3() int {
+	switch e {
+	case P1:
+		return _Parsable3
+	case P2:
+		return 2
+	case P3:
+		return 1
+	}
+
+	return *new(int)
+}
+
 // TypedString returns the enum's associated trait of the same name.
 // If no trait exists for the enumeration a default value will be returned.
 func (e EnumerableWithParsableTraits) TypedString() OtherType {
@@ -138,7 +153,7 @@ func (e EnumerableWithParsableTraits) ParseString(text string) (EnumerableWithPa
 }
 
 // ParseEnumerableWithParsableTraits will attempt to parse the value of a EnumerableWithParsableTraits from either its string form
-// or any value of a trait flagged with the --parsableByTrait flag
+// or any value of a trait flagged with the --parsableByTrait flag.
 func ParseEnumerableWithParsableTraits(input any) (EnumerableWithParsableTraits, error) {
 	switch input {
 	case "P1", _OtherEnum, _Parsable1, _Parsable2, _TypedString:
@@ -181,8 +196,16 @@ func (e *EnumerableWithParsableTraits) UnmarshalJSON(data []byte) error {
 	}
 	// ints:
 	var sint64 int64
-	if err := json.Unmarshal(data, &s); err == nil {
-		*e, err = ParseEnumerableWithParsableTraits(MyEnum(sint64))
+	if err := json.Unmarshal(data, &sint64); err == nil {
+		*e, err = ParseEnumerableWithParsableTraits(int(sint64))
+		if err == nil {
+			return nil
+		}
+	}
+	// native parsing
+	v0 := *new(MyEnum)
+	if err := json.Unmarshal(data, &v0); err == nil {
+		*e, err = ParseEnumerableWithParsableTraits(v0)
 		if err == nil {
 			return nil
 		}
@@ -226,15 +249,21 @@ func (e *EnumerableWithParsableTraits) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		return nil
 	}
-
-	// then try and parse for any string-like traits
 	*e, err = ParseEnumerableWithParsableTraits(OtherType(value.Value))
 	if err == nil {
 		return nil
 	}
 	// ints:
 	if sint64, err := strconv.ParseInt(value.Value, 10, 64); err != nil {
-		*e, err = ParseEnumerableWithParsableTraits(MyEnum(sint64))
+		*e, err = ParseEnumerableWithParsableTraits(int(sint64))
+		if err == nil {
+			return nil
+		}
+	}
+	// native parsing
+	var v0 MyEnum
+	if err := v0.UnmarshalYAML(value); err == nil {
+		*e, err = ParseEnumerableWithParsableTraits(v0)
 		if err == nil {
 			return nil
 		}

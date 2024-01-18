@@ -147,7 +147,7 @@ func (e *{{$enumTypeName}}) UnmarshalJSON(data []byte) error {
 			return nil
 		}
 
-		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingString }}
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingStringForJSON }}
 		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(s))
 		if err == nil {
 			return nil
@@ -155,11 +155,11 @@ func (e *{{$enumTypeName}}) UnmarshalJSON(data []byte) error {
 		{{- end }}
 	}
 
-	{{- if (len ((index $.Traits $i).GetParsableUnderlyingUint64)) }}
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingUint64ForJSON)) }}
 	// uints:
 	var uinter64 uint64
 	if err := json.Unmarshal(data, &uinter64); err == nil {
-		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingUint64 }}
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingUint64ForJSON }}
 		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(uinter64))
 		if err == nil {
 			return nil
@@ -168,11 +168,11 @@ func (e *{{$enumTypeName}}) UnmarshalJSON(data []byte) error {
 	}
 	{{- end }}
 
-	{{- if (len ((index $.Traits $i).GetParsableUnderlyingInt64)) }}
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingInt64ForJSON)) }}
 	// ints:
 	var sint64 int64
 	if err := json.Unmarshal(data, &sint64); err == nil {
-		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingInt64 }}
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingInt64ForJSON }}
 		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(sint64))
 		if err == nil {
 			return nil
@@ -182,11 +182,11 @@ func (e *{{$enumTypeName}}) UnmarshalJSON(data []byte) error {
 	{{- end }}
 
 
-	{{- if (len ((index $.Traits $i).GetParsableUnderlyingFloat64)) }}
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingFloat64ForJSON)) }}
 	// floats64: (must treat differently than float32- I hate floats.)
 	var floater64 float64
 	if err := json.Unmarshal(data, &floater64); err == nil {
-		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingFloat64 }}
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingFloat64ForJSON }}
 		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(floater64))
 		if err == nil {
 			return nil
@@ -195,11 +195,11 @@ func (e *{{$enumTypeName}}) UnmarshalJSON(data []byte) error {
 	}
 	{{- end }}
 
-	{{- if (len ((index $.Traits $i).GetParsableUnderlyingFloat32)) }}
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingFloat32ForJSON)) }}
 	// float32:
 	var floater32 float32
 	if err := json.Unmarshal(data, &floater32); err == nil {
-		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingFloat32 }}
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingFloat32ForJSON }}
 		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(floater32))
 		if err == nil {
 			return nil
@@ -240,7 +240,7 @@ func (e *{{$enumTypeName}}) UnmarshalText(text []byte) error {
 		return nil
 	}
 
-	{{- range $trait := (index $.Traits $i).GetParsableUnderlyingString }}
+	{{- range $trait := (index $.Traits $i).GetParsableUnderlyingStringForText }}
 	*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(s))
 	if err == nil {
 		return nil
@@ -280,7 +280,7 @@ func (e *{{$enumTypeName}}) UnmarshalYAML(value *yaml.Node) error {
 		return nil
 	}
 
-	{{- range $trait := (index $.Traits $i).GetParsableUnderlyingString }}
+	{{- range $trait := (index $.Traits $i).GetParsableUnderlyingStringForYAML }}
 	*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(value.Value))
 	if err == nil {
 		return nil
@@ -288,10 +288,10 @@ func (e *{{$enumTypeName}}) UnmarshalYAML(value *yaml.Node) error {
 	{{- end }}
 
 
-	{{- if (len ((index $.Traits $i).GetParsableUnderlyingUint64)) }}
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingUint64ForYAML)) }}
 	// uints:
 	if uinter64, err := strconv.ParseUint(value.Value, 10, 64); err != nil {
-		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingUint64 }}
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingUint64ForYAML }}
 		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(uinter64))
 		if err == nil {
 			return nil
@@ -301,10 +301,10 @@ func (e *{{$enumTypeName}}) UnmarshalYAML(value *yaml.Node) error {
 	{{- end }}
 
 
-	{{- if (len ((index $.Traits $i).GetParsableUnderlyingInt64)) }}
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingInt64ForYAML)) }}
 	// ints:
 	if sint64, err := strconv.ParseInt(value.Value, 10, 64); err != nil {
-		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingInt64 }}
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingInt64ForYAML }}
 		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(sint64))
 		if err == nil {
 			return nil
@@ -314,10 +314,10 @@ func (e *{{$enumTypeName}}) UnmarshalYAML(value *yaml.Node) error {
 	{{- end }}
 
 
-	{{- if (len ((index $.Traits $i).GetParsableUnderlyingFloat64)) }}
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingFloat64ForYAML)) }}
 	// floats64: (must treat differently than float32- I hate floats.)
 	if floater64, err := strconv.ParseFloat(value.Value, 64); err != nil  {
-		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingFloat64 }}
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingFloat64ForYAML }}
 		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(floater64))
 		if err == nil {
 			return nil
@@ -326,10 +326,10 @@ func (e *{{$enumTypeName}}) UnmarshalYAML(value *yaml.Node) error {
 	}
 	{{- end }}
 
-	{{- if (len ((index $.Traits $i).GetParsableUnderlyingFloat32)) }}
+	{{- if (len ((index $.Traits $i).GetParsableUnderlyingFloat32ForYAML)) }}
 	// float32:
 	if floater32, err := strconv.ParseFloat(value.Value, 32); err != nil {
-		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingFloat32 }}
+		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingFloat32ForYAML }}
 		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(float32(floater32)))
 		if err == nil {
 			return nil

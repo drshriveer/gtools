@@ -67,7 +67,7 @@ func (e DimensionOne) ParseString(text string) (DimensionOne, error) {
 }
 
 // ParseDimensionOne will attempt to parse the value of a DimensionOne from either its string form
-// or any value of a trait flagged with the --parsableByTrait flag
+// or any value of a trait flagged with the --parsableByTrait flag.
 func ParseDimensionOne(input any) (DimensionOne, error) {
 	switch input {
 	case "D1a":
@@ -154,8 +154,6 @@ func (e *DimensionOne) UnmarshalYAML(value *yaml.Node) error {
 		return nil
 	}
 
-	// then try and parse for any string-like traits
-
 	return fmt.Errorf("unable to unmarshal DimensionOne from yaml `%s`", value.Value)
 }
 
@@ -222,7 +220,7 @@ func (e DimensionTwo) ParseString(text string) (DimensionTwo, error) {
 }
 
 // ParseDimensionTwo will attempt to parse the value of a DimensionTwo from either its string form
-// or any value of a trait flagged with the --parsableByTrait flag
+// or any value of a trait flagged with the --parsableByTrait flag.
 func ParseDimensionTwo(input any) (DimensionTwo, error) {
 	switch input {
 	case "D2a":
@@ -313,8 +311,6 @@ func (e *DimensionTwo) UnmarshalYAML(value *yaml.Node) error {
 		return nil
 	}
 
-	// then try and parse for any string-like traits
-
 	return fmt.Errorf("unable to unmarshal DimensionTwo from yaml `%s`", value.Value)
 }
 
@@ -373,7 +369,7 @@ func (e DimensionThree) ParseString(text string) (DimensionThree, error) {
 }
 
 // ParseDimensionThree will attempt to parse the value of a DimensionThree from either its string form
-// or any value of a trait flagged with the --parsableByTrait flag
+// or any value of a trait flagged with the --parsableByTrait flag.
 func ParseDimensionThree(input any) (DimensionThree, error) {
 	switch input {
 	case "D3a":
@@ -455,8 +451,6 @@ func (e *DimensionThree) UnmarshalYAML(value *yaml.Node) error {
 	if err == nil {
 		return nil
 	}
-
-	// then try and parse for any string-like traits
 
 	return fmt.Errorf("unable to unmarshal DimensionThree from yaml `%s`", value.Value)
 }

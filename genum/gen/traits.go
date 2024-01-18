@@ -32,40 +32,64 @@ func (s TraitDescs) Less(i, j int) bool {
 	return s[i].Name < s[j].Name
 }
 
-func (s TraitDescs) getParsableUnderlying(u underlying) TraitDescs {
+func (s TraitDescs) getParsableUnderlying(u underlying, excluding func(*TraitDesc) bool) TraitDescs {
 	out := make([]TraitDesc, 0, len(s))
 	for _, t := range s {
-		if t.Parsable && t.hasUnderlying(u) {
+		if t.Parsable && t.hasUnderlying(u) && !excluding(&t) {
 			out = append(out, t)
 		}
 	}
 	return out
 }
 
-func (s TraitDescs) GetParsableUnderlyingString() TraitDescs {
-	return s.getParsableUnderlying(String)
+func (s TraitDescs) GetParsableUnderlyingStringForJSON() TraitDescs {
+	return s.getParsableUnderlying(String, implementsJSONUnmarshaler)
 }
 
-func (s TraitDescs) GetParsableUnderlyingFloat64() TraitDescs {
-	return s.getParsableUnderlying(Float64)
+func (s TraitDescs) GetParsableUnderlyingFloat64ForJSON() TraitDescs {
+	return s.getParsableUnderlying(Float64, implementsJSONUnmarshaler)
 }
 
-func (s TraitDescs) GetParsableUnderlyingFloat32() TraitDescs {
-	return s.getParsableUnderlying(Float32)
+func (s TraitDescs) GetParsableUnderlyingFloat32ForJSON() TraitDescs {
+	return s.getParsableUnderlying(Float32, implementsJSONUnmarshaler)
 }
 
-func (s TraitDescs) GetParsableUnderlyingInt64() TraitDescs {
-	return s.getParsableUnderlying(Int64)
+func (s TraitDescs) GetParsableUnderlyingInt64ForJSON() TraitDescs {
+	return s.getParsableUnderlying(Int64, implementsJSONUnmarshaler)
 }
 
-func (s TraitDescs) GetParsableUnderlyingUint64() TraitDescs {
-	return s.getParsableUnderlying(Uint64)
+func (s TraitDescs) GetParsableUnderlyingUint64ForJSON() TraitDescs {
+	return s.getParsableUnderlying(Uint64, implementsJSONUnmarshaler)
+}
+
+func (s TraitDescs) GetParsableUnderlyingStringForYAML() TraitDescs {
+	return s.getParsableUnderlying(String, implementsYAMLUnmarshaler)
+}
+
+func (s TraitDescs) GetParsableUnderlyingFloat64ForYAML() TraitDescs {
+	return s.getParsableUnderlying(Float64, implementsYAMLUnmarshaler)
+}
+
+func (s TraitDescs) GetParsableUnderlyingFloat32ForYAML() TraitDescs {
+	return s.getParsableUnderlying(Float32, implementsYAMLUnmarshaler)
+}
+
+func (s TraitDescs) GetParsableUnderlyingInt64ForYAML() TraitDescs {
+	return s.getParsableUnderlying(Int64, implementsYAMLUnmarshaler)
+}
+
+func (s TraitDescs) GetParsableUnderlyingUint64ForYAML() TraitDescs {
+	return s.getParsableUnderlying(Uint64, implementsYAMLUnmarshaler)
+}
+
+func (s TraitDescs) GetParsableUnderlyingStringForText() TraitDescs {
+	return s.getParsableUnderlying(String, implementsTextUnmarshaler)
 }
 
 func (s TraitDescs) GetParsableJSONUnmarshalable() TraitDescs {
 	out := make([]TraitDesc, 0, len(s))
 	for _, t := range s {
-		if t.Parsable && t.implementsJSONUnmarshaler() {
+		if t.Parsable && implementsJSONUnmarshaler(&t) {
 			out = append(out, t)
 		}
 	}
@@ -75,7 +99,7 @@ func (s TraitDescs) GetParsableJSONUnmarshalable() TraitDescs {
 func (s TraitDescs) GetParsableYAMLUnmarshalable() TraitDescs {
 	out := make([]TraitDesc, 0, len(s))
 	for _, t := range s {
-		if t.Parsable && t.implementsYAMLUnmarshaler() {
+		if t.Parsable && implementsYAMLUnmarshaler(&t) {
 			out = append(out, t)
 		}
 	}
@@ -85,7 +109,7 @@ func (s TraitDescs) GetParsableYAMLUnmarshalable() TraitDescs {
 func (s TraitDescs) GetParsableTextUnmarshalable() TraitDescs {
 	out := make([]TraitDesc, 0, len(s))
 	for _, t := range s {
-		if t.Parsable && t.implementsTextUnmarshaler() {
+		if t.Parsable && implementsTextUnmarshaler(&t) {
 			out = append(out, t)
 		}
 	}
@@ -108,7 +132,7 @@ func (td *TraitDesc) extractUnderlying() (underlying, bool) {
 	}
 	switch v.Kind() {
 	case
-		// types.UntypedInt,
+		types.UntypedInt,
 		types.Int,
 		types.Int8,
 		types.Int16,
@@ -130,6 +154,8 @@ func (td *TraitDesc) extractUnderlying() (underlying, bool) {
 		types.Float64:
 		return Float64, true
 	case
+		// untyped strings dont need casting
+		// so we can skip them here
 		// types.UntypedString,
 		types.String:
 		return String, true
@@ -145,7 +171,7 @@ func (td *TraitDesc) hasUnderlying(u underlying) bool {
 	return underlying == u
 }
 
-func (td *TraitDesc) implementsJSONUnmarshaler() bool {
+func implementsJSONUnmarshaler(td *TraitDesc) bool {
 	iFace, err := gencommon.FindIFaceDef("encoding/json", "Unmarshaler")
 	if err != nil || iFace == nil {
 		panic("Failed to find encoding/json.Unmarshaler")
@@ -153,7 +179,7 @@ func (td *TraitDesc) implementsJSONUnmarshaler() bool {
 	return gencommon.TypeImplements(td.Type, iFace)
 }
 
-func (td *TraitDesc) implementsYAMLUnmarshaler() bool {
+func implementsYAMLUnmarshaler(td *TraitDesc) bool {
 	iFace, err := gencommon.FindIFaceDef("gopkg.in/yaml.v3", "Unmarshaler")
 	if err != nil || iFace == nil {
 		panic("Failed to find gopkg.in/yaml.v3.Unmarshaler")
@@ -161,7 +187,7 @@ func (td *TraitDesc) implementsYAMLUnmarshaler() bool {
 	return gencommon.TypeImplements(td.Type, iFace)
 }
 
-func (td *TraitDesc) implementsTextUnmarshaler() bool {
+func implementsTextUnmarshaler(td *TraitDesc) bool {
 	iFace, err := gencommon.FindIFaceDef("encoding", "TextUnmarshaler")
 	if err != nil || iFace == nil {
 		panic("Failed to find encoding.TextUnmarshaler")
