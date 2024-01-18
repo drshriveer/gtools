@@ -127,8 +127,8 @@ Usage of ./bin/genum:
 1.	Enum definitions must be in a single file.
 2.	Currently no string transformation support.
 3.	[Duplicate Values](#duplicate-values) can cause some issues; prefer not to use them.
+4. In some cases parsing by traits may have unexpected behaviors. Durations, for example.  
 
 ### TODO:
 
--	consider making traits explicitly defined in comments or as input value.
--	uniqueness constraint and reverse mapping from traits
+- generate tests for parsing traits to prevent unintentional bugs and to flag issues that may arise 
