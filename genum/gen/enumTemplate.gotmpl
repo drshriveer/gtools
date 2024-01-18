@@ -93,7 +93,7 @@ func (e {{$enumTypeName}}) ParseString(text string) ({{$enumTypeName}}, error) {
 }
 
 // Parse{{$enumTypeName}} will attempt to parse the value of a {{$enumTypeName}} from either its string form
-// or any value of a trait flagged with the --parsableByTrait flag
+// or any value of a trait flagged with the --parsableByTrait flag.
 func Parse{{$enumTypeName}}(input any) ({{$enumTypeName}}, error) {
 	switch input {
 	{{- range $j, $val := $values }}
