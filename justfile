@@ -44,7 +44,6 @@ _tools-linter:
 
 # Other packages should use the _install-go-pkg script.
 _tools-generate:
-    @just _install-go-pkg "google.golang.org/grpc/cmd/protoc-gen-go-grpc"
     @just _install-go-pkg "google.golang.org/protobuf" "cmd/protoc-gen-go"
     go build -o bin/genum genum/cmd/genum/main.go
     go build -o bin/gsort gsort/cmd/gsort/main.go
