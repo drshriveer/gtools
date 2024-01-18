@@ -158,7 +158,7 @@ func (td *TraitDesc) implementsYAMLUnmarshaler() bool {
 	if err != nil || iFace == nil {
 		panic("Failed to find gopkg.in/yaml.v3.Unmarshaler")
 	}
-	return types.Implements(td.Type, iFace)
+	return gencommon.TypeImplements(td.Type, iFace)
 }
 
 func (td *TraitDesc) implementsTextUnmarshaler() bool {
