@@ -303,7 +303,7 @@ func (e *{{$enumTypeName}}) UnmarshalYAML(value *yaml.Node) error {
 
 
 	{{- if (len ((index $.Traits $i).GetParsableUnderlyingFloat64)) }}
-	// floats64: ( i hate floats)..
+	// floats64: (must treat differently than float32- I hate floats.)
 	if floater64, err := strconv.ParseFloat(value.Value, 64); err != nil  {
 		{{- range $trait := (index $.Traits $i).GetParsableUnderlyingFloat64 }}
 		*e, err = Parse{{$enumTypeName}}({{$trait.TypeRef}}(floater64))
