@@ -212,7 +212,7 @@ func (e *{{$enumTypeName}}) UnmarshalJSON(data []byte) error {
 	// native parsing
 	{{- range $trait := (index $.Traits $i).GetParsableJSONUnmarshalable }}
 	var v{{$i}} {{$trait.TypeRef}}
-	if err := json.Unmarshal(data, &s); err == nil {
+	if err := json.Unmarshal(data, &v{{$i}}); err == nil {
 		*e, err = Parse{{$enumTypeName}}(v{{$i}})
 		if err == nil {
 			return nil
