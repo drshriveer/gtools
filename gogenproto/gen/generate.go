@@ -90,7 +90,6 @@ func (g Generate) Run() error {
 		}
 	}
 	args = append(args, paths...)
-	// Logger.Printf("Running protoc with args: %s", strings.Join(args, " "))
 	cmd := exec.Command("protoc", args...)
 	cmd.Stdout = logPipe{}
 	cmd.Stderr = logPipe{}
