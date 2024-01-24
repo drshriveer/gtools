@@ -4,9 +4,10 @@ import (
 	"io/fs"
 	"log"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/drshriveer/gtools/gencommon"
 )
 
 // Logger is the name-spaced logger for this script.
@@ -16,8 +17,7 @@ var Logger = log.New(log.Writer(), "[gogenproto] ", log.LstdFlags)
 // Generate is a simple script for generating proto files with a go:generate directive
 // relative to the input directory.
 type Generate struct {
-	InputDir  string `aliases:"inputDir" env:"PWD" usage:"path to root directory for proto generation"`
-	OutputDir string `aliases:"outputDir" default:"../" usage:"relative output path for generated files"`
+	InputDir string `aliases:"inputDir" env:"PWD" usage:"path to root directory for proto generation"`
 
 	Recurse bool     `default:"false" usage:"generate protos recursively"`
 	VTProto bool     `default:"false" usage:"also generate vtproto"`
@@ -30,29 +30,63 @@ type Generate struct {
 
 // Run runs the generate command.
 func (g Generate) Run() error {
-	paths, err := g.findProtos()
+	paths, err := g.findProtos(g.InputDir, g.Recurse)
 	if err != nil {
 		return err
 	}
 	args := []string{
-		"--proto_path=" + path.Dir(g.InputDir),
-		"--go_out=" + g.OutputDir,
+		"--go_out=.",
+		"--go_opt=paths=source_relative",
 		"--fatal_warnings",
 	}
 	if g.VTProto {
 		args = append(args,
-			"--go-vtproto_out="+g.OutputDir,
+			"--go-vtproto_out=.",
 			"--go-vtproto_opt=paths=source_relative,features=marshal+unmarshal+size+equal+clone+pool",
 		)
 	}
 	if g.GRPC {
 		args = append(args,
-			"--go-grpc_out="+g.OutputDir,
+			"--go-grpc_out=.",
 			"--go-grpc_opt=paths=source_relative",
 		)
 	}
-	for _, include := range g.Include {
-		args = append(args, "-I="+filepath.Join(g.InputDir, include))
+	includePaths := append([]string{g.InputDir}, g.Include...)
+	for _, path := range includePaths {
+		includePath, err := filepath.Abs(path)
+		if err != nil {
+			return err
+		}
+		args = append(args, "-I="+includePath)
+		protoImportPaths, err := g.findProtos(includePath, true)
+		if err != nil {
+			return err
+		}
+		for _, path := range protoImportPaths {
+			pkg, err := gencommon.PackageNameFromPath(filepath.Dir(path))
+			if err != nil {
+				return err
+			}
+			relPath, err := filepath.Rel(includePath, path)
+			if err != nil {
+				return err
+			}
+			mapping := relPath + "=" + pkg
+
+			args = append(args,
+				"--go_opt=M"+mapping,
+			)
+			if g.VTProto {
+				args = append(args,
+					"--go-vtproto_opt=M"+mapping,
+				)
+			}
+			if g.GRPC {
+				args = append(args,
+					"--go-grpc_opt=M"+mapping,
+				)
+			}
+		}
 	}
 	args = append(args, paths...)
 	cmd := exec.Command("protoc", args...)
@@ -61,13 +95,13 @@ func (g Generate) Run() error {
 	return cmd.Run()
 }
 
-func (g Generate) findProtos() ([]string, error) {
+func (g Generate) findProtos(dir string, recurse bool) ([]string, error) {
 	protoList := []string{}
-	err := filepath.WalkDir(g.InputDir,
+	err := filepath.WalkDir(dir,
 		func(pathname string, d fs.DirEntry, err error) error {
 			if err != nil || pathname == "." || pathname == g.InputDir {
 				return err
-			} else if d.IsDir() && !g.Recurse {
+			} else if d.IsDir() && !recurse {
 				return fs.SkipDir
 			}
 			if d.Type().IsRegular() {

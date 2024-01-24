@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package gtools.gogenproto.internal;
 
-option go_package = "internal/";
-
 enum TestEnum {
   UNSET = 0;
   ENUM_A = 1;

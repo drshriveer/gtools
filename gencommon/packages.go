@@ -2,6 +2,7 @@ package gencommon
 
 import (
 	"errors"
+	"fmt"
 	"go/ast"
 	"path"
 	"strings"
@@ -35,7 +36,7 @@ func LoadPackages(fileName string, additional ...string) (
 		return nil, nil, nil, nil, errors.New("package for file " + fileName + " NOT FOUND")
 	}
 
-	pkg, err := FindPackageWihFile(pkgs, fileName)
+	pkg, err := FindPackageWithFile(pkgs, fileName)
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
@@ -62,8 +63,8 @@ func FindFAST(pkg *packages.Package, fileName string) (*ast.File, error) {
 	return nil, errors.New("fAST for " + fileName + " Not found")
 }
 
-// FindPackageWihFile finds a package with a file.
-func FindPackageWihFile(pkgs []*packages.Package, fileName string) (*packages.Package, error) {
+// FindPackageWithFile finds a package with a file.
+func FindPackageWithFile(pkgs []*packages.Package, fileName string) (*packages.Package, error) {
 	cleanFName := path.Clean(fileName)
 	for _, pkg := range pkgs {
 		for _, fName := range pkg.GoFiles {
@@ -76,4 +77,21 @@ func FindPackageWihFile(pkgs []*packages.Package, fileName string) (*packages.Pa
 		}
 	}
 	return nil, errors.New("package for " + fileName + " Not found")
+}
+
+// PackageNameFromPath returns a fully-qualified package path from a given filename.
+// TODO: cache this per directory.
+func PackageNameFromPath(fileName string) (string, error) {
+	cfg := &packages.Config{
+		Mode: packages.NeedName | packages.NeedFiles,
+	}
+
+	pkgs, err := packages.Load(cfg, fileName)
+	if err != nil {
+		return "", err
+	}
+	for _, pkg := range pkgs {
+		return pkg.PkgPath, nil
+	}
+	return "", fmt.Errorf("package for path %s not found", fileName)
 }
