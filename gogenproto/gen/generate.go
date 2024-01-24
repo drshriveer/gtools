@@ -22,7 +22,7 @@ type Generate struct {
 	Recurse bool     `default:"false" usage:"generate protos recursively"`
 	VTProto bool     `default:"false" usage:"also generate vtproto"`
 	GRPC    bool     `default:"false" usage:"also generate grpc service definitions (experimental)"`
-	Include []string `usage:"comma-separated paths to additional packages to include"`
+	Include []string `usage:"comma-separated paths to additional directories to add to the proto include path. You can set an optional Go package mapping by appending a = and the package path, e.g. foo=github.com/foo/bar"`
 
 	// TODO: add flags for other languages, TS, etc.
 	// TODO: add NATIVE validation support.
@@ -52,7 +52,8 @@ func (g Generate) Run() error {
 		)
 	}
 	includePaths := append([]string{g.InputDir}, g.Include...)
-	for _, path := range includePaths {
+	for _, pathAndMaybePkg := range includePaths {
+		path, pkgPrefix, hasPkgPrefix := strings.Cut(pathAndMaybePkg, "=")
 		includePath, err := filepath.Abs(path)
 		if err != nil {
 			return err
@@ -63,14 +64,23 @@ func (g Generate) Run() error {
 			return err
 		}
 		for _, path := range protoImportPaths {
-			pkg, err := gencommon.PackageNameFromPath(filepath.Dir(path))
-			if err != nil {
-				return err
-			}
 			relPath, err := filepath.Rel(includePath, path)
 			if err != nil {
 				return err
 			}
+
+			var pkg string
+			if hasPkgPrefix {
+				// Use the explicit package mapping
+				pkg = filepath.Join(pkgPrefix, filepath.Dir(relPath))
+			} else {
+				// Auto detect package name from directory
+				pkg, err = gencommon.PackageNameFromPath(filepath.Dir(path))
+				if err != nil {
+					return err
+				}
+			}
+
 			mapping := relPath + "=" + pkg
 
 			args = append(args,
