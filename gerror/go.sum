@@ -1,7 +1,7 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/drshriveer/gtools/gencommon v0.0.0-20240124213640-cce4c1a7d3d7 h1:yFskQXa9rBZcLmlTT5JzUtc4TBYCmlO4VgIGiHSDJr0=
-github.com/drshriveer/gtools/gencommon v0.0.0-20240124213640-cce4c1a7d3d7/go.mod h1:l/vd79mrf8t2d5hWmphREtkLZdIvnWNVTcJcN0N/6o0=
+github.com/drshriveer/gtools/gencommon v0.0.0-20240124215327-01a0403558aa h1:BaYgyip5nMhg8+e4PvzhtsFk21hdXbDk/GtTt+ut12o=
+github.com/drshriveer/gtools/gencommon v0.0.0-20240124215327-01a0403558aa/go.mod h1:F0ZM1G4JkwKKnnaDKq9FhzA0RJbmJc5p5DlGSaC6tr4=
 github.com/drshriveer/gtools/set v0.0.0-20240118184715-48af8963ff63 h1:DqlIkURzr3q2WGelV6FlCJfAo9dmJtgq50IV1JBfiwI=
 github.com/drshriveer/gtools/set v0.0.0-20240118184715-48af8963ff63/go.mod h1:oKjRVsjkkR+xeL/D3IqO/QrSSibcoXYuDapbc46LQyA=
 github.com/fatih/structtag v1.2.0 h1:/OdNE99OxoI/PqaW/SuSK9uxxT3f/tcSZgon/ssNSx4=
