@@ -75,7 +75,7 @@ _invokeMod cmd:
     #!/usr/bin/env bash
     set -euo pipefail # makes scripts act like justfiles (https://github.com/casey/just#safer-bash-shebang-recipes)
     if [ "{{ CURRENT_DIR }}" = "{{ PKG_ROOT }}" ]; then
-      go list -f '{{{{.Dir}}}}' -m | xargs -L1 -P 8 -t -I {} {{ cmd }}
+      go list -f '{{{{.Dir}}' -m | xargs -L1 -P 8 -t -I {} {{ cmd }}
     else
       xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ CURRENT_DIR }}"
     fi
