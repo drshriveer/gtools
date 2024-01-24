@@ -1,12 +1,14 @@
 package gen
 
 import (
+	"fmt"
 	"io/fs"
 	"log"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strings"
+
+	"golang.org/x/tools/go/packages"
 )
 
 // Logger is the name-spaced logger for this script.
@@ -17,7 +19,7 @@ var Logger = log.New(log.Writer(), "[gogenproto] ", log.LstdFlags)
 // relative to the input directory.
 type Generate struct {
 	InputDir  string `aliases:"inputDir" env:"PWD" usage:"path to root directory for proto generation"`
-	OutputDir string `aliases:"outputDir" default:"../" usage:"relative output path for generated files"`
+	OutputDir string `aliases:"outputDir" default:"." usage:"relative output path for generated files"`
 
 	Recurse bool     `default:"false" usage:"generate protos recursively"`
 	VTProto bool     `default:"false" usage:"also generate vtproto"`
@@ -35,8 +37,9 @@ func (g Generate) Run() error {
 		return err
 	}
 	args := []string{
-		"--proto_path=" + path.Dir(g.InputDir),
+		"--proto_path=" + g.InputDir,
 		"--go_out=" + g.OutputDir,
+		"--go_opt=paths=source_relative",
 		"--fatal_warnings",
 	}
 	if g.VTProto {
@@ -53,6 +56,31 @@ func (g Generate) Run() error {
 	}
 	for _, include := range g.Include {
 		args = append(args, "-I="+filepath.Join(g.InputDir, include))
+	}
+	for _, path := range paths {
+		pkg, err := PackageNameFromPath(filepath.Join(g.InputDir, g.OutputDir))
+		if err != nil {
+			return err
+		}
+		relPath, err := filepath.Rel(g.InputDir, path)
+		if err != nil {
+			return err
+		}
+		mapping := relPath + "=" + pkg
+
+		args = append(args,
+			"--go_opt=M"+mapping,
+		)
+		if g.VTProto {
+			args = append(args,
+				"--go-vtproto_opt=M"+mapping,
+			)
+		}
+		if g.GRPC {
+			args = append(args,
+				"--go-grpc_opt=M"+mapping,
+			)
+		}
 	}
 	args = append(args, paths...)
 	cmd := exec.Command("protoc", args...)
@@ -87,4 +115,19 @@ func (lw logPipe) Write(p []byte) (n int, err error) {
 	toLog := strings.TrimSuffix(string(p), "\n")
 	Logger.Println(toLog)
 	return len(p), nil
+}
+
+func PackageNameFromPath(fileName string) (string, error) {
+	cfg := &packages.Config{
+		Mode: packages.NeedName | packages.NeedFiles,
+	}
+
+	pkgs, err := packages.Load(cfg, fileName)
+	if err != nil {
+		return "", err
+	}
+	for _, pkg := range pkgs {
+		return pkg.PkgPath, nil
+	}
+	return "", fmt.Errorf("package for path %s not found", fileName)
 }
