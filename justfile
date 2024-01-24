@@ -1,50 +1,40 @@
-GO_LINT_VERSION := '1.54.2'
 PKG_ROOT := `pwd`
 INSTALLED_TOOLS := PKG_ROOT / "bin" / ".installed_tools"
-MODS := `go list -f '{{.Dir}}' -m`
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
 export GOBIN := PKG_ROOT + "/bin"
 export GOEXPERIMENT := "loopvar"
 CURRENT_DIR := invocation_directory_native()
 
 # Runs `go mod tidy` for all modules in the current directory, then sync go workspaces.
-tidy:
-    @just _invokeMod "go mod tidy -C {}" "{{ CURRENT_DIR }}"
+tidy: (_invokeMod "go mod tidy -C {}")
     go work sync
 
 # Runs `go test --race ` for all modules in the current directory.
-test:
-    @just _invokeMod "go test --race {}/..." "{{ CURRENT_DIR }}"
+test: (_invokeMod "go test --race {}/...")
 
 # Runs lint and test for all modules in the current directory.
 check: lint test
 
 # Runs lint/format for all modules in the current directory.
-lint: _tools-linter
-    @just _invokeMod "golangci-lint run {}/..." "{{ CURRENT_DIR }}"
+lint: _tools-linter (_invokeMod "golangci-lint run {}/...")
 
 # Fixes all auto-fixable format and lint errors for all modules in the current directory.
-fix: _tools-linter format-md
+fix: _tools-linter format-md && (_invokeMod "golangci-lint run --fix {}/...")
     just --fmt --unstable
-    @just _invokeMod "golangci-lint run --fix {}/..." "{{ CURRENT_DIR }}"
 
 # Formats markdown.
-format-md:
-    @just _install-go-pkg "github.com/moorereason/mdfmt"
+format-md: (_install-go-pkg "github.com/moorereason/mdfmt")
     @mdfmt -w -l ./**/*.md
 
 # Runs `go generate` on all modules in the current directory.
-generate: _tools-generate
-    @just _invokeMod "go generate -C {} ./..." "{{ CURRENT_DIR }}"
+generate: _tools-generate (_invokeMod "go generate -C {} ./...")
 
-_tools-linter:
-    @just _tools-install "golangci-lint" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v{{ GO_LINT_VERSION }}"
+_tools-linter: (_tools-install "golangci-lint" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.54.2")
 
 # Always rebuild the genum, gsort, and gerror executibles from this package direclty for testing.
 
 # Other packages should use the _install-go-pkg script.
-_tools-generate:
-    @just _install-go-pkg "google.golang.org/protobuf" "cmd/protoc-gen-go"
+_tools-generate: (_install-go-pkg "google.golang.org/protobuf" "cmd/protoc-gen-go")
     go build -o bin/genum genum/cmd/genum/main.go
     go build -o bin/gsort gsort/cmd/gsort/main.go
     go build -o bin/gerror gerror/cmd/gerror/main.go
@@ -81,11 +71,11 @@ _tools-install tool cmd:
     sort {{ INSTALLED_TOOLS }} -o {{ INSTALLED_TOOLS }}
 
 # a the placeholder `{}` which is the path to the correct module.
-_invokeMod cmd target='all':
+_invokeMod cmd:
     #!/usr/bin/env bash
     set -euo pipefail # makes scripts act like justfiles (https://github.com/casey/just#safer-bash-shebang-recipes)
-    if [ "{{ target }}" = "{{ PKG_ROOT }}" ]; then
-      xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ MODS }}"
-     else
-      xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ target }}"
+    if [ "{{ CURRENT_DIR }}" = "{{ PKG_ROOT }}" ]; then
+      go list -f '{{{{.Dir}}}}' -m | xargs -L1 -P 8 -t -I {} {{ cmd }}
+    else
+      xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ CURRENT_DIR }}"
     fi
