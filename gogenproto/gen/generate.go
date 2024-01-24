@@ -125,6 +125,8 @@ func (lw logPipe) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
+// PackageNameFromPath returns a fully-qualified package path from a given filename.
+// TODO: cache this per directory.
 func PackageNameFromPath(fileName string) (string, error) {
 	cfg := &packages.Config{
 		Mode: packages.NeedName | packages.NeedFiles,
