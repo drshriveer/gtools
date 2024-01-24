@@ -35,7 +35,7 @@ func LoadPackages(fileName string, additional ...string) (
 		return nil, nil, nil, nil, errors.New("package for file " + fileName + " NOT FOUND")
 	}
 
-	pkg, err := FindPackageWihFile(pkgs, fileName)
+	pkg, err := FindPackageWithFile(pkgs, fileName)
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
@@ -62,8 +62,8 @@ func FindFAST(pkg *packages.Package, fileName string) (*ast.File, error) {
 	return nil, errors.New("fAST for " + fileName + " Not found")
 }
 
-// FindPackageWihFile finds a package with a file.
-func FindPackageWihFile(pkgs []*packages.Package, fileName string) (*packages.Package, error) {
+// FindPackageWithFile finds a package with a file.
+func FindPackageWithFile(pkgs []*packages.Package, fileName string) (*packages.Package, error) {
 	cleanFName := path.Clean(fileName)
 	for _, pkg := range pkgs {
 		for _, fName := range pkg.GoFiles {
