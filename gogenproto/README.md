@@ -59,21 +59,17 @@ package models
 → ./path/to/bin/gogenproto --help
 Usage of ./bin/gogenproto:
   -grpc
-        also generate grpc service definitions (experimental)
+    	also generate grpc service definitions (experimental)
   -include value
-        comma-separated paths to additional packages to include
+    	comma-separated paths to additional directories to add to the proto include path. You can set an optional Go package mapping by appending a = and the package path, e.g. foo=github.com/foo/bar
   -input-dir string
-        path to root directory for proto generation (env PWD)
+    	path to root directory for proto generation (env PWD)
   -inputDir string
-        path to root directory for proto generation (env PWD)
-  -output-dir string
-        relative output path for generated files (default "../")
-  -outputDir string
-        relative output path for generated files (default "../")
+    	path to root directory for proto generation (env PWD)
   -recurse
-        generate protos recursively
+    	generate protos recursively
   -vt-proto
-        also generate vtproto
+    	also generate vtproto
 ```
 
 ### TODO:
