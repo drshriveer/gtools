@@ -2,6 +2,7 @@ package gencommon
 
 import (
 	"errors"
+	"fmt"
 	"go/ast"
 	"path"
 	"strings"
@@ -76,4 +77,21 @@ func FindPackageWithFile(pkgs []*packages.Package, fileName string) (*packages.P
 		}
 	}
 	return nil, errors.New("package for " + fileName + " Not found")
+}
+
+// PackageNameFromPath returns a fully-qualified package path from a given filename.
+// TODO: cache this per directory.
+func PackageNameFromPath(fileName string) (string, error) {
+	cfg := &packages.Config{
+		Mode: packages.NeedName | packages.NeedFiles,
+	}
+
+	pkgs, err := packages.Load(cfg, fileName)
+	if err != nil {
+		return "", err
+	}
+	for _, pkg := range pkgs {
+		return pkg.PkgPath, nil
+	}
+	return "", fmt.Errorf("package for path %s not found", fileName)
 }

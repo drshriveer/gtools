@@ -1,14 +1,13 @@
 package gen
 
 import (
-	"fmt"
 	"io/fs"
 	"log"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
-	"golang.org/x/tools/go/packages"
+	"github.com/drshriveer/gtools/gencommon"
 )
 
 // Logger is the name-spaced logger for this script.
@@ -64,7 +63,7 @@ func (g Generate) Run() error {
 			return err
 		}
 		for _, path := range protoImportPaths {
-			pkg, err := PackageNameFromPath(filepath.Dir(path))
+			pkg, err := gencommon.PackageNameFromPath(filepath.Dir(path))
 			if err != nil {
 				return err
 			}
@@ -122,21 +121,4 @@ func (lw logPipe) Write(p []byte) (n int, err error) {
 	toLog := strings.TrimSuffix(string(p), "\n")
 	Logger.Println(toLog)
 	return len(p), nil
-}
-
-// PackageNameFromPath returns a fully-qualified package path from a given filename.
-// TODO: cache this per directory.
-func PackageNameFromPath(fileName string) (string, error) {
-	cfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedFiles,
-	}
-
-	pkgs, err := packages.Load(cfg, fileName)
-	if err != nil {
-		return "", err
-	}
-	for _, pkg := range pkgs {
-		return pkg.PkgPath, nil
-	}
-	return "", fmt.Errorf("package for path %s not found", fileName)
 }
