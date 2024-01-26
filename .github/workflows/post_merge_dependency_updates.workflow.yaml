@@ -15,13 +15,9 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - if: github.event.commits[0].message != "[AutoCommit] update inter dependent modules"
-        uses: actions/checkout@v4
-      - if: github.event.commits[0].message != "[AutoCommit] update inter dependent modules"
-        uses: ./.github/actions/setup-repo
-      - if: github.event.commits[0].message != "[AutoCommit] update inter dependent modules"
-        run: just update-interdependencies
-      - if: github.event.commits[0].message != "[AutoCommit] update inter dependent modules"
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-repo
+      - run: just update-interdependencies
+      - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "[AutoCommit] update inter dependent modules"
