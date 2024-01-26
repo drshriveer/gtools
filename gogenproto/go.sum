@@ -1,7 +1,7 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/drshriveer/gtools/gencommon v0.0.0-20240126195109-85089b7e3319 h1:beGvZ/9AUswGj1pcKxbW0kL9TrZ9YmF+fJUsqGhEQWo=
-github.com/drshriveer/gtools/gencommon v0.0.0-20240126195109-85089b7e3319/go.mod h1:F0ZM1G4JkwKKnnaDKq9FhzA0RJbmJc5p5DlGSaC6tr4=
+github.com/drshriveer/gtools/gencommon v0.0.0-20240126203715-0dade61e5a14 h1:bpBa/Y6VVfpt2OXVbGoqr4oLCkFLCcBSiBVSA0DsqJY=
+github.com/drshriveer/gtools/gencommon v0.0.0-20240126203715-0dade61e5a14/go.mod h1:F0ZM1G4JkwKKnnaDKq9FhzA0RJbmJc5p5DlGSaC6tr4=
 github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
 github.com/itzg/go-flagsfiller v1.12.0 h1:LSwSUGxzZqueprm0D8FBCAG0JMgwAkkh2UjtwreNgAg=
