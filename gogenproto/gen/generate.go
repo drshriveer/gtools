@@ -1,8 +1,10 @@
 package gen
 
 import (
+	"bufio"
 	"io/fs"
 	"log"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -64,6 +66,15 @@ func (g Generate) Run() error {
 			return err
 		}
 		for _, path := range protoImportPaths {
+			hasGoPackage, err := protoFileHasGoPackage(path)
+			if err != nil {
+				return err
+			}
+			if hasGoPackage {
+				// Don't make a mapping for this, it already specifies its output package name
+				continue
+			}
+
 			relPath, err := filepath.Rel(includePath, path)
 			if err != nil {
 				return err
@@ -123,6 +134,27 @@ func (g Generate) findProtos(dir string, recurse bool) ([]string, error) {
 		},
 	)
 	return protoList, err
+}
+
+// A basic check for whether a proto file has a go_package option declared.
+func protoFileHasGoPackage(path string) (bool, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	// Read line-by-line instead of loading the whole file into memory
+	scanner := bufio.NewScanner(f)
+	if err != nil {
+		return false, err
+	}
+	for scanner.Scan() {
+		if strings.Contains(scanner.Text(), "option go_package =") {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 type logPipe struct{}
