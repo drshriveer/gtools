@@ -1,22 +1,33 @@
-name: PostMergeReleaser
+name: Post Merge
 run-name: Post Merge → ${{ github.event.pull_request.tile }} by @${{ github.actor }}
 on:
-  workflow_run:
-    workflows:
-      - "Post Merge Dependency Updates"
-    types:
-      - 'completed'
+  push:
     branches:
       - 'main'
 
-
-# Keep releases sequential as much as possible with concurrency control
+      # Keep releases sequential as much as possible with concurrency control
 concurrency:
   group: ${{ github.workflow }}
 
 jobs:
+  update-interdependencies:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ./.github/actions/setup-repo
+      - run: just update-interdependencies
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "[AutoCommit] update inter dependent modules"
+
   release:
     runs-on: ubuntu-latest
+    needs:
+      - update-interdependencies
     permissions:
       contents: write
     steps:
