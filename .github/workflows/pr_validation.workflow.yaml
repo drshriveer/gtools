@@ -13,6 +13,7 @@ jobs:
     permissions:
       contents: read
     steps:
+      - uses: actions/checkout@v4
       - id: changes
         uses: ./.github/actions/detect-changes
       - if: steps.changes.outputs.go == 'true'
@@ -25,6 +26,7 @@ jobs:
     permissions:
       contents: read
     steps:
+      - uses: actions/checkout@v4
       - id: changes
         uses: ./.github/actions/detect-changes
       - if: steps.changes.outputs.go == 'true'
@@ -37,6 +39,7 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
       - id: changes
         uses: ./.github/actions/detect-changes
 #        with:
