@@ -1,5 +1,5 @@
 name: Post Merge Dependency Updates
-run-name: Post Merge → ${{ github.event.pull_request.tile }} by @${{ github.actor }}
+run-name: Post Merge Dependency Updates → ${{ github.event.pull_request.tile }} by @${{ github.actor }}
 on:
   push:
     branches:
@@ -10,7 +10,7 @@ concurrency:
   group: ${{ github.workflow }}
 
 jobs:
-  lint:
+  update-interdependencies:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
