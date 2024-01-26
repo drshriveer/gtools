@@ -40,10 +40,10 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.AUTO_COMMIT_BOT }}
       - id: changes
         uses: ./.github/actions/detect-changes
-#        with:
-#          commit-bot-perms: 'true'
       - if: steps.changes.outputs.go == 'true'
         uses: ./.github/actions/setup-repo
       - if: steps.changes.outputs.go == 'true'

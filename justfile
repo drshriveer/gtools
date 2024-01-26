@@ -20,8 +20,7 @@ lint: _tools-linter (_invokeMod "golangci-lint run {}/...")
 
 # Fixes all auto-fixable format and lint errors for all modules in the current directory.
 fix: _tools-linter format-md && (_invokeMod "golangci-lint run --fix {}/...")
-
-#    just --fmt --unstable <- disabled because it is causing issues.
+    just --fmt --unstable
 
 # Updates interdependent modules of gtools. TODO: could make this wayyy smarter.
 update-interdependencies: \
