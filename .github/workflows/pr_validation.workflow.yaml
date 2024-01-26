@@ -47,6 +47,10 @@ jobs:
       - if: steps.changes.outputs.go == 'true'
         uses: ./.github/actions/setup-repo
       - if: steps.changes.outputs.go == 'true'
+        uses: arduino/setup-protoc@v2
+        with:
+          version: "25.2"
+      - if: steps.changes.outputs.go == 'true'
         run: just fix
       - if: steps.changes.outputs.go == 'true'
         run: just generate
