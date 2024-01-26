@@ -1,0 +1,27 @@
+name: Post Merge Dependency Updates
+run-name: Post Merge → ${{ github.event.pull_request.tile }} by @${{ github.actor }}
+on:
+  push:
+    branches:
+      - 'main'
+
+      # Keep releases sequential as much as possible with concurrency control
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - if: github.event.commits[0].message != "[AutoCommit] update inter dependent modules"
+        uses: actions/checkout@v4
+      - if: github.event.commits[0].message != "[AutoCommit] update inter dependent modules"
+        uses: ./.github/actions/setup-repo
+      - if: github.event.commits[0].message != "[AutoCommit] update inter dependent modules"
+        run: just update-interdependencies
+      - if: github.event.commits[0].message != "[AutoCommit] update inter dependent modules"
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "[AutoCommit] update inter dependent modules"

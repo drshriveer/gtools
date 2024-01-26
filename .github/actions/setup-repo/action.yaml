@@ -1,0 +1,22 @@
+name: "Setup Repo"
+description: "Set up go the way we want"
+#inputs:
+#  commit-bot-perms:
+#    description: 'Who to greet'
+#    required: false
+#    default: 'false'
+runs:
+  using: "composite"
+  steps:
+#    - if: inputs.commit-bot-perms == 'true'
+#      uses: actions/checkout@v3
+#      with:
+#        token: ${{ secrets.BOT }}
+#    - if: inputs.commit-bot-perms == 'false'
+#      uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - uses: extractions/setup-just@v1
+    - uses: actions/setup-go@v5
+      with:
+        go-version-file: go.work
+        cache-dependency-path: "**/go.sum"

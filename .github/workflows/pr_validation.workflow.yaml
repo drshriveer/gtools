@@ -2,49 +2,52 @@ name: Validation
 run-name: validating → ${{ github.event.pull_request.tile }} by @${{ github.actor }}
 on: pull_request
 
+# Ensures that only one task per branch/environment will run at a time.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  changes:
+  lint:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
-    outputs:
-      changes: ${{ steps.filter.outputs.changes }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
-            changes:
-              - '**/*.go'
-              - '**/go.mod'
-              - 'go.work'
-
-  lint:
-    needs: changes
-    if: ${{ needs.changes.outputs.changes == 'true' }}
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: read
-    steps:
-      - uses: actions/checkout@v3
-      - uses: extractions/setup-just@v1
-      - uses: actions/setup-go@v4
-        with:
-          go-version-file: go.work
-      - run: just lint
+      - id: changes
+        uses: ./.github/actions/detect-changes
+      - if: steps.changes.outputs.go == 'true'
+        uses: ./.github/actions/setup-repo
+      - if: steps.changes.outputs.go == 'true'
+        run: just lint
 
   test:
-    needs: changes
-    if: ${{ needs.changes.outputs.changes == 'true' }}
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: read
+      contents: read
     steps:
-      - uses: actions/checkout@v3
-      - uses: extractions/setup-just@v1
-      - uses: actions/setup-go@v4
+      - id: changes
+        uses: ./.github/actions/detect-changes
+      - if: steps.changes.outputs.go == 'true'
+        uses: ./.github/actions/setup-repo
+      - if: steps.changes.outputs.go == 'true'
+        run: just test
+
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - id: changes
+        uses: ./.github/actions/detect-changes
+#        with:
+#          commit-bot-perms: 'true'
+      - if: steps.changes.outputs.go == 'true'
+        uses: ./.github/actions/setup-repo
+      - if: steps.changes.outputs.go == 'true'
+        run: just fix
+      - if: steps.changes.outputs.go == 'true'
+        run: just generate
+      - if: steps.changes.outputs.go == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          go-version-file: go.work
-      - run: just test
+          commit_message: "[AutoCommit] auto generate"
