@@ -20,10 +20,13 @@ lint: _tools-linter (_invokeMod "golangci-lint run {}/...")
 
 # Fixes all auto-fixable format and lint errors for all modules in the current directory.
 fix: _tools-linter format-md && (_invokeMod "golangci-lint run --fix {}/...")
-    just --fmt --unstable
+
+#    just --fmt --unstable <- disabled because it is causing issues.
 
 # Updates interdependent modules of gtools. TODO: could make this wayyy smarter.
-update-interdependencies: (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/gencommon") (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/genum") && tidy
+update-interdependencies: \
+    (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/gencommon") \
+    (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/genum") && tidy
 
 # updates a single package across all go modules.
 update-pkg pkgName: && tidy
