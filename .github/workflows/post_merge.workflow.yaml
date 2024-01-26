@@ -1,0 +1,45 @@
+name: Post Merge
+run-name: Post Merge → ${{ github.event.pull_request.tile }} by @${{ github.actor }}
+on:
+  push:
+    branches:
+      - 'main'
+
+      # Keep releases sequential as much as possible with concurrency control
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  update-interdependencies:
+    if: ${{ github.actor != 'github-actions[bot]' && github.event_name != 'push' || github.event.pusher.name != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.AUTO_COMMIT_BOT }}
+      - uses: ./.github/actions/setup-repo
+      - run: just update-interdependencies
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "[AutoCommit] update inter dependent modules"
+
+  release:
+    if: ${{ github.actor != 'github-actions[bot]' && github.event_name != 'push' || github.event.pusher.name != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    needs:
+      - update-interdependencies
+    permissions:
+      contents: write
+    steps:
+      - if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        uses: actions/checkout@v4
+      - if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        uses: ./.github/actions/setup-repo
+      - if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        uses: go-semantic-release/action@v1
+        with:
+          hooks: goreleaser
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

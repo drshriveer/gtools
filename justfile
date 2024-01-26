@@ -22,12 +22,12 @@ lint: _tools-linter (_invokeMod "golangci-lint run {}/...")
 fix: _tools-linter format-md && (_invokeMod "golangci-lint run --fix {}/...")
     just --fmt --unstable
 
-updateInternals: \
-    (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/gencommon") \
-    (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/genum") && tidy
+# Updates interdependent modules of gtools. TODO: could make this wayyy smarter.
+update-interdependencies: (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/gencommon") (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/genum") && tidy
 
-updatepkg pkgName: && tidy
-  _invokeMod "go get -C {} -u  {{pkgName}}"
+# updates a single package across all go modules.
+update-pkg pkgName: && tidy
+    _invokeMod "go get -C {} -u  {{ pkgName }}"
 
 # Formats markdown.
 format-md: (_install-go-pkg "github.com/moorereason/mdfmt")
