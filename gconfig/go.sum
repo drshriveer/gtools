@@ -1,8 +1,8 @@
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/drshriveer/gtools/genum v0.0.0-20240124215327-01a0403558aa h1:s1q+2atf9fACTyh/H4IBYcfBBtjhzh/mpzkehymC01M=
-github.com/drshriveer/gtools/genum v0.0.0-20240124215327-01a0403558aa/go.mod h1:QD1nwOZHOZQzh+UQDZojcUgZbzx47+5D+zAFhGLWk68=
+github.com/drshriveer/gtools/genum v0.0.0-20240126195109-85089b7e3319 h1:LH/bVLHLnBHZmyYDGdJKIgQHBGSie+wGsDoZlk5CEuY=
+github.com/drshriveer/gtools/genum v0.0.0-20240126195109-85089b7e3319/go.mod h1:CLOig7mTYxohJBj9WOE9ICveeDl+cnCyo2VZ54Xzdb8=
 github.com/drshriveer/gtools/gerror v0.0.0-20240118184715-48af8963ff63 h1:68fFlmjLvkXFDzDuWzl0rEHMh95YcXVBK7RwAm69X24=
 github.com/drshriveer/gtools/gerror v0.0.0-20240118184715-48af8963ff63/go.mod h1:ECm354PjhLXufBbOf5r3PcqG23lqSzv3o2C0WVD0YtA=
 github.com/drshriveer/gtools/set v0.0.0-20240118184715-48af8963ff63 h1:DqlIkURzr3q2WGelV6FlCJfAo9dmJtgq50IV1JBfiwI=
