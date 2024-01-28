@@ -16,11 +16,22 @@ import (
 // SorterDesc is a description of a sorter.
 type SorterDesc struct {
 	// The underlying type name (that we're making sortable).
-	TypeName string `gsort:"SorterDescs,1"`
+	TypeName string `gsort:"*SorterDescs,1"`
 
 	// The name of the sortable type (sorted in case we support generating different sorters per type)
-	SortTypeName string `gsort:"SorterDescs,2"`
-	Fields       SortFieldDescs
+	sortTypeName string `gsort:"*SorterDescs,2"`
+
+	Fields SortFieldDescs
+}
+
+// SortTypeName returns the clarified SortTypeName.
+func (sd *SorterDesc) SortTypeName() string {
+	return strings.TrimPrefix(sd.sortTypeName, "*")
+}
+
+// UsePointer returns true if the caller should generate structs with pointers.
+func (sd *SorterDesc) UsePointer() bool {
+	return strings.HasPrefix(sd.sortTypeName, "*")
 }
 
 // PriorityTree produces a lopsided tree that expresses how to compare values.
@@ -70,7 +81,7 @@ func createSorterDesc(obj types.Object, typeName string) (SorterDescs, error) {
 			} else {
 				desc = &SorterDesc{
 					TypeName:     typeName,
-					SortTypeName: fd.SortTypeName,
+					sortTypeName: fd.SortTypeName,
 					Fields:       SortFieldDescs{fd},
 				}
 			}
@@ -115,7 +126,7 @@ type SortFieldDesc struct {
 	FieldType      types.Type
 	CustomAccessor string
 	SortTypeName   string
-	Priority       int `gsort:"SortFieldDescs,1"`
+	Priority       int `gsort:"*SortFieldDescs,1"`
 }
 
 func sfdFromLine(options string) (*SortFieldDesc, error) {

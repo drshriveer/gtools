@@ -21,7 +21,7 @@ return {{.String}}
 
 {{- range $desc := .SorterDescs}}
 // {{$desc.SortTypeName}} implements a sort.Sort interface for {{$desc.TypeName}}.
-type {{$desc.SortTypeName}} []{{- if $.UsePointer -}}*{{- end -}}{{$desc.TypeName}}
+type {{$desc.SortTypeName}} []{{- if $desc.UsePointer -}}*{{- end -}}{{$desc.TypeName}}
 
 func (s {{$desc.SortTypeName}}) Len() int {
 	return len(s)

@@ -45,10 +45,9 @@ func TestGenerate(t *testing.T) {
 			t.Parallel()
 			tempFile := filepath.Join(t.TempDir(), "sortable.gsort.go")
 			g := gen.Generate{
-				InFile:     "./sortable.go",
-				OutFile:    tempFile,
-				Types:      []string{test.typeName},
-				UsePointer: true,
+				InFile:  "./sortable.go",
+				OutFile: tempFile,
+				Types:   []string{test.typeName},
 			}
 			err := g.Parse()
 			if test.expectedError != nil {

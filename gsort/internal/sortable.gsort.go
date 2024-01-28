@@ -2,7 +2,7 @@
 package internal
 
 // SortByProp1 implements a sort.Sort interface for MultiSort.
-type SortByProp1 []*MultiSort
+type SortByProp1 []MultiSort
 
 func (s SortByProp1) Len() int {
 	return len(s)
@@ -15,7 +15,7 @@ func (s SortByProp1) Less(i, j int) bool {
 }
 
 // SortByProp2 implements a sort.Sort interface for MultiSort.
-type SortByProp2 []*MultiSort
+type SortByProp2 []MultiSort
 
 func (s SortByProp2) Len() int {
 	return len(s)
@@ -31,7 +31,7 @@ func (s SortByProp2) Less(i, j int) bool {
 }
 
 // Sortables implements a sort.Sort interface for Sortable.
-type Sortables []*Sortable
+type Sortables []Sortable
 
 func (s Sortables) Len() int {
 	return len(s)

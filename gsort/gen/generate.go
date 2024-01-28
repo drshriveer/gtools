@@ -21,9 +21,6 @@ type Generate struct {
 	OutFile string   `alias:"out" usage:"name of output file (defaults to go:generate context filename.gerror.go)"`
 	Types   []string `usage:"list of type names to generate sorters for"`
 
-	// TODO: remove this argument in favor of an indicator in the tags themselves.
-	UsePointer bool `default:"true" usage:"use pointer to value in slice"`
-
 	// derived, (exposed for template use):
 	Imports     *gencommon.ImportHandler `flag:""` // ignore these fields
 	SorterDescs SorterDescs              `flag:""` // ignore these fields
