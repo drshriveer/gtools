@@ -25,7 +25,7 @@ func (s SorterDescs) Swap(i, j int) {
 }
 func (s SorterDescs) Less(i, j int) bool {
 	if s[i].TypeName == s[j].TypeName {
-		return s[i].SortType < s[j].SortType
+		return s[i].SortTypeName < s[j].SortTypeName
 	}
 	return s[i].TypeName < s[j].TypeName
 }

@@ -1,7 +1,11 @@
 package internal_test
 
 import (
+<<<<<<< Updated upstream
 	"path"
+=======
+	"path/filepath"
+>>>>>>> Stashed changes
 	"sort"
 	"testing"
 
@@ -27,6 +31,7 @@ func TestGenerate(t *testing.T) {
 			description: "sortable success",
 			typeName:    "Sortable",
 		},
+<<<<<<< Updated upstream
 		{
 			description: "sortable success with bool",
 			typeName:    "SortBool",
@@ -36,16 +41,33 @@ func TestGenerate(t *testing.T) {
 			typeName:      "NotSortable",
 			expectedError: true,
 		},
+=======
+		// {
+		// 	description: "multi sortable success",
+		// 	typeName:    "MultiSort",
+		// },
+		// {
+		// 	description:   "fails because there are no properties to sort",
+		// 	typeName:      "NotSortable",
+		// 	expectedError: true,
+		// },
+>>>>>>> Stashed changes
 		// add more tests some day.
 	}
 
 	for _, test := range tests {
 		t.Run(test.description, func(t *testing.T) {
 			t.Parallel()
+			tempFile := filepath.Join(t.TempDir(), "sortable.gsort.go")
 			g := gen.Generate{
 				InFile:     "./sortable.go",
+<<<<<<< Updated upstream
 				OutFile:    path.Join(t.TempDir(), "sortable.gsort.go"),
 				Types:      map[string]string{test.typeName: test.typeName + "s"},
+=======
+				OutFile:    tempFile,
+				Types:      []string{test.typeName},
+>>>>>>> Stashed changes
 				UsePointer: true,
 			}
 			err := g.Parse()
@@ -55,6 +77,10 @@ func TestGenerate(t *testing.T) {
 			}
 			require.NoError(t, err)
 			require.NoError(t, g.Write())
+<<<<<<< Updated upstream
+=======
+			assert.FileExists(t, tempFile)
+>>>>>>> Stashed changes
 		})
 	}
 }

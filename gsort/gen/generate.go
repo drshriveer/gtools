@@ -17,10 +17,17 @@ var (
 // Generate is the parser and writer of sorters
 // It seems to double as its own 'options' holder.
 type Generate struct {
+<<<<<<< Updated upstream
 	InFile     string            `aliases:"in" env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
 	OutFile    string            `aliases:"out" usage:"name of output file (defaults to go:generate context filename.gerror.go)"`
 	Types      map[string]string `usage:"[required] mapping of type names to generate sorters for to name to use for the generated type"`
 	UsePointer bool              `aliases:"usePointer" default:"true" usage:"use pointer to value in slice"`
+=======
+	InFile     string   `alias:"in" env:"GOFILE" usage:"path to input file (defaults to go:generate context)"`
+	OutFile    string   `alias:"out" usage:"name of output file (defaults to go:generate context filename.gerror.go)"`
+	Types      []string `usage:"list of type names to generate sorters for"`
+	UsePointer bool     `default:"true" usage:"use pointer to value in slice"`
+>>>>>>> Stashed changes
 
 	// derived, (exposed for template use):
 	Imports     *gencommon.ImportHandler `flag:""` // ignore these fields
@@ -40,13 +47,13 @@ func (g *Generate) Parse() error {
 	pkgScope := pkg.Types.Scope()
 
 	g.SorterDescs = make(SorterDescs, 0)
-	for typeToSort, nameOfResultType := range g.Types {
+	for _, typeToSort := range g.Types {
 		obj := pkgScope.Lookup(typeToSort)
-		sortDesc, err := createSorterDesc(obj, typeToSort, nameOfResultType)
+		sortDescs, err := createSorterDesc(obj, typeToSort)
 		if err != nil {
 			return err
 		}
-		g.SorterDescs = append(g.SorterDescs, sortDesc)
+		g.SorterDescs = append(g.SorterDescs, sortDescs...)
 	}
 
 	sort.Sort(g.SorterDescs)
