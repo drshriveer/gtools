@@ -1,11 +1,7 @@
 package internal_test
 
 import (
-<<<<<<< Updated upstream
-	"path"
-=======
 	"path/filepath"
->>>>>>> Stashed changes
 	"sort"
 	"testing"
 
@@ -23,35 +19,24 @@ func TestGenerate(t *testing.T) {
 		description string
 		typeName    string
 
-		// TODO: use proper errors for this... I didn't have them when I wrote it,
-		//  so not doing that now.
-		expectedError bool
+		expectedError error
+		expectedFile  bool
 	}{
 		{
-			description: "sortable success",
-			typeName:    "Sortable",
-		},
-<<<<<<< Updated upstream
-		{
-			description: "sortable success with bool",
-			typeName:    "SortBool",
+			description:  "sortable success",
+			typeName:     "Sortable",
+			expectedFile: true,
 		},
 		{
-			description:   "fails because there are no properties to sort",
-			typeName:      "NotSortable",
-			expectedError: true,
+			description:  "multi sortable success",
+			typeName:     "MultiSort",
+			expectedFile: true,
 		},
-=======
-		// {
-		// 	description: "multi sortable success",
-		// 	typeName:    "MultiSort",
-		// },
-		// {
-		// 	description:   "fails because there are no properties to sort",
-		// 	typeName:      "NotSortable",
-		// 	expectedError: true,
-		// },
->>>>>>> Stashed changes
+		{
+			description:  "fails because there are no properties to sort",
+			typeName:     "NotSortable",
+			expectedFile: false,
+		},
 		// add more tests some day.
 	}
 
@@ -61,26 +46,22 @@ func TestGenerate(t *testing.T) {
 			tempFile := filepath.Join(t.TempDir(), "sortable.gsort.go")
 			g := gen.Generate{
 				InFile:     "./sortable.go",
-<<<<<<< Updated upstream
-				OutFile:    path.Join(t.TempDir(), "sortable.gsort.go"),
-				Types:      map[string]string{test.typeName: test.typeName + "s"},
-=======
 				OutFile:    tempFile,
 				Types:      []string{test.typeName},
->>>>>>> Stashed changes
 				UsePointer: true,
 			}
 			err := g.Parse()
-			if test.expectedError {
-				require.Error(t, err)
+			if test.expectedError != nil {
+				require.ErrorIs(t, err, test.expectedError)
 				return
 			}
 			require.NoError(t, err)
 			require.NoError(t, g.Write())
-<<<<<<< Updated upstream
-=======
-			assert.FileExists(t, tempFile)
->>>>>>> Stashed changes
+			if test.expectedFile {
+				assert.FileExists(t, tempFile)
+			} else {
+				assert.NoFileExists(t, tempFile)
+			}
 		})
 	}
 }

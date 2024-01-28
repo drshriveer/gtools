@@ -58,11 +58,8 @@ func createSorterDesc(obj types.Object, typeName string) (SorterDescs, error) {
 	descs := make(map[string]*SorterDesc)
 	sortFields := make(SortFieldDescs, 0)
 	for i := 0; i < strukt.NumFields(); i++ {
-<<<<<<< Updated upstream
-		sfd, err := sortFieldDescFromTag(strukt.Field(i).Name(), strukt.Tag(i), strukt.Field(i).Type())
-=======
-		sfds, err := sortFieldDescFromTag(strukt.Field(i).Name(), strukt.Tag(i))
->>>>>>> Stashed changes
+		sField := strukt.Field(i)
+		sfds, err := sortFieldDescFromTag(sField, strukt.Tag(i))
 		if err != nil {
 			return nil, err
 		}
@@ -88,7 +85,7 @@ func createSorterDesc(obj types.Object, typeName string) (SorterDescs, error) {
 		}
 	}
 
-	result := make(SorterDescs, len(sortFields))
+	result := make(SorterDescs, 0, len(sortFields))
 	for _, desc := range descs {
 		result = append(result, desc)
 	}
@@ -121,12 +118,6 @@ type SortFieldDesc struct {
 	Priority       int `gsort:"SortFieldDescs,1"`
 }
 
-<<<<<<< Updated upstream
-func sortFieldDescFromTag(fName, tagLine string, fType types.Type) (*SortFieldDesc, error) {
-	tags, err := structtag.Parse(tagLine)
-	if err != nil { // error returned when not found
-		return nil, nil
-=======
 func sfdFromLine(options string) (*SortFieldDesc, error) {
 	sfd := &SortFieldDesc{}
 	tuple := strings.Split(options, ",")
@@ -134,25 +125,11 @@ func sfdFromLine(options string) (*SortFieldDesc, error) {
 		return nil, errors.New("minimum two tag options required; name of type to generate, and field priority")
 	} else if len(tuple) > 3 {
 		return nil, errors.New("maximum three tag options allowed; name of type to generate, field priority, optional accessor")
->>>>>>> Stashed changes
 	}
 	sfd.SortTypeName = tuple[0]
 
-<<<<<<< Updated upstream
-	sortTags, err := tags.Get("gsort")
-	if err != nil { // error returned when not found
-		return nil, nil
-	}
-
-	result := &SortFieldDesc{
-		FieldName: fName,
-		FieldType: fType,
-	}
-	result.Priority, err = strconv.Atoi(sortTags.Name)
-=======
 	var err error
 	sfd.Priority, err = strconv.Atoi(tuple[1])
->>>>>>> Stashed changes
 	if err != nil {
 		return nil, errors.New("second option must be an int indicating sort priority! found: " + tuple[1])
 	}
@@ -162,7 +139,7 @@ func sfdFromLine(options string) (*SortFieldDesc, error) {
 	return sfd, nil
 }
 
-func sortFieldDescFromTag(fName, tagLine string) ([]*SortFieldDesc, error) {
+func sortFieldDescFromTag(sFiled *types.Var, tagLine string) ([]*SortFieldDesc, error) {
 	remaining := reflect.StructTag(tagLine)
 	result := make([]*SortFieldDesc, 0)
 	for options, ok := remaining.Lookup("gsort"); ok; options, ok = remaining.Lookup("gsort") {
@@ -170,7 +147,8 @@ func sortFieldDescFromTag(fName, tagLine string) ([]*SortFieldDesc, error) {
 		if err != nil {
 			return nil, err
 		}
-		sfd.FieldName = fName
+		sfd.FieldName = sFiled.Name()
+		sfd.FieldType = sFiled.Type()
 		result = append(result, sfd)
 		remaining = reflect.StructTag(strings.Replace(string(remaining), `gsort:"`+options+`"`, "", 1))
 	}

@@ -2,11 +2,7 @@ package internal
 
 // Sortable is for testing.
 //
-<<<<<<< Updated upstream
-//go:generate gsort -types Sortable=Sortables SortBool=SortedWithBools
-=======
 //go:generate gsort -types Sortable,MultiSort
->>>>>>> Stashed changes
 type Sortable struct {
 	Category     Category `gsort:"Sortables,1,String()"`
 	Property1    string   `gsort:"Sortables,2"`
@@ -17,7 +13,7 @@ type Sortable struct {
 
 // MultiSort is for testing.
 type MultiSort struct {
-	Property1 string `gsort:"SortByProp1,1" gsort:"SortByProp2,1"`
+	Property1 string `gsort:"SortByProp1,1" gsort:"SortByProp2,2"`
 	Property2 string `gsort:"SortByProp2,1"`
 }
 
