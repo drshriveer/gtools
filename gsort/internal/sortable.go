@@ -6,7 +6,7 @@ package internal
 type Sortable struct {
 	Category     Category `gsort:"Sortables,1,String()"`
 	Property1    string   `gsort:"Sortables,2"`
-	Property2    int      `gsort:"Sortables,3"`
+	Property2    int      `gsort:"Sortables,3" gsort:"*SortOnPriority2,1"`
 	property3    int      `gsort:"Sortables,4"`
 	UnsortedProp string
 }

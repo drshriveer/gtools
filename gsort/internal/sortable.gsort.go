@@ -30,6 +30,19 @@ func (s SortByProp2) Less(i, j int) bool {
 	return s[i].Property2 < s[j].Property2
 }
 
+// SortOnPriority2 implements a sort.Sort interface for Sortable.
+type SortOnPriority2 []*Sortable
+
+func (s SortOnPriority2) Len() int {
+	return len(s)
+}
+func (s SortOnPriority2) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+func (s SortOnPriority2) Less(i, j int) bool {
+	return s[i].Property2 < s[j].Property2
+}
+
 // Sortables implements a sort.Sort interface for Sortable.
 type Sortables []Sortable
 
