@@ -100,3 +100,8 @@ issues:
     - linters:
         - unused
       source: "^\\s*unimplemented\\w*Server"
+
+    # gsort handles duplicate tags
+    - linters:
+        - staticcheck
+      text: "SA5008: duplicate struct tag \"gsort\""

@@ -20,16 +20,16 @@ return {{.String}}
 
 
 {{- range $desc := .SorterDescs}}
-// {{$desc.SortType}} implements the sort.Sort interface for {{$desc.TypeName}}.
-type {{$desc.SortType}} []{{- if $.UsePointer -}}*{{- end -}}{{$desc.TypeName}}
+// {{$desc.SortTypeName}} implements a sort.Sort interface for {{$desc.TypeName}}.
+type {{$desc.SortTypeName}} []{{- if $desc.UsePointer -}}*{{- end -}}{{$desc.TypeName}}
 
-func (s {{$desc.SortType}}) Len() int {
+func (s {{$desc.SortTypeName}}) Len() int {
 	return len(s)
 }
-func (s {{$desc.SortType}}) Swap(i, j int) {
+func (s {{$desc.SortTypeName}}) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
-func (s {{$desc.SortType}}) Less(i, j int) bool {
+func (s {{$desc.SortTypeName}}) Less(i, j int) bool {
 	{{- template "PriorityBlock" $desc.PriorityTree}}
 }
 

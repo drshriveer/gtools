@@ -1,7 +1,7 @@
 package internal_test
 
 import (
-	"path"
+	"path/filepath"
 	"sort"
 	"testing"
 
@@ -19,22 +19,23 @@ func TestGenerate(t *testing.T) {
 		description string
 		typeName    string
 
-		// TODO: use proper errors for this... I didn't have them when I wrote it,
-		//  so not doing that now.
-		expectedError bool
+		expectedError error
+		expectedFile  bool
 	}{
 		{
-			description: "sortable success",
-			typeName:    "Sortable",
+			description:  "sortable success",
+			typeName:     "Sortable",
+			expectedFile: true,
 		},
 		{
-			description: "sortable success with bool",
-			typeName:    "SortBool",
+			description:  "multi sortable success",
+			typeName:     "MultiSort",
+			expectedFile: true,
 		},
 		{
-			description:   "fails because there are no properties to sort",
-			typeName:      "NotSortable",
-			expectedError: true,
+			description:  "fails because there are no properties to sort",
+			typeName:     "NotSortable",
+			expectedFile: false,
 		},
 		// add more tests some day.
 	}
@@ -42,19 +43,24 @@ func TestGenerate(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.description, func(t *testing.T) {
 			t.Parallel()
+			tempFile := filepath.Join(t.TempDir(), "sortable.gsort.go")
 			g := gen.Generate{
-				InFile:     "./sortable.go",
-				OutFile:    path.Join(t.TempDir(), "sortable.gsort.go"),
-				Types:      map[string]string{test.typeName: test.typeName + "s"},
-				UsePointer: true,
+				InFile:  "./sortable.go",
+				OutFile: tempFile,
+				Types:   []string{test.typeName},
 			}
 			err := g.Parse()
-			if test.expectedError {
-				require.Error(t, err)
+			if test.expectedError != nil {
+				require.ErrorIs(t, err, test.expectedError)
 				return
 			}
 			require.NoError(t, err)
 			require.NoError(t, g.Write())
+			if test.expectedFile {
+				assert.FileExists(t, tempFile)
+			} else {
+				assert.NoFileExists(t, tempFile)
+			}
 		})
 	}
 }

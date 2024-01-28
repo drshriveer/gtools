@@ -4,11 +4,11 @@ import (
 	"sort"
 )
 
-//go:generate gsort --types ErrorDesc=ErrorDescs,Field=Fields
+//go:generate gsort --types=ErrorDesc,Field
 
 // ErrorDesc describes an error.
 type ErrorDesc struct {
-	TypeName string `gsort:"1"`
+	TypeName string `gsort:"*ErrorDescs"`
 	Fields   Fields
 }
 
@@ -28,7 +28,7 @@ func (e *ErrorDesc) FieldsToClone() Fields {
 
 // Field is an error field and its meaning.
 type Field struct {
-	Name    string `gsort:"1"`
+	Name    string `gsort:"*Fields"`
 	PrintAs string
 	Clone   bool
 	Print   bool

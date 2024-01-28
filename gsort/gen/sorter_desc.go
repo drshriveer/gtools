@@ -1,14 +1,14 @@
 package gen
 
-//go:generate gsort --types SorterDesc=SorterDescs,SortFieldDesc=SortFieldDescs
+//go:generate gsort --types=SorterDesc,SortFieldDesc
 
 import (
 	"errors"
 	"go/types"
+	"reflect"
 	"sort"
 	"strconv"
-
-	"github.com/fatih/structtag"
+	"strings"
 
 	"github.com/drshriveer/gtools/set"
 )
@@ -16,26 +16,37 @@ import (
 // SorterDesc is a description of a sorter.
 type SorterDesc struct {
 	// The underlying type name (that we're making sortable).
-	TypeName string `gsort:"1"`
+	TypeName string `gsort:"*SorterDescs,1"`
 
 	// The name of the sortable type (sorted in case we support generating different sorters per type)
-	SortType string `gsort:"2"`
-	Fields   SortFieldDescs
+	sortTypeName string `gsort:"*SorterDescs,2"`
+
+	Fields SortFieldDescs
+}
+
+// SortTypeName returns the clarified SortTypeName.
+func (sd *SorterDesc) SortTypeName() string {
+	return strings.TrimPrefix(sd.sortTypeName, "*")
+}
+
+// UsePointer returns true if the caller should generate structs with pointers.
+func (sd *SorterDesc) UsePointer() bool {
+	return strings.HasPrefix(sd.sortTypeName, "*")
 }
 
 // PriorityTree produces a lopsided tree that expresses how to compare values.
 // Exposed for use in templates.
-func (s SorterDesc) PriorityTree() *CompareLine {
-	sort.Sort(s.Fields)
+func (sd SorterDesc) PriorityTree() *CompareLine {
+	sort.Sort(sd.Fields)
 	result := &CompareLine{}
 	current := result
-	for i, v := range s.Fields {
+	for i, v := range sd.Fields {
 		current.IsBool = v.FieldType.String() == "bool"
 		current.Accessor = v.FieldName
 		if len(v.CustomAccessor) > 0 {
 			current.Accessor += "." + v.CustomAccessor
 		}
-		if len(s.Fields)-1 > i {
+		if len(sd.Fields)-1 > i {
 			current.Nest = &CompareLine{}
 			current = current.Nest
 		}
@@ -44,7 +55,7 @@ func (s SorterDesc) PriorityTree() *CompareLine {
 	return result
 }
 
-func createSorterDesc(obj types.Object, typeName, sortableTypeName string) (*SorterDesc, error) {
+func createSorterDesc(obj types.Object, typeName string) (SorterDescs, error) {
 	if obj == nil {
 		return nil, errors.New(typeName + " was not found in AST")
 	}
@@ -55,26 +66,42 @@ func createSorterDesc(obj types.Object, typeName, sortableTypeName string) (*Sor
 	}
 
 	// pull out tags and ordering info.
+	descs := make(map[string]*SorterDesc)
 	sortFields := make(SortFieldDescs, 0)
 	for i := 0; i < strukt.NumFields(); i++ {
-		sfd, err := sortFieldDescFromTag(strukt.Field(i).Name(), strukt.Tag(i), strukt.Field(i).Type())
+		sField := strukt.Field(i)
+		sfds, err := sortFieldDescFromTag(sField, strukt.Tag(i))
 		if err != nil {
 			return nil, err
-		} else if sfd != nil {
-			sortFields = append(sortFields, sfd)
+		}
+		for _, fd := range sfds {
+			desc, ok := descs[fd.SortTypeName]
+			if ok {
+				desc.Fields = append(desc.Fields, fd)
+			} else {
+				desc = &SorterDesc{
+					TypeName:     typeName,
+					sortTypeName: fd.SortTypeName,
+					Fields:       SortFieldDescs{fd},
+				}
+			}
+			sort.Sort(desc.Fields)
+			descs[fd.SortTypeName] = desc
 		}
 	}
 
-	// validate.
-	if err := sortFields.Validate(); err != nil {
-		return nil, err
+	for _, desc := range descs {
+		if err := desc.Fields.Validate(); err != nil {
+			return nil, err
+		}
 	}
 
-	return &SorterDesc{
-		TypeName: typeName,
-		SortType: sortableTypeName,
-		Fields:   sortFields,
-	}, nil
+	result := make(SorterDescs, 0, len(sortFields))
+	for _, desc := range descs {
+		result = append(result, desc)
+	}
+
+	return result, nil
 }
 
 // Validate returns an error if anything is broken.
@@ -98,35 +125,47 @@ type SortFieldDesc struct {
 	FieldName      string
 	FieldType      types.Type
 	CustomAccessor string
-	Priority       int `gsort:"1"`
+	SortTypeName   string
+	Priority       int `gsort:"*SortFieldDescs,1"`
 }
 
-func sortFieldDescFromTag(fName, tagLine string, fType types.Type) (*SortFieldDesc, error) {
-	tags, err := structtag.Parse(tagLine)
-	if err != nil { // error returned when not found
-		return nil, nil
+func sfdFromLine(options string) (*SortFieldDesc, error) {
+	sfd := &SortFieldDesc{}
+	tuple := strings.Split(options, ",")
+	if len(tuple) < 1 {
+		return nil, errors.New("name of type to generate is required")
+	} else if len(tuple) > 3 {
+		return nil, errors.New("maximum three tag options allowed; name of type to generate, field priority, optional accessor")
+	}
+	sfd.SortTypeName = tuple[0]
+
+	if len(tuple) >= 2 {
+		var err error
+		sfd.Priority, err = strconv.Atoi(tuple[1])
+		if err != nil {
+			return nil, errors.New("second option must be an int indicating sort priority! found: " + tuple[1])
+		}
 	}
 
-	sortTags, err := tags.Get("gsort")
-	if err != nil { // error returned when not found
-		return nil, nil
+	if len(tuple) == 3 {
+		sfd.CustomAccessor = tuple[2]
 	}
+	return sfd, nil
+}
 
-	result := &SortFieldDesc{
-		FieldName: fName,
-		FieldType: fType,
+func sortFieldDescFromTag(sFiled *types.Var, tagLine string) ([]*SortFieldDesc, error) {
+	remaining := reflect.StructTag(tagLine)
+	result := make([]*SortFieldDesc, 0)
+	for options, ok := remaining.Lookup("gsort"); ok; options, ok = remaining.Lookup("gsort") {
+		sfd, err := sfdFromLine(options)
+		if err != nil {
+			return nil, err
+		}
+		sfd.FieldName = sFiled.Name()
+		sfd.FieldType = sFiled.Type()
+		result = append(result, sfd)
+		remaining = reflect.StructTag(strings.Replace(string(remaining), `gsort:"`+options+`"`, "", 1))
 	}
-	result.Priority, err = strconv.Atoi(sortTags.Name)
-	if err != nil {
-		return nil, errors.New("first element must be an int indicating sort priority! fieldName: " + fName)
-	}
-
-	if len(sortTags.Options) == 1 {
-		result.CustomAccessor = sortTags.Options[0]
-	} else if len(sortTags.Options) > 1 {
-		return nil, errors.New("too many gsort options found! fieldName: " + fName)
-	}
-
 	return result, nil
 }
 

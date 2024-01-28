@@ -8,11 +8,11 @@ import (
 
 // Method is a type representing a method.
 type Method struct {
-	Name       string `gsort:"2"`
+	Name       string `gsort:"*Methods,2"`
 	Comments   Comments
 	Input      Params
 	Output     Params
-	IsExported bool `gsort:"1"`
+	IsExported bool `gsort:"*Methods,1"`
 }
 
 // MethodFromSignature returns a partially constructed Method-- it contains the raw function
