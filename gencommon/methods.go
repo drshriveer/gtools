@@ -4,7 +4,7 @@ import (
 	"sort"
 )
 
-//go:generate gsort --types Method=Methods
+//go:generate gsort --types Method
 
 // Exported returns ony exported methods.
 func (ms Methods) Exported() Methods {

@@ -132,18 +132,21 @@ type SortFieldDesc struct {
 func sfdFromLine(options string) (*SortFieldDesc, error) {
 	sfd := &SortFieldDesc{}
 	tuple := strings.Split(options, ",")
-	if len(tuple) < 2 {
-		return nil, errors.New("minimum two tag options required; name of type to generate, and field priority")
+	if len(tuple) < 1 {
+		return nil, errors.New("name of type to generate is required")
 	} else if len(tuple) > 3 {
 		return nil, errors.New("maximum three tag options allowed; name of type to generate, field priority, optional accessor")
 	}
 	sfd.SortTypeName = tuple[0]
 
-	var err error
-	sfd.Priority, err = strconv.Atoi(tuple[1])
-	if err != nil {
-		return nil, errors.New("second option must be an int indicating sort priority! found: " + tuple[1])
+	if len(tuple) >= 2 {
+		var err error
+		sfd.Priority, err = strconv.Atoi(tuple[1])
+		if err != nil {
+			return nil, errors.New("second option must be an int indicating sort priority! found: " + tuple[1])
+		}
 	}
+	
 	if len(tuple) == 3 {
 		sfd.CustomAccessor = tuple[2]
 	}
