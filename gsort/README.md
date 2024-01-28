@@ -3,6 +3,20 @@ GSort
 
 Is a generator that generates sort interfaces with ordered fields.
 
+### Features
+
+-	auto generate sortable variations of structs via struct tags
+-	support multiple sorters per struct. **Note:** to use this feature you may need to disable static check `SA5008`. i.e. in `.golangci.yaml`:
+
+```yaml
+issues:
+  exclude-rules:
+    # gsort handles duplicate tags
+    - linters:
+        - staticcheck
+      text: "SA5008: duplicate struct tag \"gsort\""
+```
+
 ### Getting started
 
 Install with:
@@ -13,7 +27,7 @@ go install github.com/drshriveer/gtool/gsort/cmd/gsort@latest
 
 ##### Usage:
 
-Add `gsort` struct tag(s) in the following format: 
+Add `gsort` struct tag(s) in the following format:
 
 ```go
 type ... struct {
@@ -21,10 +35,10 @@ type ... struct {
 }
 ```
 
-- `TypeNameToGenerate` is the type name to use for the generated sortable structure. 
-    - Prefix this with an optional `*` to indicate that a pointer to the struct should be generated.
-- `Priority` must be specified as an integer; this indicates the relative sort priority of the field in cases where there are multiple fields to sort on.
-- `Accessor` is an optional attribute that indicates a method of the type to use in the sortable computation.
+-	`TypeNameToGenerate` is the type name to use for the generated sortable structure.
+	-	Prefix this with an optional `*` to indicate that a pointer to the struct should be generated.
+-	`Priority` must be specified as an integer; this indicates the relative sort priority of the field in cases where there are multiple fields to sort on.
+-	`Accessor` is an optional attribute that indicates a method of the type to use in the sortable computation.
 
 **Example:**
 

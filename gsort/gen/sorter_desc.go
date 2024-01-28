@@ -36,17 +36,17 @@ func (sd *SorterDesc) UsePointer() bool {
 
 // PriorityTree produces a lopsided tree that expresses how to compare values.
 // Exposed for use in templates.
-func (s SorterDesc) PriorityTree() *CompareLine {
-	sort.Sort(s.Fields)
+func (sd SorterDesc) PriorityTree() *CompareLine {
+	sort.Sort(sd.Fields)
 	result := &CompareLine{}
 	current := result
-	for i, v := range s.Fields {
+	for i, v := range sd.Fields {
 		current.IsBool = v.FieldType.String() == "bool"
 		current.Accessor = v.FieldName
 		if len(v.CustomAccessor) > 0 {
 			current.Accessor += "." + v.CustomAccessor
 		}
-		if len(s.Fields)-1 > i {
+		if len(sd.Fields)-1 > i {
 			current.Nest = &CompareLine{}
 			current = current.Nest
 		}
@@ -146,7 +146,7 @@ func sfdFromLine(options string) (*SortFieldDesc, error) {
 			return nil, errors.New("second option must be an int indicating sort priority! found: " + tuple[1])
 		}
 	}
-	
+
 	if len(tuple) == 3 {
 		sfd.CustomAccessor = tuple[2]
 	}
