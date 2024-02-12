@@ -111,13 +111,13 @@ func (ps Params) ensureNames(paramDeduper map[string]int, isOutput bool) {
 	// To better preserve a customer's naming in case of them colliding with our own,
 	// process the named variables first:
 	for _, p := range ps {
-		if p.Name != "" {
+		if p.Name != "" && p.Name != "_" {
 			p.Name = getSafeParamName(paramDeduper, p.Name, false)
 		}
 	}
 
 	for i, p := range ps {
-		if p.Name == "" {
+		if p.Name == "" || p.Name == "_" {
 			if isOutput && len(ps)-1 == i && TypeImplements(p.ActualType, ErrorInterface) {
 				p.Name = getSafeParamName(paramDeduper, "err", false)
 			} else if !isOutput && i == 0 && TypeImplements(p.ActualType, ContextInterface) {
