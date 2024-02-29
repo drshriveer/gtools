@@ -19,12 +19,12 @@ var Logger = log.New(log.Writer(), "[gogenproto] ", log.LstdFlags)
 // Generate is a simple script for generating proto files with a go:generate directive
 // relative to the input directory.
 type Generate struct {
-	InputDir string `aliases:"inputDir" env:"PWD" usage:"path to root directory for proto generation"`
-
-	Recurse bool     `default:"false" usage:"generate protos recursively"`
-	VTProto bool     `default:"false" usage:"also generate vtproto"`
-	GRPC    bool     `default:"false" usage:"also generate grpc service definitions (experimental)"`
-	Include []string `usage:"comma-separated paths to additional directories to add to the proto include path. You can set an optional Go package mapping by appending a = and the package path, e.g. foo=github.com/foo/bar"`
+	InputDir   string   `aliases:"inputDir" env:"PWD" usage:"path to root directory for proto generation"`
+	ProtocPath string   `usage:"path to protoc executable (e.g. /path/to/bin/protoc) defaults to 'protoc' in PATH if not set"`
+	Recurse    bool     `default:"false" usage:"generate protos recursively"`
+	VTProto    bool     `default:"false" usage:"also generate vtproto"`
+	GRPC       bool     `default:"false" usage:"also generate grpc service definitions (experimental)"`
+	Include    []string `usage:"comma-separated paths to additional directories to add to the proto include path. You can set an optional Go package mapping by appending a = and the package path, e.g. foo=github.com/foo/bar"`
 
 	// TODO: add flags for other languages, TS, etc.
 	// TODO: add NATIVE validation support.
@@ -110,7 +110,11 @@ func (g Generate) Run() error {
 		}
 	}
 	args = append(args, paths...)
-	cmd := exec.Command("protoc", args...)
+	path := "protoc"
+	if g.ProtocPath != "" {
+		path = g.ProtocPath
+	}
+	cmd := exec.Command(path, args...)
 	cmd.Stdout = logPipe{}
 	cmd.Stderr = logPipe{}
 	return cmd.Run()
