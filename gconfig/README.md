@@ -23,7 +23,8 @@ go get -u github.com/drshriveer/gtools/gconfig
 -	**Dimensions:** A single configuration file may multiple "dimensions" that are resolved at runtime based on program flags to determine the variation of a setting to vend. Differentiating setting variables by environment/stage (e.g. Development, Beta, Prod) is a great example of how this can be leveraged.
 	-	**Auto-flagging:** The configuration library will automatically turn dimensions into flags and parse them! (unless otherwise specified)
 	-	**Env Parsing:** The configuration library will automatically parse dimensions environment variables.
-	-	**GetDimension:** Extract a Dimension value via `gconfig.GetDimension[my.DimensionType](cfg)`.  
+	-	**GetDimension:** Extract a Dimension value via `gconfig.GetDimension[my.DimensionType](cfg)`.
+-	**Template Environmental Variables:** You can reference environmental variables in a config.yaml as values themselves! e.g. `var: ${{env: MY_ENV_VAR}}` will look up the variable `MY_ENV_VAR`.
 -	**Environmental Overrides:** (TODO) In some cases it is useful to override a single static configuration variable in a specific environment. This can be done though the use of environmental variables.
 
 ### Usage
@@ -63,13 +64,16 @@ clients:
     maxTries: 3
   serviceA:
     address: servceA.com:443
+    accessToken:
+      Development: hard-coded-fake-token-for-local-development-only
+      default: ${{env:SECRET_ACCESS_TOKEN}}
     requestTimeout:
-        Prod: 2s
-        default: 3s
+      Prod: 2s
+      default: 3s
     maxTries: 
       Development: 1
       default: 5
-      
+
 ```
 
 **Initialize the Config object:**
