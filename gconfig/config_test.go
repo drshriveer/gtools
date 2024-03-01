@@ -55,8 +55,11 @@ func TestEnvParsing(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, internal.D1c, gconfig.GetDimension[internal.DimensionOne](cfg))
 	assert.Equal(t, internal.D2e, gconfig.GetDimension[internal.DimensionTwo](cfg))
+
+	// TEST env var parsing from templates defined in the config.yaml.
 	assert.Equal(t, internal.D1c.String(), gconfig.MustGet[string](cfg, "envTemplating.firstDim"))
 	assert.Equal(t, internal.D2e.String(), gconfig.MustGet[string](cfg, "envTemplating.secondDim"))
+	assert.Equal(t, "default value", gconfig.MustGet[string](cfg, "envTemplating.switchedDim"))
 	assert.Equal(t, internal.D1c, gconfig.MustGet[internal.DimensionOne](cfg, "envTemplating.firstDim"))
 	assert.Equal(t, internal.D2e, gconfig.MustGet[internal.DimensionTwo](cfg, "envTemplating.secondDim"))
 }
