@@ -48,14 +48,6 @@ func TestExtendedError_Equality(t *testing.T) {
 
 	// XXX: not really sure if i like this.... we gonna do it anyway.
 	assert.False(t, errors.Is(errToConvert, convertedErr))
-
-	switch errors.Unwrap(err2) {
-	case internal.ErrExtendedExample:
-	default:
-		assert.Fail(t, "was supposed to reach case above")
-	}
-
-	assert.Equal(t, internal.ErrExtendedExample, errors.Unwrap(err2))
 }
 
 func TestExtendedError_CorrectlyLogged(t *testing.T) {

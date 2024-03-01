@@ -16,7 +16,7 @@ import (
 	"github.com/drshriveer/gtools/gconfig"
 )
 
-//go:embed internal/test.yaml
+//go:embed internal/*.yaml
 var testFS embed.FS
 
 type testStruct struct {
@@ -50,11 +50,18 @@ func TestEnvParsing(t *testing.T) {
 	cfg, err := gconfig.NewBuilder().
 		WithDimension("d1", internal.D1a).
 		WithDimension("d2", internal.D2a).
-		FromFile(testFS, "internal/test.yaml")
+		FromFile(testFS, "internal/test_template_env_vars.yaml")
 
 	require.NoError(t, err)
 	assert.Equal(t, internal.D1c, gconfig.GetDimension[internal.DimensionOne](cfg))
 	assert.Equal(t, internal.D2e, gconfig.GetDimension[internal.DimensionTwo](cfg))
+
+	// TEST env var parsing from templates defined in the config.yaml.
+	assert.Equal(t, internal.D1c.String(), gconfig.MustGet[string](cfg, "envTemplating.firstDim"))
+	assert.Equal(t, internal.D2e.String(), gconfig.MustGet[string](cfg, "envTemplating.secondDim"))
+	assert.Equal(t, "default value", gconfig.MustGet[string](cfg, "envTemplating.switchedDim"))
+	assert.Equal(t, internal.D1c, gconfig.MustGet[internal.DimensionOne](cfg, "envTemplating.firstDim"))
+	assert.Equal(t, internal.D2e, gconfig.MustGet[internal.DimensionTwo](cfg, "envTemplating.secondDim"))
 }
 
 func TestDimensions(t *testing.T) {

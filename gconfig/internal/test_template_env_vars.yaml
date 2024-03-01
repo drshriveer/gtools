@@ -1,0 +1,6 @@
+envTemplating:
+  firstDim: ${{env:D1}}
+  secondDim: ${{env:d2}}
+  switchedDim:
+    default: "default value"
+    D1a: ${{env:UNSET_VAR}}
