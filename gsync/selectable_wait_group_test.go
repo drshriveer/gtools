@@ -16,7 +16,7 @@ func TestSelectableWaitGroup_Wait(t *testing.T) {
 	wg := gsync.NewSelectableWaitGroup()
 	wg.Add(1)
 	err := wg.WaitTimeout(100 * time.Millisecond)
-	assert.Equal(t, gsync.ErrWGTimeout, err)
+	assert.ErrorIs(t, err, gsync.ErrWGTimeout)
 
 	ctx, done := context.WithTimeout(context.TODO(), 100*time.Millisecond)
 	defer done()

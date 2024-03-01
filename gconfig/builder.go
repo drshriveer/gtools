@@ -142,6 +142,11 @@ func (b *Builder) FromBytes(bytes []byte) (*Config, error) {
 		return nil, ErrFailedParsing.Msg("unexpected non-map result")
 	}
 
+	result, err = parseTemplatedElements(result)
+	if err != nil {
+		return nil, err
+	}
+
 	dims := make(map[reflect.Type]genum.Enum, len(b.dimensions))
 	for _, d := range b.dimensions {
 		dims[reflect.TypeOf(d.defaultVal)] = d.get()

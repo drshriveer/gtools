@@ -1,0 +1,3 @@
+envTemplating:
+  firstDim: ${{env:D1}}
+  secondDim: ${{env:d2}}

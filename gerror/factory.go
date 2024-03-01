@@ -97,12 +97,16 @@ func CloneBase[T factoryOf](
 	srcError error, // Be careful with this...
 ) *GError {
 	base := err._embededGError()
+	fRef := factoryOf(base)
+	if base.factoryRef != nil {
+		fRef = base.factoryRef
+	}
 	clone := &GError{
 		Name:       base.Name,
 		Message:    base.Message,
 		Source:     base.Source,
 		detailTag:  base.detailTag,
-		factoryRef: base.factoryRef,
+		factoryRef: fRef,
 		stack:      base.stack,
 		srcError:   base.srcError,
 	}
