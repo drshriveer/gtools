@@ -81,24 +81,37 @@ func (ih *ImportHandler) ExtractTypeRef(typ types.Type) string {
 	case *types.Named:
 		pkg := t.Obj().Pkg()
 		typeName := t.Obj().Name()
-		if pkg == nil || pkg.Path() == ih.PInfo.PkgPath {
-			return typeName
-		}
+		alias := ""
 
-		// first check if we have a mapping for the package:
-		i, ok := ih.imports[pkg.Path()]
-		if ok {
-			i.inUse = true
-		} else {
-			i = &ImportDesc{
-				Alias:   pkg.Name(),
-				PkgPath: pkg.Path(),
-				inUse:   true,
+		// If we need an import, find it and use the proper alias
+		if pkg != nil && pkg.Path() != ih.PInfo.PkgPath {
+			// first check if we have a mapping for the package:
+			i, ok := ih.imports[pkg.Path()]
+			if ok {
+				i.inUse = true
+			} else {
+				i = &ImportDesc{
+					Alias:   pkg.Name(),
+					PkgPath: pkg.Path(),
+					inUse:   true,
+				}
+				ih.imports[i.PkgPath] = i
 			}
-			ih.imports[i.PkgPath] = i
+			alias = i.Alias + "."
 		}
 
-		return fmt.Sprintf("%s.%s", i.Alias, typeName)
+		// Recurse into type arguments for generic types
+		targs := t.TypeArgs()
+		if targs != nil {
+			typeArgNames := make([]string, targs.Len())
+			for i := 0; i < targs.Len(); i++ {
+				typeArg := targs.At(i)
+				typeArgNames[i] = ih.ExtractTypeRef(typeArg)
+			}
+			return fmt.Sprintf("%s%s[%s]", alias, typeName, strings.Join(typeArgNames, ", "))
+		}
+
+		return fmt.Sprintf("%s%s", alias, typeName)
 
 	default:
 		// *types.Interface is usually handled here too.
