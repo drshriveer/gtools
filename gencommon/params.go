@@ -40,6 +40,18 @@ func ParamsFromSignatureTuple(ih *ImportHandler, tuple *types.Tuple, variadic bo
 			// Comments: nil, // FIXME: need AST
 		}
 
+		// Fill in type args if it's a generic type.
+		t := v.Type()
+		if n, ok := t.(*types.Pointer); ok { // unwrap pointer
+			t = n.Elem()
+		}
+		if n, ok := t.(*types.Named); ok && n.TypeArgs() != nil {
+			p.TypeArgNames = make([]string, n.TypeArgs().Len())
+			for i := 0; i < n.TypeArgs().Len(); i++ {
+				p.TypeArgNames[i] = ih.ExtractTypeRef(n.TypeArgs().At(i))
+			}
+		}
+
 		// ...Variadic's seem to be very forced into the language
 		// They exist at a signature level, but not lower.
 		// Lower, the type just resolves to a slice, so we need to trim that out.
@@ -131,11 +143,12 @@ func (ps Params) ensureNames(paramDeduper map[string]int, isOutput bool) {
 
 // Param has information about a single parameter.
 type Param struct {
-	ActualType types.Type
-	TypeRef    string
-	Name       string
-	Comments   Comments
-	Variadic   bool
+	ActualType   types.Type
+	TypeRef      string
+	Name         string
+	Comments     Comments
+	Variadic     bool
+	TypeArgNames []string
 }
 
 // Declaration returns a name and type.
