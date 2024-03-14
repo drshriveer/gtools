@@ -7,7 +7,7 @@ require (
 	github.com/drshriveer/gtools/gerror v0.0.0-20240118184715-48af8963ff63
 	github.com/drshriveer/gtools/set v0.0.0-20240118184715-48af8963ff63
 	github.com/puzpuzpuz/xsync/v3 v3.0.2
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

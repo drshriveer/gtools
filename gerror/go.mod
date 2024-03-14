@@ -7,7 +7,7 @@ require (
 	github.com/drshriveer/gtools/set v0.0.0-20240118184715-48af8963ff63
 	github.com/fatih/structtag v1.2.0
 	github.com/itzg/go-flagsfiller v1.12.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
