@@ -3,7 +3,7 @@ module github.com/drshriveer/gtools/gogenproto
 go 1.21.1
 
 require (
-	github.com/drshriveer/gtools/gencommon v0.0.0-20240314193424-6a0f360e569e
+	github.com/drshriveer/gtools/gencommon v0.0.0-20240314202711-64624fbcb20a
 	github.com/itzg/go-flagsfiller v1.12.0
 )
 
