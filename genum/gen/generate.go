@@ -129,6 +129,7 @@ func (g *Generate) Parse() error {
 
 // validateParsableTraits returns an error if two instances of a value of a parsable trait map to
 // different enums.
+//
 // eg:
 //
 //	type EnumerableWithTraits int

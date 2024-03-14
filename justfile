@@ -26,7 +26,7 @@ fix: _tools-linter format-md && (_invokeMod "golangci-lint run --fix {}/...")
 update-interdependencies: \
     (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/gencommon") \
     (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/genum") \
-    (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/gsort")
+    (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/set") \
     && tidy
 
 # updates a single package across all go modules.
