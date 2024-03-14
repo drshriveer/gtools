@@ -125,7 +125,7 @@ func (s Set[T]) Has(items ...T) bool {
 	return true
 }
 
-// Has returns true if ANY items are contained.
+// HasAny returns true if ANY items are contained.
 func (s Set[T]) HasAny(items ...T) bool {
 	if len(s) == 0 {
 		return false

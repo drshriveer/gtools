@@ -61,4 +61,5 @@ func TestSet_NilHandling(t *testing.T) {
 	assert.True(t, s1.Remove("hi", "cry"))
 	assert.False(t, s1.Has("hi"))
 	assert.True(t, s1.Has("bye"))
+	assert.True(t, s1.HasAny("hi", "bye", "cry"))
 }
