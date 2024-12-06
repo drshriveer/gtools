@@ -16,7 +16,6 @@ linters:
     - contextcheck
     - dupl
     - errname
-    - exportloopref
     - gocheckcompilerdirectives
     - gocritic # MAYBE NOT THIS ONE
     - godot

@@ -5,6 +5,42 @@ import (
 	"go/types"
 
 	"golang.org/x/tools/go/packages"
+
+	"github.com/drshriveer/gtools/set"
+)
+
+// ParseIFaceOption are options for parsing an interface.
+type ParseIFaceOption uint
+
+const (
+	// IncludePrivate indicates private methods should be included in the parsed interface.
+	IncludePrivate ParseIFaceOption = 1 << iota
+
+	// IncludeEmbedded indicates embedded methods should be included in the parsed interface.
+	// Note 1: Overloaded methods will be dropped, giving priority to the parent.
+	// e.g. given:
+	//
+	// type A struct { }
+	// func (A) Foo() { }
+	// func (A) Bar() { }
+	//
+	// type B struct {}
+	// func (B) Foo() { }
+	// func (B) Baz() { }
+	//
+	// generating an interface for C:
+	// type C struct { A; B }
+	// func (C) Blah() { }
+	//
+	// will result in:
+	// type CIFace interface {
+	// 	Bar()
+	// 	Baz()
+	// 	Blah()
+	// }
+	//
+	// Note 2: This is recursive, so embedded methods of embedded methods will be included.
+	IncludeEmbedded
 )
 
 // Interface is a parsed interface.
@@ -50,24 +86,41 @@ func FindInterface(
 	ih *ImportHandler,
 	pkgs []*packages.Package,
 	pkgName, target string,
-	includePrivate bool,
+	options ...ParseIFaceOption,
 ) (*Interface, error) {
+	opts := set.MakeBitSet(options...)
+	allPkgs := allpkgs(pkgs)
+	pkg, ok := allPkgs.findPKgByName(pkgName)
+	if !ok {
+		return nil, fmt.Errorf("target %s in package %s not found", target, pkgName)
+	}
+	return allPkgs.findIFaceByNameInPackage(ih, pkg, target, opts)
+}
+
+type allpkgs []*packages.Package
+
+func (pkgs allpkgs) findPKgByName(pkgName string) (*packages.Package, bool) {
 	for _, pkg := range pkgs {
 		if pkg.PkgPath == pkgName {
-			return findIFaceByNameInPackage(ih, pkg, target, includePrivate)
+			return pkg, true
 		}
 		// I don't really see why this should be necessary...
 		for pkgPath, pkg := range pkg.Imports {
 			if pkgPath == pkgName {
-				return findIFaceByNameInPackage(ih, pkg, target, includePrivate)
+				return pkg, true
 			}
 		}
-
 	}
-	return nil, fmt.Errorf("target %s in package %s not found", target, pkgName)
+
+	return nil, false
 }
 
-func findIFaceByNameInPackage(ih *ImportHandler, pkg *packages.Package, target string, includePrivate bool) (
+func (pkgs allpkgs) findIFaceByNameInPackage(
+	ih *ImportHandler,
+	pkg *packages.Package,
+	target string,
+	opts set.BitSet[ParseIFaceOption],
+) (
 	*Interface,
 	error,
 ) {
@@ -84,14 +137,15 @@ func findIFaceByNameInPackage(ih *ImportHandler, pkg *packages.Package, target s
 		return nil, fmt.Errorf("target %s found but not a handled nested type (found %T)", target, typLayer1)
 	}
 
-	return namedTypeToInterface(ih, pkg, typLayer2, includePrivate)
+	return pkgs.namedTypeToInterface(ih, typLayer2, opts), nil
 }
 
-func namedTypeToInterface(ih *ImportHandler, pkg *packages.Package, t *types.Named, includePrivate bool) (
-	*Interface,
-	error,
-) {
-
+func (pkgs allpkgs) namedTypeToInterface(
+	ih *ImportHandler,
+	t *types.Named,
+	opts set.BitSet[ParseIFaceOption],
+) *Interface {
+	pkg, hasPkg := pkgs.findPKgByName(t.Obj().Pkg().Path())
 	var methodz hasMethods = t
 	if methodz.NumMethods() == 0 {
 		if iface, ok := t.Underlying().(*types.Interface); ok {
@@ -103,13 +157,15 @@ func namedTypeToInterface(ih *ImportHandler, pkg *packages.Package, t *types.Nam
 		Name:        t.Obj().Name(),
 		IsInterface: false,
 		TypeRef:     ih.ExtractTypeRef(t),
-		Comments:    CommentsFromObj(pkg, t.Obj().Name()),
 		Methods:     make(Methods, 0, t.NumMethods()),
+	}
+	if hasPkg {
+		result.Comments = CommentsFromObj(pkg, t.Obj().Name())
 	}
 
 	for i := 0; i < methodz.NumMethods(); i++ {
 		mInfo := methodz.Method(i)
-		if includePrivate || mInfo.Exported() {
+		if opts.Has(IncludePrivate) || mInfo.Exported() {
 			method := MethodFromSignature(ih, mInfo.Type().(*types.Signature))
 			method.Name = mInfo.Name()
 			method.IsExported = mInfo.Exported()
@@ -117,7 +173,63 @@ func namedTypeToInterface(ih *ImportHandler, pkg *packages.Package, t *types.Nam
 			result.Methods = append(result.Methods, method)
 		}
 	}
-	return result, nil
+
+	if !opts.Has(IncludeEmbedded) {
+		return result
+	}
+
+	// Nothing embedded, so we're done.
+	s, ok := t.Underlying().(*types.Struct)
+	if !ok {
+		return result
+	}
+
+	// This is the way we look for overloaded embedded methods.
+	// Since we cannot generate an interface with overloaded methods,
+	// we will drop them.
+	methodsToAdd := make(map[string]*Method)
+
+	// We will use the methods of the _parent_ type over embedded methods,
+	// so if we encounter a method with the same name, we will drop the embedded one.
+	ignoreEmbeddedMethodsNamed := make(set.Set[string], len(result.Methods))
+	for _, m := range result.Methods {
+		ignoreEmbeddedMethodsNamed.Add(m.Name)
+	}
+
+	for i := 0; i < s.NumFields(); i++ {
+		field := s.Field(i)
+		if !field.Embedded() {
+			continue
+		}
+		var embeddedIface *Interface
+		switch v := field.Type().(type) {
+		case *types.Pointer:
+			if named, ok := v.Elem().(*types.Named); ok {
+				embeddedIface = pkgs.namedTypeToInterface(ih, named, opts)
+			}
+		case *types.Named:
+			embeddedIface = pkgs.namedTypeToInterface(ih, v, opts)
+		default:
+			continue
+		}
+		for _, m := range embeddedIface.Methods {
+			if ignoreEmbeddedMethodsNamed.Has(m.Name) {
+				continue
+			}
+			if _, ok := methodsToAdd[m.Name]; ok {
+				ignoreEmbeddedMethodsNamed.Add(m.Name)
+				delete(methodsToAdd, m.Name)
+			} else {
+				methodsToAdd[m.Name] = m
+			}
+		}
+	}
+
+	for _, m := range methodsToAdd {
+		result.Methods = append(result.Methods, m)
+	}
+
+	return result
 }
 
 func mapper[Tin any, Tout any](input []Tin, mapFn func(in Tin) Tout) []Tout {

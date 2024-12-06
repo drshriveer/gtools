@@ -43,7 +43,7 @@ func (sd SorterDesc) PriorityTree() *CompareLine {
 	for i, v := range sd.Fields {
 		current.IsBool = v.FieldType.String() == "bool"
 		current.Accessor = v.FieldName
-		if len(v.CustomAccessor) > 0 {
+		if v.CustomAccessor != "" {
 			current.Accessor += "." + v.CustomAccessor
 		}
 		if len(sd.Fields)-1 > i {

@@ -171,13 +171,13 @@ func (e *GError) ConvertS(err error) Error {
 func (e *GError) Error() string {
 	const separator = ", "
 	result := ""
-	if len(e.Name) > 0 {
+	if e.Name != "" {
 		result += "Name: " + e.Name + separator
 	}
-	if len(e.detailTag) > 0 {
+	if e.detailTag != "" {
 		result += "DTag: " + e.detailTag + separator
 	}
-	if len(e.Source) > 0 {
+	if e.Source != "" {
 		result += "Source: " + e.Source + separator
 	}
 	result += "Message: " + e.Message

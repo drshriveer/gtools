@@ -64,7 +64,7 @@ func getFromCache[T any](cfg *Config, key string) (T, error) {
 	var err error
 	var r T
 	k := key + fmt.Sprintf("%T", r) // add type to key to prevent complicated conversions.
-	v, _ := cfg.cached.Compute(k, func(oldValue any, loaded bool) (newValue any, delete bool) {
+	v, _ := cfg.cached.Compute(k, func(oldValue any, loaded bool) (newValue any, shouldDelete bool) {
 		if loaded {
 			return oldValue, false
 		}
