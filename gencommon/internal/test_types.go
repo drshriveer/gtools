@@ -10,13 +10,13 @@ func (t *TypeToGenerate) ParentMethod() {}
 func (t *TypeToGenerate) BazMethod()    {}
 func (t *TypeToGenerate) pooMethod()    {}
 
-type EmbeddedA struct{}
+type EmbeddedA struct{ EmbeddedD }
 
 func (e *EmbeddedA) FooMethod() {}
 func (e *EmbeddedA) BarMethod() {}
 func (e *EmbeddedA) AMethod()   {}
 
-type EmbeddedB struct{ EmbeddedC }
+type EmbeddedB struct{ *EmbeddedC }
 
 func (e *EmbeddedB) FooMethod() {}
 func (e *EmbeddedB) BazMethod() {}
@@ -28,3 +28,7 @@ type EmbeddedC struct{}
 func (e *EmbeddedC) FooMethod() {}
 func (e *EmbeddedC) BazMethod() {}
 func (e *EmbeddedC) CMethod()   {}
+
+type EmbeddedD interface {
+	DMethod()
+}

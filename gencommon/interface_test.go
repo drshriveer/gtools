@@ -29,9 +29,17 @@ func TestFindInterface(t *testing.T) {
 			expectedMethods: []string{"ParentMethod", "BazMethod", "pooMethod"},
 		},
 		{
-			description:     "IncludeEmbedded options",
-			options:         gencommon.IncludeEmbedded,
-			expectedMethods: []string{"ParentMethod", "BazMethod", "BarMethod", "AMethod", "BMethod", "CMethod"},
+			description: "IncludeEmbedded options",
+			options:     gencommon.IncludeEmbedded,
+			expectedMethods: []string{
+				"ParentMethod",
+				"BazMethod",
+				"BarMethod",
+				"AMethod",
+				"BMethod",
+				"CMethod",
+				"DMethod",
+			},
 		},
 		{
 			description: "IncludeEmbedded & IncludePrivate options",
@@ -44,6 +52,7 @@ func TestFindInterface(t *testing.T) {
 				"AMethod",
 				"BMethod",
 				"CMethod",
+				"DMethod",
 				"bPrivate",
 			},
 		},

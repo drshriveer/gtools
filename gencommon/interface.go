@@ -179,9 +179,9 @@ func namedTypeToInterface(
 
 	// We will use the methods of the _parent_ type over embedded methods,
 	// so if we encounter a method with the same name, we will drop the embedded one.
-	droppedMethods := make(set.Set[string], len(result.Methods))
+	ignoreEmbeddedMethodsNamed := make(set.Set[string], len(result.Methods))
 	for _, m := range result.Methods {
-		droppedMethods.Add(m.Name)
+		ignoreEmbeddedMethodsNamed.Add(m.Name)
 	}
 
 	for i := 0; i < s.NumFields(); i++ {
@@ -189,17 +189,21 @@ func namedTypeToInterface(
 		if !field.Embedded() {
 			continue
 		}
-		typeToParse, ok := field.Type().(*types.Named)
-		if !ok {
+		var embeddedIface *Interface
+		switch v := field.Type().(type) {
+		case *types.Pointer:
+			embeddedIface = namedTypeToInterface(ih, pkg, v.Elem().(*types.Named), opts)
+		case *types.Named:
+			embeddedIface = namedTypeToInterface(ih, pkg, v, opts)
+		default:
 			continue
 		}
-		embeddedIface := namedTypeToInterface(ih, pkg, typeToParse, opts)
 		for _, m := range embeddedIface.Methods {
-			if droppedMethods.Has(m.Name) {
+			if ignoreEmbeddedMethodsNamed.Has(m.Name) {
 				continue
 			}
 			if _, ok := methodsToAdd[m.Name]; ok {
-				droppedMethods.Add(m.Name)
+				ignoreEmbeddedMethodsNamed.Add(m.Name)
 				delete(methodsToAdd, m.Name)
 			} else {
 				methodsToAdd[m.Name] = m
