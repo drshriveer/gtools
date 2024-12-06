@@ -143,7 +143,7 @@ func TestStackSource(t *testing.T) {
 			// Looks Like: <PKG>.glob..func1
 			description: "pkg var > anonymous",
 			err:         pkgVarInlineFunc1,
-			expected:    "gerror_test:glob",
+			expected:    "gerror_test:init",
 		},
 		{
 			// Looks Like: github.com/drshriveer/gtools/gerror_test.TestStackSource.pkgFuncInlineErr1.func4

@@ -1,6 +1,6 @@
 module github.com/drshriveer/gtools/gsync
 
-go 1.21.1
+go 1.23
 
 require (
 	github.com/drshriveer/gtools/gerror v0.0.0

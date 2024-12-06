@@ -1,8 +1,6 @@
 module github.com/drshriveer/gtools/gogenproto/internal
 
-go 1.21.1
-
-toolchain go1.21.4
+go 1.23
 
 require (
 	github.com/stretchr/testify v1.9.0
