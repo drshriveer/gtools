@@ -63,3 +63,80 @@ func TestSet_NilHandling(t *testing.T) {
 	assert.True(t, s1.Has("bye"))
 	assert.True(t, s1.HasAny("hi", "bye", "cry"))
 }
+
+func BenchmarkMapDelete(b *testing.B) {
+	b.Run("check delete always full", func(b *testing.B) {
+		b.StopTimer()
+		m := map[int]int{}
+		for i := 0; i < b.N; i++ {
+			m[i] = i
+		}
+		b.ResetTimer()
+		b.StartTimer()
+		for i := 0; i < b.N; i++ {
+			if _, ok := m[i]; ok {
+				delete(m, i)
+			}
+		}
+	})
+	b.Run("check delete partially full", func(b *testing.B) {
+		b.StopTimer()
+		m := map[int]int{}
+		for i := 0; i < b.N; i++ {
+			if i%2 == 0 {
+				m[i] = i
+			}
+		}
+		b.ResetTimer()
+		b.StartTimer()
+		for i := 0; i < b.N; i++ {
+			if _, ok := m[i]; ok {
+				delete(m, i)
+			}
+		}
+	})
+	b.Run("delete only always full", func(b *testing.B) {
+		b.StopTimer()
+		m := map[int]int{}
+		for i := 0; i < b.N; i++ {
+			m[i] = i
+		}
+		b.ResetTimer()
+		b.StartTimer()
+		for i := 0; i < b.N; i++ {
+			delete(m, i)
+		}
+	})
+	b.Run("delete only partially full", func(b *testing.B) {
+		b.StopTimer()
+		m := map[int]int{}
+		for i := 0; i < b.N; i++ {
+			if i%2 == 0 {
+				m[i] = i
+			}
+		}
+		b.ResetTimer()
+		b.StartTimer()
+		for i := 0; i < b.N; i++ {
+			delete(m, i)
+		}
+	})
+	b.Run("delete only nil map", func(b *testing.B) {
+		var m map[int]int
+		for i := 0; i < b.N; i++ {
+			delete(m, i)
+		}
+	})
+	b.Run("delete empty nil map", func(b *testing.B) {
+		m := map[int]int{}
+		for i := 0; i < b.N; i++ {
+			delete(m, i)
+		}
+	})
+	b.Run("delete very sparsely populated map", func(b *testing.B) {
+		m := map[int]int{111111: 1, 2222222: 2, 33333333: 3}
+		for i := 0; i < b.N; i++ {
+			delete(m, i)
+		}
+	})
+}
