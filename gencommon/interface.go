@@ -89,22 +89,33 @@ func FindInterface(
 	options ...ParseIFaceOption,
 ) (*Interface, error) {
 	opts := set.MakeBitSet(options...)
+	allPkgs := allpkgs(pkgs)
+	pkg, ok := allPkgs.findPKgByName(pkgName)
+	if !ok {
+		return nil, fmt.Errorf("target %s in package %s not found", target, pkgName)
+	}
+	return allPkgs.findIFaceByNameInPackage(ih, pkg, target, opts)
+}
+
+type allpkgs []*packages.Package
+
+func (pkgs allpkgs) findPKgByName(pkgName string) (*packages.Package, bool) {
 	for _, pkg := range pkgs {
 		if pkg.PkgPath == pkgName {
-			return findIFaceByNameInPackage(ih, pkg, target, opts)
+			return pkg, true
 		}
 		// I don't really see why this should be necessary...
 		for pkgPath, pkg := range pkg.Imports {
 			if pkgPath == pkgName {
-				return findIFaceByNameInPackage(ih, pkg, target, opts)
+				return pkg, true
 			}
 		}
-
 	}
-	return nil, fmt.Errorf("target %s in package %s not found", target, pkgName)
+
+	return nil, false
 }
 
-func findIFaceByNameInPackage(
+func (pkgs allpkgs) findIFaceByNameInPackage(
 	ih *ImportHandler,
 	pkg *packages.Package,
 	target string,
@@ -126,16 +137,15 @@ func findIFaceByNameInPackage(
 		return nil, fmt.Errorf("target %s found but not a handled nested type (found %T)", target, typLayer1)
 	}
 
-	return namedTypeToInterface(ih, pkg, typLayer2, opts), nil
+	return pkgs.namedTypeToInterface(ih, typLayer2, opts), nil
 }
 
-func namedTypeToInterface(
+func (pkgs allpkgs) namedTypeToInterface(
 	ih *ImportHandler,
-	pkg *packages.Package,
 	t *types.Named,
 	opts set.BitSet[ParseIFaceOption],
 ) *Interface {
-
+	pkg, hasPkg := pkgs.findPKgByName(t.Obj().Pkg().Path())
 	var methodz hasMethods = t
 	if methodz.NumMethods() == 0 {
 		if iface, ok := t.Underlying().(*types.Interface); ok {
@@ -147,8 +157,10 @@ func namedTypeToInterface(
 		Name:        t.Obj().Name(),
 		IsInterface: false,
 		TypeRef:     ih.ExtractTypeRef(t),
-		Comments:    CommentsFromObj(pkg, t.Obj().Name()),
 		Methods:     make(Methods, 0, t.NumMethods()),
+	}
+	if hasPkg {
+		result.Comments = CommentsFromObj(pkg, t.Obj().Name())
 	}
 
 	for i := 0; i < methodz.NumMethods(); i++ {
@@ -192,9 +204,11 @@ func namedTypeToInterface(
 		var embeddedIface *Interface
 		switch v := field.Type().(type) {
 		case *types.Pointer:
-			embeddedIface = namedTypeToInterface(ih, pkg, v.Elem().(*types.Named), opts)
+			if named, ok := v.Elem().(*types.Named); ok {
+				embeddedIface = pkgs.namedTypeToInterface(ih, named, opts)
+			}
 		case *types.Named:
-			embeddedIface = namedTypeToInterface(ih, pkg, v, opts)
+			embeddedIface = pkgs.namedTypeToInterface(ih, v, opts)
 		default:
 			continue
 		}

@@ -70,6 +70,10 @@ func TestFindInterface(t *testing.T) {
 			expected := set.Make(test.expectedMethods...)
 			for _, m := range iface.Methods {
 				assert.Truef(t, expected.Remove(m.Name), "found duplicate OR unexpected method %q", m.Name)
+				// check that CMethod has a comment:
+				if m.Name == "CMethod" {
+					assert.NotEmpty(t, m.Comments)
+				}
 			}
 			assert.Emptyf(t, expected.Slice(), "methods that were not found!")
 
