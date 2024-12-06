@@ -1,6 +1,6 @@
 module github.com/drshriveer/gtools/tools
 
-go 1.21.1
+go 1.23
 
 require github.com/moorereason/mdfmt v0.0.0-20181128042805-29e3d55cbe5a
 

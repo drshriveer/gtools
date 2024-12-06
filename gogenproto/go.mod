@@ -1,6 +1,6 @@
 module github.com/drshriveer/gtools/gogenproto
 
-go 1.21.1
+go 1.23
 
 require (
 	github.com/drshriveer/gtools/gencommon v0.0.0-20240314202711-64624fbcb20a

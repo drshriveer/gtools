@@ -1,6 +1,6 @@
 module github.com/drshriveer/gtools/gencommon
 
-go 1.21.1
+go 1.23
 
 require (
 	github.com/drshriveer/gtools/set v0.0.0
