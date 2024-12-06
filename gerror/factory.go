@@ -112,12 +112,12 @@ func CloneBase[T factoryOf](
 	}
 
 	// handle source:
-	if len(source) > 0 && clone.Source == "" {
+	if source != "" && clone.Source == "" {
 		clone.Source = source
 	}
 
 	// handle detail tags:
-	if len(dTag) > 0 {
+	if dTag != "" {
 		if clone.detailTag == "" {
 			clone.detailTag = dTag
 		} else {
@@ -127,7 +127,7 @@ func CloneBase[T factoryOf](
 
 	// handle message extension:
 	extMsg = strings.TrimSpace(extMsg)
-	if len(extMsg) > 0 {
+	if extMsg != "" {
 		if clone.Message == "" {
 			clone.Message = extMsg
 		} else {
@@ -148,7 +148,7 @@ func CloneBase[T factoryOf](
 	// skip stacks.
 	if len(clone.stack) > 0 ||
 		stackType == NoStack ||
-		stackType == SourceStack && len(clone.Source) > 0 {
+		stackType == SourceStack && clone.Source != "" {
 		return clone
 	}
 

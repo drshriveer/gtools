@@ -2,7 +2,6 @@ PKG_ROOT := `pwd`
 INSTALLED_TOOLS := PKG_ROOT / "bin" / ".installed_tools"
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
 export GOBIN := PKG_ROOT + "/bin"
-export GOEXPERIMENT := "loopvar"
 CURRENT_DIR := invocation_directory_native()
 
 # Runs `go mod tidy` for all modules in the current directory, then sync go workspaces.
@@ -40,7 +39,7 @@ format-md: (_install-go-pkg "github.com/moorereason/mdfmt")
 # Runs `go generate` on all modules in the current directory.
 generate: _tools-generate (_invokeMod "go generate -C {} ./...")
 
-_tools-linter: (_tools-install "golangci-lint" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.54.2")
+_tools-linter: (_tools-install "golangci-lint" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.62.2")
 
 # Always rebuild the genum, gsort, and gerror executibles from this package direclty for testing.
 

@@ -249,7 +249,7 @@ type TraitInstance struct {
 
 // Value safely returns a reference to a constant OR an absolute value.
 func (t TraitInstance) Value() string {
-	if len(t.variableName) > 0 && t.variableName != "_" {
+	if t.variableName != "" && t.variableName != "_" {
 		return t.variableName
 	}
 	return t.value

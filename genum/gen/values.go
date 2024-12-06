@@ -86,6 +86,7 @@ type Value struct {
 // Less is a Value sorting function.
 func (v Value) Less(vIn Value) bool {
 	if v.Signed || vIn.Signed {
+		//nolint:gosec // overflow is not a concern here.
 		v1, v2 := int64(v.Value), int64(vIn.Value)
 		if v1 == v2 {
 			return v.Name < vIn.Name

@@ -3,8 +3,9 @@ package set_test
 import (
 	"testing"
 
-	"github.com/drshriveer/gtools/set"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/drshriveer/gtools/set"
 )
 
 type testBitSet uint64
