@@ -3,7 +3,7 @@ module github.com/drshriveer/gtools/gencommon
 go 1.23
 
 require (
-	github.com/drshriveer/gtools/set v0.0.0
+	github.com/drshriveer/gtools/set v0.0.0-20241206235751-0e7e276b6606
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/tools v0.19.0
 )
