@@ -3,8 +3,8 @@ module github.com/drshriveer/gtools/gerror
 go 1.23
 
 require (
-	github.com/drshriveer/gtools/gencommon v0.0.0-20240314202711-64624fbcb20a
-	github.com/drshriveer/gtools/set v0.0.0-20240314202711-64624fbcb20a
+	github.com/drshriveer/gtools/gencommon v0.0.0-20241207001051-5f905ef45a61
+	github.com/drshriveer/gtools/set v0.0.0-20241207001051-5f905ef45a61
 	github.com/fatih/structtag v1.2.0
 	github.com/itzg/go-flagsfiller v1.12.0
 	github.com/stretchr/testify v1.9.0
