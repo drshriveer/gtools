@@ -67,6 +67,10 @@ func TestFindInterface(t *testing.T) {
 			iface, err := gencommon.FindInterface(imports, pkgs, pkg.PkgPath, "TypeToGenerate", test.options)
 			require.NoError(t, err)
 
+			assert.Equal(t,
+				"// TypeToGenerate has a comment.\n// SecondLine of expected comment.",
+				iface.Comments.String())
+
 			expected := set.Make(test.expectedMethods...)
 			for _, m := range iface.Methods {
 				assert.Truef(t, expected.Remove(m.Name), "found duplicate OR unexpected method %q", m.Name)

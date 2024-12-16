@@ -5,6 +5,10 @@ import (
 	"github.com/drshriveer/gtools/gencommon/internal/nestedpkg"
 )
 
+// Comment to throw us off the trail.
+
+// TypeToGenerate has a comment.
+// SecondLine of expected comment.
 type TypeToGenerate struct {
 	EmbeddedA
 	EmbeddedB
