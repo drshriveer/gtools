@@ -54,9 +54,31 @@ func CommentsFromObj(pkg *packages.Package, typeName string) Comments {
 		}
 
 		if decl, ok := obj.Decl.(*ast.TypeSpec); ok {
-			return FromCommentGroup(decl.Doc)
+			// structs/interfaces won't have comments built-in unless
+			// they're defined a particular way... e.g.
+			// type {
+			//    // comment on MyType
+			//    MyType struct {
+			//    ...
+			//    }
+			// }
+			// So we'll check that first, but then build a comment map and try to get the
+			// correct comment that way.
+			if decl.Doc != nil && len(decl.Doc.List) > 0 {
+				return FromCommentGroup(decl.Doc)
+			} else if decl.Comment != nil && len(decl.Comment.List) > 0 {
+				return FromCommentGroup(decl.Comment)
+			}
+			cmap := ast.NewCommentMap(pkg.Fset, stax, stax.Comments)
+			for tp, commentCommentGroups := range cmap {
+				if v, ok := tp.(*ast.GenDecl); ok && len(v.Specs) == 1 && v.Specs[0] == decl && len(commentCommentGroups) > 0 {
+					// take the LAST comment.... theoretically the closest comment to the actual struct we're looking at.
+					return FromCommentGroup(commentCommentGroups[len(commentCommentGroups)-1])
+				}
+			}
 		}
 	}
+
 	return nil
 }
 
