@@ -3,6 +3,7 @@ package gconfig
 import (
 	"os"
 	"regexp"
+	"strings"
 )
 
 type templateVariable interface {
@@ -28,7 +29,8 @@ func (envVarTmpl) MatchAndResolve(in string) (out string, ok bool, err error) {
 	if !ok {
 		// This is the "default" case, where the environment variable is not found.
 		if len(matches) == 3 && matches[2] != "" {
-			return matches[2], true, nil
+			out = strings.Trim(matches[2], `"`)
+			return out, true, nil
 		}
 
 		return out, false, ErrFailedParsing.Msg(

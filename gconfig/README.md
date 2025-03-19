@@ -25,7 +25,8 @@ go get -u github.com/drshriveer/gtools/gconfig
 	-	**Env Parsing:** The configuration library will automatically parse dimensions environment variables.
 	-	**GetDimension:** Extract a Dimension value via `gconfig.GetDimension[my.DimensionType](cfg)`.
 -	**Template Environmental Variables:** You can reference environmental variables in a config.yaml as values themselves! e.g. `var: ${{env: MY_ENV_VAR}}` will look up the variable `MY_ENV_VAR`.
-  - Defaults to use when an environmental variable is missing using the syntax `{{ env:MY_ENV_VAR | default_value }}`.
+	-	Defaults to use when an environmental variable is missing using the syntax `{{ env:MY_ENV_VAR | default_value }}`.
+	-	Note: any `"` characters will be trimmed from default values... e.g. `{{ env:MY_ENV_VAR | "" }}` would default to an empty string.
 -	**Environmental Overrides:** (TODO) In some cases it is useful to override a single static configuration variable in a specific environment. This can be done though the use of environmental variables.
 
 ### Usage

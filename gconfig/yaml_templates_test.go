@@ -37,6 +37,18 @@ func TestEnvVarTmpl_MatchAndResolve(t *testing.T) {
 			expectedUsed:   true,
 		},
 		{
+			description:    "template found, env var not found, empty string default",
+			input:          `${{env:MY_ENV_VAR|""}}`,
+			expectedOutput: "",
+			expectedUsed:   true,
+		},
+		{
+			description:    "template found, env var not found, empty string default",
+			input:          `${{env:MY_ENV_VAR|""}}`,
+			expectedOutput: "",
+			expectedUsed:   true,
+		},
+		{
 			description:    "template found, env var used",
 			input:          "${{env:MY_ENV_VAR}}",
 			envVal:         "aws:secret",
