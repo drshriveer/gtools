@@ -31,6 +31,12 @@ func TestEnvVarTmpl_MatchAndResolve(t *testing.T) {
 			expectedError:  ErrFailedParsing,
 		},
 		{
+			description:    "template found, env var not found, default provided",
+			input:          "${{env:MY_ENV_VAR|some-default}}",
+			expectedOutput: "some-default",
+			expectedUsed:   true,
+		},
+		{
 			description:    "template found, env var used",
 			input:          "${{env:MY_ENV_VAR}}",
 			envVal:         "aws:secret",
@@ -57,6 +63,12 @@ func TestEnvVarTmpl_MatchAndResolve(t *testing.T) {
 			envVal:         "aws:secret",
 			expectedUsed:   true,
 			expectedOutput: "aws:secret",
+		},
+		{
+			description:    "template found, env var not found, default provided with spacing",
+			input:          "${{  env:MY_ENV_VAR  |  some-default  }}",
+			expectedOutput: "some-default",
+			expectedUsed:   true,
 		},
 	}
 

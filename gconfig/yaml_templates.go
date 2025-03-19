@@ -15,7 +15,7 @@ var templates = []templateVariable{
 
 type envVarTmpl struct{}
 
-var envVarTmplMatcher = regexp.MustCompile(`^\$\{\{\s*env:\s*(\w+)\s*\}\}$`)
+var envVarTmplMatcher = regexp.MustCompile(`^\$\{\{\s*env:\s*(\w+)\s*\|?\s*(.*\S)?\s*\}\}$`)
 
 func (envVarTmpl) MatchAndResolve(in string) (out string, ok bool, err error) {
 	out = in
@@ -26,6 +26,11 @@ func (envVarTmpl) MatchAndResolve(in string) (out string, ok bool, err error) {
 	envVarName := matches[1]
 	out, ok = os.LookupEnv(envVarName)
 	if !ok {
+		// This is the "default" case, where the environment variable is not found.
+		if len(matches) == 3 && matches[2] != "" {
+			return matches[2], true, nil
+		}
+
 		return out, false, ErrFailedParsing.Msg(
 			"templated environment environment variable %s not found in env",
 			envVarName)
