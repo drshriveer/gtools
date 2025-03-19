@@ -1,11 +1,11 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/drshriveer/gtools/genum v0.0.0-20241207001051-5f905ef45a61 h1:3fF6dKXVGicZH0HGD3jDozOQ9JulT4t8WSMzfTs/Rzk=
-github.com/drshriveer/gtools/genum v0.0.0-20241207001051-5f905ef45a61/go.mod h1:CCyLYy09Z/ZwtdXcidmH6OyiygEsvvindVuXyxnW924=
+github.com/drshriveer/gtools/genum v0.0.0-20241216201808-8f15e419d834 h1:hZKb/p63kk7CVIeXnJ0dbdNjpB3NJT+/pXc7cPLw1ck=
+github.com/drshriveer/gtools/genum v0.0.0-20241216201808-8f15e419d834/go.mod h1:rtHRRPyuqBXjXDJPp4w0fGVStFCuOhA0RgUrdBLbZsI=
 github.com/drshriveer/gtools/gerror v0.0.0-20240118184715-48af8963ff63 h1:68fFlmjLvkXFDzDuWzl0rEHMh95YcXVBK7RwAm69X24=
 github.com/drshriveer/gtools/gerror v0.0.0-20240118184715-48af8963ff63/go.mod h1:ECm354PjhLXufBbOf5r3PcqG23lqSzv3o2C0WVD0YtA=
-github.com/drshriveer/gtools/set v0.0.0-20241207001051-5f905ef45a61 h1:lXFDZknQh3RNlwtKvMQC4nBCE52061znIMwQbg7nu/M=
-github.com/drshriveer/gtools/set v0.0.0-20241207001051-5f905ef45a61/go.mod h1:I7aXqceF7qDQATZgGowY1cSItpEmRNNfSpGBJRrec6g=
+github.com/drshriveer/gtools/set v0.0.0-20241216201808-8f15e419d834 h1:C8rEV1hOD/Zc4of71KPHR5hS+HW02NkVtDCe8QbaYic=
+github.com/drshriveer/gtools/set v0.0.0-20241216201808-8f15e419d834/go.mod h1:I7aXqceF7qDQATZgGowY1cSItpEmRNNfSpGBJRrec6g=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
