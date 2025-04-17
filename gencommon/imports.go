@@ -122,7 +122,9 @@ func (ih *ImportHandler) addNamed(t named) string {
 			if importPkg, ok := ih.PInfo.Imports[pkg.Path()]; ok && pkgAlias == "" {
 				pkgAlias = importPkg.Name
 				aliasIsPackageName = true
-			} // else we don't know, so we just want to say aliasIsPackageName = false
+			} else {
+				aliasIsPackageName = strings.HasSuffix(pkg.Path(), pkgAlias)
+			}
 
 			i = &ImportDesc{
 				Alias:              pkgAlias,
