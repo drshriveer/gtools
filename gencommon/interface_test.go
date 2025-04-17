@@ -21,12 +21,12 @@ func TestFindInterface(t *testing.T) {
 	}{
 		{
 			description:     "Default options",
-			expectedMethods: []string{"ParentMethod", "BazMethod"},
+			expectedMethods: []string{"ParentMethod", "BazMethod", "MethodTakesAlias"},
 		},
 		{
 			description:     "IncludePrivate options",
 			options:         gencommon.IncludePrivate,
-			expectedMethods: []string{"ParentMethod", "BazMethod", "pooMethod"},
+			expectedMethods: []string{"ParentMethod", "BazMethod", "pooMethod", "MethodTakesAlias"},
 		},
 		{
 			description: "IncludeEmbedded options",
@@ -39,6 +39,7 @@ func TestFindInterface(t *testing.T) {
 				"BMethod",
 				"CMethod",
 				"DMethod",
+				"MethodTakesAlias",
 			},
 		},
 		{
@@ -54,6 +55,7 @@ func TestFindInterface(t *testing.T) {
 				"CMethod",
 				"DMethod",
 				"bPrivate",
+				"MethodTakesAlias",
 			},
 		},
 	}
@@ -77,6 +79,9 @@ func TestFindInterface(t *testing.T) {
 				// check that CMethod has a comment:
 				if m.Name == "CMethod" {
 					assert.NotEmpty(t, m.Comments)
+				}
+				if m.Name == "MethodTakesAlias" {
+					assert.Equal(t, "arg0 AliasID", m.Input.Declarations())
 				}
 			}
 			assert.Emptyf(t, expected.Slice(), "methods that were not found!")
