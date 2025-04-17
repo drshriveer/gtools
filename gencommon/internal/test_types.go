@@ -5,6 +5,9 @@ import (
 	"github.com/drshriveer/gtools/gencommon/internal/nestedpkg"
 )
 
+// An alias to a type in a different package.
+type AliasID = nestedpkg.SomeID
+
 // Comment to throw us off the trail.
 
 // TypeToGenerate has a comment.
@@ -14,9 +17,10 @@ type TypeToGenerate struct {
 	EmbeddedB
 }
 
-func (t *TypeToGenerate) ParentMethod() {}
-func (t *TypeToGenerate) BazMethod()    {}
-func (t *TypeToGenerate) pooMethod()    {}
+func (t *TypeToGenerate) ParentMethod()              {}
+func (t *TypeToGenerate) BazMethod()                 {}
+func (t *TypeToGenerate) pooMethod()                 {}
+func (t *TypeToGenerate) MethodTakesAlias(_ AliasID) {}
 
 type EmbeddedA struct{ nestedpkg.EmbeddedD }
 

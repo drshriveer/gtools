@@ -78,47 +78,57 @@ func (ih *ImportHandler) ExtractTypeRef(typ types.Type) string {
 		key := ih.ExtractTypeRef(t.Key())
 		value := ih.ExtractTypeRef(t.Elem())
 		return "map[" + key + "]" + value
+	case *types.Alias:
+		return ih.addNamed(t)
 	case *types.Named:
-		pkg := t.Obj().Pkg()
-		typeName := t.Obj().Name()
-		alias := ""
-
-		// If we need an import, find it and use the proper alias
-		if pkg != nil && pkg.Path() != ih.PInfo.PkgPath {
-			// first check if we have a mapping for the package:
-			i, ok := ih.imports[pkg.Path()]
-			if ok {
-				i.inUse = true
-			} else {
-				i = &ImportDesc{
-					Alias:   pkg.Name(),
-					PkgPath: pkg.Path(),
-					inUse:   true,
-				}
-				ih.imports[i.PkgPath] = i
-			}
-			alias = i.Alias + "."
-		}
-
-		// Recurse into type arguments for generic types
-		targs := t.TypeArgs()
-		if targs != nil {
-			typeArgNames := make([]string, targs.Len())
-			for i := 0; i < targs.Len(); i++ {
-				typeArg := targs.At(i)
-				typeArgNames[i] = ih.ExtractTypeRef(typeArg)
-			}
-			return fmt.Sprintf("%s%s[%s]", alias, typeName, strings.Join(typeArgNames, ", "))
-		}
-
-		return fmt.Sprintf("%s%s", alias, typeName)
-
+		return ih.addNamed(t)
 	default:
 		// *types.Interface is usually handled here too.
 		// "*types.Basic"s e.g. string come out as "untyped string"; we need to drop
 		//  that part... Not sure why this is how the type information is conveyed :-/.
 		return strings.TrimPrefix(t.String(), "untyped ")
 	}
+}
+
+type named interface {
+	Obj() *types.TypeName
+	TypeArgs() *types.TypeList
+}
+
+func (ih *ImportHandler) addNamed(t named) string {
+	pkg := t.Obj().Pkg()
+	typeName := t.Obj().Name()
+	alias := ""
+
+	// If we need an import, find it and use the proper alias
+	if pkg != nil && pkg.Path() != ih.PInfo.PkgPath {
+		// first check if we have a mapping for the package:
+		i, ok := ih.imports[pkg.Path()]
+		if ok {
+			i.inUse = true
+		} else {
+			i = &ImportDesc{
+				Alias:   pkg.Name(),
+				PkgPath: pkg.Path(),
+				inUse:   true,
+			}
+			ih.imports[i.PkgPath] = i
+		}
+		alias = i.Alias + "."
+	}
+
+	// Recurse into type arguments for generic types
+	targs := t.TypeArgs()
+	if targs != nil {
+		typeArgNames := make([]string, targs.Len())
+		for i := 0; i < targs.Len(); i++ {
+			typeArg := targs.At(i)
+			typeArgNames[i] = ih.ExtractTypeRef(typeArg)
+		}
+		return fmt.Sprintf("%s%s[%s]", alias, typeName, strings.Join(typeArgNames, ", "))
+	}
+
+	return fmt.Sprintf("%s%s", alias, typeName)
 }
 
 // GetActive returns ordered, active imports.

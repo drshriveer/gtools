@@ -12,3 +12,5 @@ func (e *EmbeddedC) CMethod() {}
 type EmbeddedD interface {
 	DMethod()
 }
+
+type SomeID uint64
