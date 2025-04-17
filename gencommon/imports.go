@@ -13,14 +13,15 @@ import (
 
 // ImportDesc is a description of an import.
 type ImportDesc struct {
-	Alias   string
-	PkgPath string
-	inUse   bool
+	Alias              string
+	PkgPath            string
+	aliasIsPackageName bool
+	inUse              bool
 }
 
 // ImportString returns a formatted import string with alias (if required).
 func (id *ImportDesc) ImportString() string {
-	if strings.HasSuffix(id.PkgPath, id.Alias) {
+	if id.aliasIsPackageName {
 		return "\"" + id.PkgPath + "\""
 	}
 	return id.Alias + " \"" + id.PkgPath + "\""
@@ -42,18 +43,27 @@ func calcImports(pkg *packages.Package, fAST *ast.File) *ImportHandler {
 	// Note: we do this loop here because we understand import aliases in this path.
 	for _, iSpec := range fAST.Imports {
 		pkgPath := strings.Trim(iSpec.Path.Value, `"`)
-		id := &ImportDesc{
-			PkgPath: pkgPath,
-			inUse:   false,
-		}
-		// iSpec.Name != nil indicates an alias for the package import.
+
+		// using the base path as the alias is not always correct, the package directory
+		// is not necessarily the same as the package name within that directory.
+		// e.g. something/v2 where the underlying package is actually 'something',
+		// but it serves as a default when there is no other info.
+		alias := path.Base(pkgPath)
+		aliasIsPackageName := true
 		if iSpec.Name != nil {
-			id.Alias = iSpec.Name.Name
-		} else {
-			// Otherwise just use the base package name as the alias.
-			id.Alias = path.Base(pkgPath)
+			alias = iSpec.Name.Name
+			aliasIsPackageName = false
+		} else if importPkg, ok := pkg.Imports[pkgPath]; ok {
+			alias = importPkg.Name
+			aliasIsPackageName = true
 		}
-		result.imports[pkgPath] = id
+
+		result.imports[pkgPath] = &ImportDesc{
+			PkgPath:            pkgPath,
+			Alias:              alias,
+			inUse:              false,
+			aliasIsPackageName: aliasIsPackageName,
+		}
 	}
 
 	return result
@@ -107,10 +117,20 @@ func (ih *ImportHandler) addNamed(t named) string {
 		if ok {
 			i.inUse = true
 		} else {
+			pkgAlias := pkg.Name()
+			var aliasIsPackageName bool
+			if importPkg, ok := ih.PInfo.Imports[pkg.Path()]; ok && pkgAlias == "" {
+				pkgAlias = importPkg.Name
+				aliasIsPackageName = true
+			} else {
+				aliasIsPackageName = strings.HasSuffix(pkg.Path(), pkgAlias)
+			}
+
 			i = &ImportDesc{
-				Alias:   pkg.Name(),
-				PkgPath: pkg.Path(),
-				inUse:   true,
+				Alias:              pkgAlias,
+				PkgPath:            pkg.Path(),
+				inUse:              true,
+				aliasIsPackageName: aliasIsPackageName,
 			}
 			ih.imports[i.PkgPath] = i
 		}
