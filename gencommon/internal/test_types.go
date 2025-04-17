@@ -3,6 +3,8 @@ package internal
 
 import (
 	"github.com/drshriveer/gtools/gencommon/internal/nestedpkg"
+	v2 "github.com/drshriveer/gtools/gencommon/internal/nestedpkg/v2"
+	"github.com/drshriveer/gtools/gencommon/internal/nestedpkg/v3"
 )
 
 // An alias to a type in a different package.
@@ -17,10 +19,15 @@ type TypeToGenerate struct {
 	EmbeddedB
 }
 
-func (t *TypeToGenerate) ParentMethod()              {}
-func (t *TypeToGenerate) BazMethod()                 {}
-func (t *TypeToGenerate) pooMethod()                 {}
-func (t *TypeToGenerate) MethodTakesAlias(_ AliasID) {}
+func (t *TypeToGenerate) ParentMethod() {}
+func (t *TypeToGenerate) BazMethod()    {}
+func (t *TypeToGenerate) pooMethod()    {}
+func (t *TypeToGenerate) MethodTakesAlias(
+	_ AliasID,
+	_ v2.InputTypeAtV2,
+	_ anyotherpackagename.InputTypeAtNonConsistentPackageName,
+) {
+}
 
 type EmbeddedA struct{ nestedpkg.EmbeddedD }
 

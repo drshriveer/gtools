@@ -81,11 +81,16 @@ func TestFindInterface(t *testing.T) {
 					assert.NotEmpty(t, m.Comments)
 				}
 				if m.Name == "MethodTakesAlias" {
-					assert.Equal(t, "arg0 AliasID", m.Input.Declarations())
+					assert.Equal(t,
+						"arg0 AliasID, arg1 v2.InputTypeAtV2, arg2 anyotherpackagename.InputTypeAtNonConsistentPackageName",
+						m.Input.Declarations())
 				}
 			}
 			assert.Emptyf(t, expected.Slice(), "methods that were not found!")
 
+			for _, m := range imports.GetActive() {
+				println(m.ImportString())
+			}
 		})
 	}
 }
