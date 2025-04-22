@@ -40,6 +40,7 @@ func TestFindInterface(t *testing.T) {
 				"CMethod",
 				"DMethod",
 				"MethodTakesAlias",
+				"MethodWithParamsFromPackagesWithSameName",
 			},
 		},
 		{
@@ -56,6 +57,7 @@ func TestFindInterface(t *testing.T) {
 				"DMethod",
 				"bPrivate",
 				"MethodTakesAlias",
+				"MethodWithParamsFromPackagesWithSameName",
 			},
 		},
 	}
@@ -77,13 +79,15 @@ func TestFindInterface(t *testing.T) {
 			for _, m := range iface.Methods {
 				assert.Truef(t, expected.Remove(m.Name), "found duplicate OR unexpected method %q", m.Name)
 				// check that CMethod has a comment:
-				if m.Name == "CMethod" {
+				switch m.Name {
+				case "CMethod":
 					assert.NotEmpty(t, m.Comments)
-				}
-				if m.Name == "MethodTakesAlias" {
+				case "MethodTakesAlias":
 					assert.Equal(t,
 						"arg0 AliasID, arg1 v2.InputTypeAtV2, arg2 anyotherpackagename.InputTypeAtNonConsistentPackageName",
 						m.Input.Declarations())
+				case "MethodWithParamsFromPackagesWithSameName":
+					assert.Equal(t, "arg0 dupepkg.InputTypeAtV4, arg1 dupepkg1.InputTypeAtV5", m.Input.Declarations())
 				}
 			}
 			assert.Emptyf(t, expected.Slice(), "methods that were not found!")
