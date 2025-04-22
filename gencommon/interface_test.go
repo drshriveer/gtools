@@ -40,6 +40,7 @@ func TestFindInterface(t *testing.T) {
 				"CMethod",
 				"DMethod",
 				"MethodTakesAlias",
+				"EmbeddedMethodTakesAlias",
 			},
 		},
 		{
@@ -56,6 +57,7 @@ func TestFindInterface(t *testing.T) {
 				"DMethod",
 				"bPrivate",
 				"MethodTakesAlias",
+				"EmbeddedMethodTakesAlias",
 			},
 		},
 	}
@@ -63,8 +65,10 @@ func TestFindInterface(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.description, func(t *testing.T) {
 			t.Parallel()
-			pwd := filepath.Join(os.Getenv("PWD"), "internal", "test_types.go")
-			pkgs, pkg, _, imports, err := gencommon.LoadPackages(pwd)
+			pwd, err := os.Getwd()
+			require.NoError(t, err)
+			pwd = filepath.Join(pwd, "internal", "test_types.go")
+			pkgs, pkg, imports, err := gencommon.LoadPackages(pwd)
 			require.NoError(t, err)
 			iface, err := gencommon.FindInterface(imports, pkgs, pkg.PkgPath, "TypeToGenerate", test.options)
 			require.NoError(t, err)
@@ -83,6 +87,11 @@ func TestFindInterface(t *testing.T) {
 				if m.Name == "MethodTakesAlias" {
 					assert.Equal(t,
 						"arg0 AliasID, arg1 v2.InputTypeAtV2, arg2 anyotherpackagename.InputTypeAtNonConsistentPackageName",
+						m.Input.Declarations())
+				}
+				if m.Name == "EmbeddedMethodTakesAlias" {
+					assert.Equal(t,
+						"a duplicate.ADuplicate, b bAlias.BDuplicate",
 						m.Input.Declarations())
 				}
 			}
