@@ -154,7 +154,7 @@ func (ih *ImportHandler) addNamed(t named) string {
 func (ih *ImportHandler) addImportDescSafe(i *ImportDesc, numberedAlias int) *ImportDesc {
 	currentAlias := i.Alias
 	if numberedAlias > 0 {
-		currentAlias = currentAlias + strconv.FormatInt(int64(numberedAlias), 10)
+		currentAlias += strconv.FormatInt(int64(numberedAlias), 10)
 	}
 	for _, existing := range ih.imports {
 		if existing.Alias == currentAlias {
