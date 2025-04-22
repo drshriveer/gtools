@@ -6,6 +6,7 @@ import (
 	"go/types"
 	"path"
 	"sort"
+	"strconv"
 	"strings"
 
 	"golang.org/x/tools/go/packages"
@@ -57,13 +58,12 @@ func calcImports(pkg *packages.Package, fAST *ast.File) *ImportHandler {
 			alias = importPkg.Name
 			aliasIsPackageName = true
 		}
-
-		result.imports[pkgPath] = &ImportDesc{
+		result.addImportDescSafe(&ImportDesc{
 			PkgPath:            pkgPath,
 			Alias:              alias,
 			inUse:              false,
 			aliasIsPackageName: aliasIsPackageName,
-		}
+		}, 0)
 	}
 
 	return result
@@ -126,13 +126,12 @@ func (ih *ImportHandler) addNamed(t named) string {
 				aliasIsPackageName = strings.HasSuffix(pkg.Path(), pkgAlias)
 			}
 
-			i = &ImportDesc{
+			i = ih.addImportDescSafe(&ImportDesc{
 				Alias:              pkgAlias,
 				PkgPath:            pkg.Path(),
 				inUse:              true,
 				aliasIsPackageName: aliasIsPackageName,
-			}
-			ih.imports[i.PkgPath] = i
+			}, 0)
 		}
 		alias = i.Alias + "."
 	}
@@ -149,6 +148,25 @@ func (ih *ImportHandler) addNamed(t named) string {
 	}
 
 	return fmt.Sprintf("%s%s", alias, typeName)
+}
+
+// addImportDescSafe adds an import description to the handler and deduplicates package aliases if needed.
+func (ih *ImportHandler) addImportDescSafe(i *ImportDesc, numberedAlias int) *ImportDesc {
+	currentAlias := i.Alias
+	if numberedAlias > 0 {
+		currentAlias = currentAlias + strconv.FormatInt(int64(numberedAlias), 10)
+	}
+	for _, existing := range ih.imports {
+		if existing.Alias == currentAlias {
+			return ih.addImportDescSafe(i, numberedAlias+1)
+		}
+	}
+	i.Alias = currentAlias
+	if numberedAlias > 0 {
+		i.aliasIsPackageName = false
+	}
+	ih.imports[i.PkgPath] = i
+	return i
 }
 
 // GetActive returns ordered, active imports.
