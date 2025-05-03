@@ -28,6 +28,7 @@ type testStruct struct {
 }
 
 func TestFlagParsing(t *testing.T) {
+	flag.Parse()
 	builder := gconfig.NewBuilder().
 		WithDimension("d1", internal.D1a).
 		WithDimension("d2", internal.D2a)
