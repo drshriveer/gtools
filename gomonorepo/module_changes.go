@@ -1,4 +1,4 @@
-package gomono
+package gomonorepo
 
 import (
 	"bufio"

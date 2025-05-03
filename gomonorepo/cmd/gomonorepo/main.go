@@ -9,25 +9,25 @@ import (
 
 	"github.com/jessevdk/go-flags"
 
-	"github.com/drshriveer/gtools/gomono"
+	"github.com/drshriveer/gtools/gomonorepo"
 )
 
 func main() {
-	opts := &gomono.GlobalOptions{}
+	opts := &gomonorepo.GlobalOptions{}
 
 	// set up a new parser with the updated cfg struct.
 	parser := flags.NewParser(opts, flags.HelpFlag|flags.PassDoubleDash)
-	cmds := []gomono.Command{
-		gomono.TestModulesCommand,
-		gomono.LintModulesCommand,
-		gomono.FormatModulesCommand,
-		gomono.GenerateModulesCommand,
-		gomono.ListModulesCommand,
-		gomono.ListDependencyTree,
+	cmds := []gomonorepo.Command{
+		gomonorepo.TestModulesCommand,
+		gomonorepo.LintModulesCommand,
+		gomonorepo.FormatModulesCommand,
+		gomonorepo.GenerateModulesCommand,
+		gomonorepo.ListModulesCommand,
+		gomonorepo.ListDependencyTree,
 	}
 	var err error
 	for _, cmd := range cmds {
-		err = gomono.AddCommand(parser, cmd)
+		err = gomonorepo.AddCommand(parser, cmd)
 		if err != nil {
 			panic(err)
 		}
@@ -40,7 +40,7 @@ func main() {
 		ctx, cancel = signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 		defer cancel()
 
-		return cmd.(gomono.Commander).RunCommand(ctx, opts)
+		return cmd.(gomonorepo.Commander).RunCommand(ctx, opts)
 	}
 
 	_, err = parser.Parse()

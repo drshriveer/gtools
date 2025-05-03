@@ -1,4 +1,4 @@
-module github.com/drshriveer/gtools/gomono
+module github.com/drshriveer/gtools/gomonorepo
 
 go 1.23.0
 

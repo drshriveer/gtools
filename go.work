@@ -9,7 +9,7 @@ use (
 	./gerror
 	./gogenproto
 	./gogenproto/internal
-	./gomono
+	./gomonorepo
 	./gsort
 	./gsync
 	./log

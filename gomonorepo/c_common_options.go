@@ -1,4 +1,4 @@
-package gomono
+package gomonorepo
 
 // ParentCommitOpt is a reusable type that can be embedded in any command to get the flag value.
 type ParentCommitOpt struct {
