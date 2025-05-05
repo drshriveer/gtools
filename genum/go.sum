@@ -1,7 +1,7 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/drshriveer/gtools/gencommon v0.0.0-20250505212851-f00a25f973f1 h1:1G36Qi5JKJdoSn4OcGP6GTDf56G9b2lxm+sdZvNWKdg=
-github.com/drshriveer/gtools/gencommon v0.0.0-20250505212851-f00a25f973f1/go.mod h1:lrUGS7COmy7w4EyRwCHpJ3BZ4cDmLaVaxpCqFsXzXn0=
+github.com/drshriveer/gtools/gencommon v0.0.0-20250505220110-e78241fb37f0 h1:Jhfm5L+kBCkdCOW+CH20N1o/hXUMhiBAsAndZRxySGI=
+github.com/drshriveer/gtools/gencommon v0.0.0-20250505220110-e78241fb37f0/go.mod h1:M4ktKv+JKSTtmyUDDwzSbsYetQR2FK5He1rTXwssaek=
 github.com/drshriveer/gtools/rutils v0.0.0-20240118184715-48af8963ff63 h1:PRV3yLYUlBnH+/HSrdezMpDRNFd+b60Tv7qOpg9IC9s=
 github.com/drshriveer/gtools/rutils v0.0.0-20240118184715-48af8963ff63/go.mod h1:ixRN41tPraNiLhfegjbhtt9zFLW8XXhZxUlmSaGGU3w=
 github.com/drshriveer/gtools/set v0.0.0-20250505214922-1840047d9273 h1:mLo32je4NSppeVeLiwj5qy3c7cspn0SYAkz9ystgj0w=
