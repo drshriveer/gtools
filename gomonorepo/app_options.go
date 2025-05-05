@@ -20,13 +20,12 @@ var (
 
 // AppOptions hold global configurations an options that are used by most if not all commands.
 type AppOptions struct {
-	Root                      flags.Filename `long:"root" short:"r" description:"Root directory of the mono repo." default:"."`
-	InvocationDir             flags.Filename `long:"invocationDir" description:"If invocationDir is not the root directory, invocation will be limited to the invocationDir and its subdirectories."`
-	NonRecursiveInvocationDir bool           `long:"non-recursive-from-invocation-dir" description:"When using invocationDir, turn off recursive invocation; limit to the invocation directory only."`
-	Verbose                   bool           `long:"verbose" short:"v" description:"Enable verbose logging."`
-	Parallelism               int            `long:"parallelism" short:"p" description:"Permitted parallelism for tasks that can be parallelized." default:"4"`
-	Timeout                   time.Duration  `long:"timeout" short:"t" description:"Timeout for the command." default:"5m"`
-	ExcludePaths              []string       `long:"excludePath" short:"x" description:"Paths to to exclude from searches (these may be regex). Note: Anything excluded by git is ignored by default." default:"node_modules" default:"vendor"`
+	Root          flags.Filename `long:"root" short:"r" description:"Root directory of the mono repo." default:"."`
+	InvocationDir flags.Filename `long:"invocationDir" description:"If invocationDir is not the root directory, invocation will be limited to the invocationDir and its subdirectories."`
+	Verbose       bool           `long:"verbose" short:"v" description:"Enable verbose logging."`
+	Parallelism   int            `long:"parallelism" short:"p" description:"Permitted parallelism for tasks that can be parallelized." default:"4"`
+	Timeout       time.Duration  `long:"timeout" short:"t" description:"Timeout for the command." default:"5m"`
+	ExcludePaths  []string       `long:"excludePath" short:"x" description:"Paths to to exclude from searches (these may be regex). Note: Anything excluded by git is ignored by default." default:"node_modules" default:"vendor"`
 }
 
 // ExcludePathPatterns compiles and returns ExcludePaths into regexes.
@@ -63,11 +62,6 @@ func (x *AppOptions) GetFocusDir() (string, bool) {
 	willUseFocus := focus != root && strings.HasPrefix(focus, root)
 	if x.Verbose && willUseFocus {
 		x.Infof("Focusing on directory: %q", focus)
-	}
-	if !x.NonRecursiveInvocationDir {
-		focus = ensureRecursivePath(focus)
-		focus = strings.TrimSuffix(focus, "/") // just in case
-		focus += "/..."
 	}
 	return focus, willUseFocus
 }

@@ -58,7 +58,7 @@ func (x *lintModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) e
 }
 
 func (x *lintModulesCommand) runPerModule(ctx context.Context, m *Module) (commandResult, error) {
-	return x.runPerTarget(ctx, ensureRecursivePath(m.ModRoot))
+	return x.runPerTarget(ctx, m.ModRoot)
 }
 
 func (x *lintModulesCommand) runPerTarget(ctx context.Context, dir string) (commandResult, error) {
@@ -66,6 +66,6 @@ func (x *lintModulesCommand) runPerTarget(ctx context.Context, dir string) (comm
 	args[0] = "golangci-lint"
 	args[1] = "run"
 	args = append(args, x.Fags...)
-	args = append(args, dir)
+	args = append(args, ensureRecursivePath(dir))
 	return runCommand(ctx, args), nil
 }

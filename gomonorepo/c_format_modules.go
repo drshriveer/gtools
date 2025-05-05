@@ -58,7 +58,7 @@ func (x *formatModulesCommand) RunCommand(ctx context.Context, opts *AppOptions)
 }
 
 func (x *formatModulesCommand) runPerModule(ctx context.Context, m *Module) (commandResult, error) {
-	return x.runPerTarget(ctx, ensureRecursivePath(m.ModRoot))
+	return x.runPerTarget(ctx, m.ModRoot)
 }
 
 func (x *formatModulesCommand) runPerTarget(ctx context.Context, dir string) (commandResult, error) {
@@ -68,6 +68,6 @@ func (x *formatModulesCommand) runPerTarget(ctx context.Context, dir string) (co
 	if x.Fags != "" {
 		args = append(args, strings.Fields(x.Fags)...)
 	}
-	args = append(args, dir)
+	args = append(args, ensureRecursivePath(dir))
 	return runCommand(ctx, args), nil
 }

@@ -59,7 +59,7 @@ func (x *genModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) er
 }
 
 func (x *genModulesCommand) runPerModule(ctx context.Context, m *Module) (commandResult, error) {
-	return x.runPerTarget(ctx, ensureRecursivePath(m.ModRoot))
+	return x.runPerTarget(ctx, m.ModRoot)
 }
 
 func (x *genModulesCommand) runPerTarget(ctx context.Context, target string) (commandResult, error) {
