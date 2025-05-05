@@ -12,6 +12,8 @@ when following the go:generate directive; consider not supplying this flag.
 Note: this command expects go and git are installed.
 `
 
+// GenerateModulesCommand is the `generate` command instance which can be added
+// to the main command line parser. See description above for details.
 var GenerateModulesCommand = &genModulesCommand{
 	EmbeddedCommand: EmbeddedCommand{
 		CmdName: "generate",
@@ -27,7 +29,7 @@ type genModulesCommand struct {
 
 // TODO: This command isn't smart yet, it would be friggen wonderful if we could search for
 // `go:generate` directives and undestand if their templates or the underlying references changed.
-func (x *genModulesCommand) RunCommand(ctx context.Context, opts *GlobalOptions) error {
+func (x *genModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) error {
 	_, mods, err := listAllChangedAndDependencies(ctx, opts, x.ParentCommit)
 	if err != nil {
 		return err
@@ -48,7 +50,7 @@ func (x *genModulesCommand) testModule(ctx context.Context, m *Module) (commandR
 		"go",
 		"generate",
 		"-C",
-		m.ModDirectory,
+		m.ModRoot,
 		"-x",
 		"./...",
 	}

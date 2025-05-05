@@ -11,10 +11,10 @@ import (
 
 func listAllChangedModules(
 	ctx context.Context,
-	opts *GlobalOptions,
+	opts *AppOptions,
 	parentCommit string,
 ) (*ModuleTree, set.Set[*Module], error) {
-	tree, err := listAllModules(ctx, opts.GetRoot())
+	tree, err := listAllModules(ctx, opts)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -24,7 +24,7 @@ func listAllChangedModules(
 
 func listAllChangedModulesWithTree(
 	ctx context.Context,
-	opts *GlobalOptions,
+	opts *AppOptions,
 	parentCommit string,
 	tree *ModuleTree,
 ) (set.Set[*Module], error) {
@@ -50,7 +50,7 @@ func listAllChangedModulesWithTree(
 	if opts.Verbose {
 		opts.Infof("Detected changes in %d modules.\n", numChanged)
 		for mod := range changedMods {
-			opts.Printf("\t - " + mod.Mod.Module.Mod.Path + "\n")
+			opts.Printf("\t - %s\n", mod.ModFile.Module.Mod.Path)
 		}
 	}
 
@@ -59,14 +59,14 @@ func listAllChangedModulesWithTree(
 
 func listAllChangedAndDependencies(
 	ctx context.Context,
-	opts *GlobalOptions,
+	opts *AppOptions,
 	parentCommit string,
 ) (
 	*ModuleTree,
 	set.Set[*Module],
 	error,
 ) {
-	tree, err := listAllModules(ctx, opts.GetRoot())
+	tree, err := listAllModules(ctx, opts)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -76,7 +76,7 @@ func listAllChangedAndDependencies(
 
 func listAllChangedAndDependenciesWithTree(
 	ctx context.Context,
-	opts *GlobalOptions,
+	opts *AppOptions,
 	parentCommit string,
 	tree *ModuleTree,
 ) (
@@ -103,7 +103,7 @@ func listAllChangedAndDependenciesWithTree(
 		numChanged, len(tree.AllModules), len(changedMods), len(tree.AllModules))
 	if opts.Verbose {
 		for mod := range changedMods {
-			opts.Printf("\t - " + mod.Mod.Module.Mod.Path + "\n")
+			opts.Printf("\t - %s\n", mod.ModFile.Module.Mod.Path)
 		}
 	}
 

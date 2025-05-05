@@ -12,11 +12,23 @@ import (
 	"github.com/drshriveer/gtools/gsync"
 )
 
+// Module represents a Go module, its dependencies,
+// and other parsed information from the module.
+// This is likely to grow considerably in the future.
 type Module struct {
-	Mod          *modfile.File
-	ModFilePath  string
-	ModDirectory string
-	DependsOn    []*Module
+	// ModFile is the parsed go.mod file.
+	ModFile *modfile.File
+
+	// ModFilePath is the path to the go.mod file, including the go.mod file suffix.
+	ModFilePath string
+
+	// ModRoot is the directory containing the go.mod file; or the root of the module.
+	ModRoot string
+
+	// DependsOn is a list of modules that this module depends on.
+	DependsOn []*Module
+
+	// DependencyOf is a list of modules that depend on this module.
 	DependencyOf []*Module
 
 	// NestedModules is a list of modules that are nested within this module,
@@ -25,121 +37,67 @@ type Module struct {
 	NestedModules []*Module
 }
 
-// ContainsFile returns true if a file is contained within this module.
-func (x *Module) ContainsFile(f string) bool {
-	if !strings.HasPrefix(f, x.ModDirectory) {
-		return false
-	}
-	// Ensure the file is not part of a nested module.
-	for _, nested := range x.NestedModules {
-		if strings.HasPrefix(f, nested.ModDirectory) {
-			return false
-		}
-	}
-	return true
-}
-
-func listAllModules(ctx context.Context, rootDir string) (*ModuleTree, error) {
-	executor, done := gsync.NewSliceExecutor[*Module](ctx)
-	defer done()
-
-	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if !info.IsDir() && info.Name() == "go.mod" {
-			data, err := os.ReadFile(path)
-			if err != nil {
-				return fmt.Errorf("failed to read go.mod file at %s: %w", path, err)
-			}
-			return executor.AddTask(func(context.Context) (*Module, error) {
-				f, err := modfile.Parse(path, data, nil)
-				if err != nil {
-					return nil, fmt.Errorf("failed to parse go.mod file at %s: %w", path, err)
-				}
-				return &Module{
-					Mod:          f,
-					ModFilePath:  path,
-					ModDirectory: filepath.Dir(path),
-				}, nil
-			})
-		}
-		return nil
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf("error walking the directory tree: %w", err)
-	}
-	mods, err := executor.WaitAndResult()
-	if err != nil {
-		return nil, fmt.Errorf("error executing tasks: %w", err)
-	}
-
-	return postProcess(mods, rootDir)
-}
-
-func postProcess(mods []*Module, rootDir string) (*ModuleTree, error) {
-	root := &ModuleTree{
-		rootDir:       rootDir,
-		AllModules:    mods,
-		AllModulesMap: make(map[string]*Module, len(mods)),
-	}
-	var err error
-	for _, mod := range mods {
-		err = root.AddModule(mod)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	for _, mod := range mods {
-		for _, dep := range mod.Mod.Require {
-			if depMod, exists := root.AllModulesMap[dep.Mod.Path]; exists {
-				mod.DependsOn = append(mod.DependsOn, depMod)
-				depMod.DependencyOf = append(depMod.DependencyOf, mod)
-			}
-		}
-	}
-
-	return root, nil
-}
-
+// ModuleTree represents a tree of Go modules starting from the root directory of the
+// repository or mono repo.
 type ModuleTree struct {
-	AllModules    []*Module
+	// AllModules is a list of all modules found in the repository.
+	AllModules []*Module
+	// AllModulesMap is a map of all modules found in the repository, keyed by the module package name.
 	AllModulesMap map[string]*Module
-	rootDir       string
-	root          treeNode
+	// rootDir is the root directory of the repository.
+	rootDir string
+
+	// directoryTreeRoot represents the root of the module directory tree.
+	// i.e. this is modules as they are laid out in the file system.
+	directoryTreeRoot modDirTreeNode
 }
 
+// ModuleContainingFile returns the module that contains the given file.
+// This is accomplished by walking the tree of modules and finding the nearest parent module.
+// It is assumed that the file path is ALREADY relative to the rootDir of the module tree.
+// The result *Module may be nil if no module was found.
 func (r *ModuleTree) ModuleContainingFile(f string) *Module {
 	// Possibly danger: this assumes the file path is relative to the rootDir.
 	path := strings.Split(filepath.Dir(f), string(filepath.Separator))
 	if len(path) > 0 && path[0] == "." {
 		path = path[1:]
 	}
-	return r.root.findModuleContainingFile(path)
+	return r.directoryTreeRoot.findModuleContainingFile(path)
 }
 
+// AddModule adds a module to the module tree.
 func (r *ModuleTree) AddModule(mod *Module) error {
-	if _, exists := r.AllModulesMap[mod.Mod.Module.Mod.Path]; exists {
-		return fmt.Errorf("duplicate module path found: %q", mod.Mod.Module.Mod.Path)
+	if _, exists := r.AllModulesMap[mod.ModFile.Module.Mod.Path]; exists {
+		return fmt.Errorf("duplicate module path found: %q", mod.ModFile.Module.Mod.Path)
 	}
-	r.AllModulesMap[mod.Mod.Module.Mod.Path] = mod
+	r.AllModulesMap[mod.ModFile.Module.Mod.Path] = mod
 
-	temp := strings.TrimPrefix(mod.ModDirectory, r.rootDir+"/")
+	temp := strings.TrimPrefix(mod.ModRoot, r.rootDir+"/")
 	path := strings.Split(temp, string(filepath.Separator))
-	r.root.addModuleWithPath(mod, path)
+	r.directoryTreeRoot.addModuleWithPath(mod, path)
 	return nil
 }
 
-type treeNode struct {
+// modDirTreeNode represents modules in the mono repo as they are laid out in the
+// file system. E.g.
+// .
+// ├── foo
+// │   └── github.com/foo  (module)
+// └── bar
+//
+//	└── github.com/bar  (module)
+type modDirTreeNode struct {
+	// directoryName is the literal name of the root directory of the module.
+	// i.e. this is not a path, just the name of the directory.
 	directoryName string
-	moduleAtPath  *Module
-	children      []*treeNode
+	// moduleAtPath is the module present at this path, if any.
+	moduleAtPath *Module
+	// children is a list of modules  nodes in the module tree.
+	children []*modDirTreeNode
 }
 
-func (r *treeNode) addModuleWithPath(mod *Module, path []string) {
+// addModuleWithPath adds a module to the module tree at the given path.
+func (r *modDirTreeNode) addModuleWithPath(mod *Module, path []string) {
 	if len(path) == 0 {
 		r.moduleAtPath = mod
 		return
@@ -151,13 +109,16 @@ func (r *treeNode) addModuleWithPath(mod *Module, path []string) {
 
 	node := r.nodeWithDirName(path[0])
 	if node == nil {
-		node = &treeNode{directoryName: path[0]}
+		node = &modDirTreeNode{directoryName: path[0]}
 		r.children = append(r.children, node)
 	}
 	node.addModuleWithPath(mod, path[1:])
 }
 
-func (r *treeNode) findModuleContainingFile(path []string) *Module {
+// findModuleContainingFile finds the module that contains the given file path,
+// starting from the current node, following the directory tree downwards.
+// The in put "path" is assumed to be a list of directory names, starting from the current node.
+func (r *modDirTreeNode) findModuleContainingFile(path []string) *Module {
 	if len(path) == 0 {
 		return r.moduleAtPath
 	}
@@ -176,7 +137,7 @@ func (r *treeNode) findModuleContainingFile(path []string) *Module {
 	return node.findModuleContainingFile(path[1:])
 }
 
-func (r *treeNode) nodeWithDirName(dirName string) *treeNode {
+func (r *modDirTreeNode) nodeWithDirName(dirName string) *modDirTreeNode {
 	for _, node := range r.children {
 		if node.directoryName == dirName {
 			return node
@@ -184,3 +145,110 @@ func (r *treeNode) nodeWithDirName(dirName string) *treeNode {
 	}
 	return nil
 }
+
+// listAllModules lists all Go modules in the given directory and its subdirectories.
+func listAllModules(ctx context.Context, opts *AppOptions) (*ModuleTree, error) {
+	// TODO: Exclude patterns are great and probably still useful, but following .gitignore
+	//       is also a GREAT idea.
+	excludePaths, err := opts.ExcludePathPatterns()
+	if err != nil {
+		return nil, err
+	}
+
+	executor, done := gsync.NewSliceExecutor[*Module](ctx)
+	defer done()
+
+	var gitIgnoreStack []Patterns
+	var gitIgnoreStackPaths []string
+
+	err = filepath.WalkDir(opts.GetRoot(), func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		
+		// check if we're still in the gitignore stack...
+		// remove gitignore patterns that are no longer relevant
+		for i := len(gitIgnoreStackPaths) - 1; i >= 0; i-- {
+			if strings.HasPrefix(path, gitIgnoreStackPaths[i]) {
+				break
+			}
+			gitIgnoreStack = gitIgnoreStack[:i]
+			gitIgnoreStackPaths = gitIgnoreStackPaths[:i]
+		}
+
+		if d.IsDir() {
+			if matchesString(excludePaths, gitIgnoreStack, path) {
+				return filepath.SkipDir
+			}
+			return nil // recurse
+		}
+
+		switch d.Name() {
+		case ".gitignore":
+			ignorePatterns, err := parseGitignore(path)
+			if err != nil {
+				return err
+			} else if ignorePatterns == nil {
+				return nil
+			}
+
+			gitIgnoreStack = append(gitIgnoreStack, ignorePatterns)
+			gitIgnoreStackPaths = append(gitIgnoreStackPaths, path)
+		case "go.mod":
+			data, err := os.ReadFile(path)
+			if err != nil {
+				return fmt.Errorf("failed to read go.mod file at %s: %w", path, err)
+			}
+			return executor.AddTask(func(context.Context) (*Module, error) {
+				f, err := modfile.Parse(path, data, nil)
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse go.mod file at %s: %w", path, err)
+				}
+				return &Module{
+					ModFile:     f,
+					ModFilePath: path,
+					ModRoot:     filepath.Dir(path),
+				}, nil
+			})
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("error walking the directory tree: %w", err)
+	}
+	mods, err := executor.WaitAndResult()
+	if err != nil {
+		return nil, fmt.Errorf("error executing tasks: %w", err)
+	}
+
+	return buildModuleTree(mods, opts.GetRoot())
+}
+
+func buildModuleTree(mods []*Module, rootDir string) (*ModuleTree, error) {
+	root := &ModuleTree{
+		rootDir:       rootDir,
+		AllModules:    mods,
+		AllModulesMap: make(map[string]*Module, len(mods)),
+	}
+	var err error
+	for _, mod := range mods {
+		err = root.AddModule(mod)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	for _, mod := range mods {
+		for _, dep := range mod.ModFile.Require {
+			if depMod, exists := root.AllModulesMap[dep.Mod.Path]; exists {
+				mod.DependsOn = append(mod.DependsOn, depMod)
+				depMod.DependencyOf = append(depMod.DependencyOf, mod)
+			}
+		}
+	}
+
+	return root, nil
+}
+
+// listAllChangedModules lists all Go modules in the given directory and its subdirectories

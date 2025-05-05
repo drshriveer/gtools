@@ -14,7 +14,7 @@ linters:
     # added:
     - bodyclose
     - contextcheck
-    - dupl
+#    - dupl # not particularly accurate ...
     - errname
     - gocheckcompilerdirectives
     - gocritic # MAYBE NOT THIS ONE

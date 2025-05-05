@@ -6,8 +6,10 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
+// Commander is an interface that represents a command that can be executed,
+// and is what will be invoked by the command line parser.
 type Commander interface {
-	RunCommand(ctx context.Context, options *GlobalOptions) error
+	RunCommand(ctx context.Context, options *AppOptions) error
 }
 
 // An EmbeddedCommand should be embedded in a struct to provide the Command interface.

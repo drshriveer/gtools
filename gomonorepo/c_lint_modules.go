@@ -12,6 +12,8 @@ modules that changed since the parent commit.
 Note: this command expects golangci-lint is installed.
 `
 
+// LintModulesCommand is the `lint` command instance which can be added
+// to the main command line parser. See description above for details.
 var LintModulesCommand = &lintModulesCommand{
 	EmbeddedCommand: EmbeddedCommand{
 		CmdName: "lint",
@@ -27,7 +29,7 @@ type lintModulesCommand struct {
 	Fags string `long:"flags" description:"Flags to pass to through to the lint command."`
 }
 
-func (x *lintModulesCommand) RunCommand(ctx context.Context, opts *GlobalOptions) error {
+func (x *lintModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) error {
 	_, mods, err := listAllChangedModules(ctx, opts, x.ParentCommit)
 	if err != nil {
 		return err
@@ -50,6 +52,6 @@ func (x *lintModulesCommand) testModule(ctx context.Context, m *Module) (command
 	if x.Fags != "" {
 		args = append(args, strings.Fields(x.Fags)...)
 	}
-	args = append(args, m.ModDirectory)
+	args = append(args, m.ModRoot)
 	return runCommand(ctx, args), nil
 }

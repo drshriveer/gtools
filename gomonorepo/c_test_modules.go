@@ -13,6 +13,8 @@ If any of the tests fail, the command will return a non-zero exit code.
 Note: this command expects go and git are installed.
 `
 
+// TestModulesCommand is the `test` command instance which can be added
+// to the main command line parser. See description above for details.
 var TestModulesCommand = &testModulesCommand{
 	EmbeddedCommand: EmbeddedCommand{
 		CmdName: "test",
@@ -27,7 +29,7 @@ type testModulesCommand struct {
 	Fags string `long:"flags" description:"Flags to pass to through to the test command." default:"-race -count=1 -cover"`
 }
 
-func (x *testModulesCommand) RunCommand(ctx context.Context, opts *GlobalOptions) error {
+func (x *testModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) error {
 	_, mods, err := listAllChangedAndDependencies(ctx, opts, x.ParentCommit)
 	if err != nil {
 		return err
@@ -50,6 +52,6 @@ func (x *testModulesCommand) testModule(ctx context.Context, m *Module) (command
 	if x.Fags != "" {
 		args = append(args, strings.Fields(x.Fags)...)
 	}
-	args = append(args, m.ModDirectory)
+	args = append(args, m.ModRoot)
 	return runCommand(ctx, args), nil
 }

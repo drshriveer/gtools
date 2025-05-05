@@ -6,10 +6,17 @@ Is a commandline tool that assists in managing a golang monorepo!
 ### Features
 
 -	invoke test/lint/format on only the modules that have changed (and modules that depend on them).
+-	skip directories based on `.gitignore`
 
 ### Getting started
 
-Install with:
+##### Requires:
+
+-	`git`
+-	`golanglint-ci`
+-	`go` (of course)
+
+##### Install:
 
 ```bash
 go install github.com/drshriveer/gtool/gomonorepo/cmd/gomonorepo@latest
@@ -44,14 +51,28 @@ Available commands:
 
 **Example: Add to your justfile:**
 
-- TODO!! (link to updated just-file) 
+-	TODO!! (link to updated just-file)
 
 **Example: Add to CI:**
 
-- TODO!! (link to updated ci yaml)
+-	TODO!! (link to updated ci yaml)
 
 ### TODO:
 
+-	make the lint pass.
+-	Are we sure indirect dependencies are properly handled?
+
+What remains / ideas of the future, time permitting.
+
 -	improve documentation (after upgrading gtools golint-ci).
--   make the lint pass.
--   tool to update inter dependencies
+-	smarter dependency resolution and test/lint planning
+	-	Option to run in dependency order (with parallelism where permitted)
+	-	sub-package dependency graph
+	-	test-package change detection and planning
+-	parallelize sub-package generate commands
+	-	Run in dependency order, parallelize what can be.
+-	module release & upgrade flow
+	-	semver change classification detection
+	-	tool to update inter dependencies
+-	config.yaml support (if/when configurations are complex enough to desire it)
+-	skip directories (e.g. node_modules)

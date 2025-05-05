@@ -12,6 +12,8 @@ modules that changed since the parent commit.
 Note: this command expects golangci-lint is installed.
 `
 
+// FormatModulesCommand is the `fmt` command instance which can be added
+// to the main command line parser. See description above for details.
 var FormatModulesCommand = &formatModulesCommand{
 	EmbeddedCommand: EmbeddedCommand{
 		CmdName: "fmt",
@@ -27,7 +29,7 @@ type formatModulesCommand struct {
 	Fags string `long:"flags" description:"Flags to pass to through to the format command."`
 }
 
-func (x *formatModulesCommand) RunCommand(ctx context.Context, opts *GlobalOptions) error {
+func (x *formatModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) error {
 	_, mods, err := listAllChangedModules(ctx, opts, x.ParentCommit)
 	if err != nil {
 		return err
@@ -50,6 +52,6 @@ func (x *formatModulesCommand) fmtModule(ctx context.Context, m *Module) (comman
 	if x.Fags != "" {
 		args = append(args, strings.Fields(x.Fags)...)
 	}
-	args = append(args, m.ModDirectory)
+	args = append(args, m.ModRoot)
 	return runCommand(ctx, args), nil
 }

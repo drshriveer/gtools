@@ -37,7 +37,7 @@ func (cr *commandResult) Print() {
 
 func invokeOnModules(
 	ctx context.Context,
-	opts *GlobalOptions,
+	opts *AppOptions,
 	mods []*Module,
 	f func(ctx context.Context, m *Module) (commandResult, error),
 ) (success bool, err error) {

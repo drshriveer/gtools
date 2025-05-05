@@ -12,7 +12,7 @@ func TestTestModulesCommand_RunCommand(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
 
-	opts := &GlobalOptions{
+	opts := &AppOptions{
 		Root: "/Users/gs/Dev/gtools",
 	}
 	cmd := &lintModulesCommand{
