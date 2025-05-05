@@ -169,11 +169,12 @@ func listAllModules(ctx context.Context, opts *AppOptions) (*ModuleTree, error) 
 		}
 
 		if d.Name() == "go.mod" {
-			data, err := os.ReadFile(path)
-			if err != nil {
-				return fmt.Errorf("failed to read go.mod file at %s: %w", path, err)
-			}
 			return executor.AddTask(func(context.Context) (*Module, error) {
+				// Sad no streaming parser for go.mod yet...
+				data, err := os.ReadFile(path)
+				if err != nil {
+					return nil, fmt.Errorf("failed to read go.mod file at %s: %w", path, err)
+				}
 				f, err := modfile.Parse(path, data, nil)
 				if err != nil {
 					return nil, fmt.Errorf("failed to parse go.mod file at %s: %w", path, err)
