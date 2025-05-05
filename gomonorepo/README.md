@@ -28,24 +28,25 @@ Once installed, run `gomonorepo --help`:
 
 ```
 Usage:
-  main [OPTIONS] <command>
+  gomonorepo [OPTIONS] <command>
 
 Application Options:
   -r, --root=        Root directory of the mono repo. (default: .)
   -v, --verbose      Enable verbose logging.
   -p, --parallelism= Permitted parallelism for tasks that can be parallelized. (default: 4)
   -t, --timeout=     Timeout for the command. (default: 5m)
+  -x, --excludePath= Paths to to exclude from searches (these may be regex). (default: node_modules, vendor)
 
 Help Options:
   -h, --help         Show this help message
 
 Available commands:
-  fmt                   Invoke format command in the mono repo.
-  generate              Invoke go generate in the mono repo.
-  lint                  Invoke lint command in the mono repo.
-  list-dependency-tree  List the dependency structure of modules in the monorepo.
-  list-modules          Recursively list all go modules, and their dependencies also defined in the mono repo.
-  test                  Invoke go tests in the mono repo.
+  detect-changes  detect changed modules and their dependencies.
+  fmt             Invoke format command in the mono repo.
+  generate        Invoke go generate in the mono repo.
+  lint            Invoke lint command in the mono repo.
+  list-modules    List all go modules, and their dependencies also defined in the mono repo.
+  test            Invoke go tests in the mono repo.
 
 ```
 
@@ -58,9 +59,6 @@ Available commands:
 -	TODO!! (link to updated ci yaml)
 
 ### TODO:
-
--	make the lint pass.
--	Are we sure indirect dependencies are properly handled?
 
 What remains / ideas of the future, time permitting.
 

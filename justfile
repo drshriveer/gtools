@@ -20,7 +20,8 @@ lint: _tools-monorepo _tools-linter
     gomonorepo lint --parent main
 
 # Fixes all auto-fixable format and lint errors for all modules in the current directory.
-fix: _tools-monorepo _tools-linter format-md && (_invokeMod "golangci-lint run --fix {}/...")
+fix: _tools-monorepo _tools-linter format-md
+    gomonorepo lint --parent main --flags="--fix"
     # just --fmt --unstable - Disabled due to combining single lines.
 
 # Updates interdependent modules of gtools. TODO: could make this wayyy smarter.

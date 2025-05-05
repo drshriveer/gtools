@@ -42,6 +42,8 @@ type Module struct {
 func (r *Module) AddDependants(s set.Set[*Module]) {
 	for _, dependant := range r.DependencyOf {
 		s.Add(dependant)
+		// XXX: This may not actually be necessary since go.mod files generally list
+		// indirect dependencies, but better safe than sorry.
 		dependant.AddDependants(s)
 	}
 }
