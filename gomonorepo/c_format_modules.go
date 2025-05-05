@@ -9,7 +9,7 @@ import (
 const formatModulesDesc = `Invoke golangci-lint fmt in the mono repo.
 When a '--parent' argument is provided, the command will run lint against the 
 modules that changed since the parent commit. 
-Note: this command expects golangci-lint is installed.
+Note: This command expects golangci-lint is installed at a version >= v2.0.0.
 `
 
 // FormatModulesCommand is the `fmt` command instance which can be added

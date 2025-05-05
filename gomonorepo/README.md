@@ -35,7 +35,7 @@ Application Options:
   -v, --verbose      Enable verbose logging.
   -p, --parallelism= Permitted parallelism for tasks that can be parallelized. (default: 4)
   -t, --timeout=     Timeout for the command. (default: 5m)
-  -x, --excludePath= Paths to to exclude from searches (these may be regex). (default: node_modules, vendor)
+  -x, --excludePath= Paths to to exclude from searches (these may be regex). Note: Anything excluded by git is ignored by default. (default: node_modules, vendor)
 
 Help Options:
   -h, --help         Show this help message

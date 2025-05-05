@@ -3,7 +3,6 @@ package gomonorepo
 import (
 	"context"
 	"os"
-	"strings"
 )
 
 const testModulesDesc = `Invoke go tests in the mono repo.
@@ -26,7 +25,7 @@ var TestModulesCommand = &testModulesCommand{
 type testModulesCommand struct {
 	EmbeddedCommand
 	ParentCommitOpt
-	Fags string `long:"flags" description:"Flags to pass to through to the test command." default:"-race -count=1 -cover"`
+	Fags []string `long:"flags" short:"f" description:"Flags to pass to through to the test command." default:"-race" default:"-count=1" default:"-cover"`
 }
 
 func (x *testModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) error {
@@ -49,9 +48,7 @@ func (x *testModulesCommand) testModule(ctx context.Context, m *Module) (command
 	args := make([]string, 2, 5)
 	args[0] = "go"
 	args[1] = "test"
-	if x.Fags != "" {
-		args = append(args, strings.Fields(x.Fags)...)
-	}
+	args = append(args, x.Fags...)
 	args = append(args, m.ModRoot)
 	return runCommand(ctx, args), nil
 }

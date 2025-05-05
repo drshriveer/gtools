@@ -3,7 +3,6 @@ package gomonorepo
 import (
 	"context"
 	"os"
-	"strings"
 )
 
 const lintModulesDesc = `Invoke lint on modules in the mono repo.
@@ -26,7 +25,7 @@ type lintModulesCommand struct {
 	EmbeddedCommand
 	ParentCommitOpt
 
-	Fags string `long:"flags" description:"Flags to pass to through to the lint command."`
+	Fags []string `long:"flags" short:"f" description:"Flags to pass to through to the lint command."`
 }
 
 func (x *lintModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) error {
@@ -49,9 +48,7 @@ func (x *lintModulesCommand) testModule(ctx context.Context, m *Module) (command
 	args := make([]string, 2, 5)
 	args[0] = "golangci-lint"
 	args[1] = "run"
-	if x.Fags != "" {
-		args = append(args, strings.Fields(x.Fags)...)
-	}
+	args = append(args, x.Fags...)
 	args = append(args, m.ModRoot)
 	return runCommand(ctx, args), nil
 }
