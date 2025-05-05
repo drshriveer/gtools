@@ -10,10 +10,10 @@ require (
 )
 
 require (
-	github.com/drshriveer/gtools/set v0.0.0-20250505212851-f00a25f973f1 // indirect
+	github.com/drshriveer/gtools/set v0.0.0-20250505214922-1840047d9273 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/sync v0.14.0 // indirect
-	golang.org/x/tools v0.32.0 // indirect
+	golang.org/x/tools v0.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -6,7 +6,7 @@ toolchain go1.23.7
 
 require (
 	github.com/drshriveer/gtools/gsync v0.0.0-20250505185248-f2099d584001
-	github.com/drshriveer/gtools/set v0.0.0-20250505212851-f00a25f973f1
+	github.com/drshriveer/gtools/set v0.0.0-20250505214922-1840047d9273
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/mod v0.24.0
