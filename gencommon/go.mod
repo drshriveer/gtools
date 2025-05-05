@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.7
 
 require (
-	github.com/drshriveer/gtools/set v0.0.0-20250505185205-42f9d636bc21
+	github.com/drshriveer/gtools/set v0.0.0-20250505185248-f2099d584001
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/tools v0.32.0
 )
