@@ -65,3 +65,19 @@ func listChangedFiles(ctx context.Context, parent string) ([]string, error) {
 
 	return result, nil
 }
+
+// getCurrentBranch returns the current branch name.
+func getCurrentBranch(ctx context.Context) (string, error) {
+	stdout, done := GetBuffer()
+	defer done(stdout)
+	stderr, done := GetBuffer()
+	defer done(stderr)
+	cmd := exec.CommandContext(ctx, "git", "rev-parse", "--abbrev-ref", "HEAD")
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+	err := cmd.Run()
+	if err != nil {
+		return "", fmt.Errorf("failed to run git diff: %w\n%s", err, stderr.String())
+	}
+	return strings.TrimSpace(stdout.String()), nil
+}
