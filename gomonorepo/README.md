@@ -49,7 +49,7 @@ Available commands:
   list-modules    List all go modules, and their dependencies also defined in the mono repo.
   test            Invoke go tests in the mono repo.
   tidy            Run 'go mod tidy' on all go modules in the monorepo. If a go.work file is found, this will also be tidied.
-
+  update-pkgs     Update all modules containing the packages to the version specified.
 ```
 
 **Example: Add to your justfile:**
