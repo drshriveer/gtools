@@ -41,7 +41,8 @@ format-md: (_install-go-pkg "github.com/moorereason/mdfmt")
     @mdfmt -w -l ./**/*.md
 
 # Runs `go generate` on all modules in the current directory.
-generate: _tools-generate (_invokeMod "go generate -C {} ./...")
+generate: _tools-monorepo _tools-generate
+    gomonorepo generate --parent main --invocationDir={{ CURRENT_DIR }}
 
 _tools-linter: (_tools-install "golangci-lint" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.62.2")
 
