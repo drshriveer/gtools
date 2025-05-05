@@ -3,6 +3,7 @@ INSTALLED_TOOLS := PKG_ROOT / "bin" / ".installed_tools"
 export PATH := env_var('PATH') + ':' + PKG_ROOT + '/bin'
 export GOBIN := PKG_ROOT + "/bin"
 CURRENT_DIR := invocation_directory_native()
+COVERAGE_DIR := PKG_ROOT / "go-coverage"
 
 # Runs `go mod tidy` for all modules in the current directory, then sync go workspaces.
 tidy: _tools-monorepo
@@ -24,6 +25,7 @@ fix: _tools-monorepo _tools-linter format-md
     gomonorepo lint --parent main -f="--fix" --invocationDir={{ CURRENT_DIR }}
     # just --fmt --unstable - Disabled due to combining single lines.
 
+
 # Updates interdependent modules of gtools. TODO: could make this wayyy smarter.
 update-interdependencies: _tools-monorepo && tidy
     gomonorepo update-pkgs \
@@ -43,6 +45,18 @@ format-md: (_install-go-pkg "github.com/moorereason/mdfmt")
 # Runs `go generate` on all modules in the current directory.
 generate: _tools-monorepo _tools-generate
     gomonorepo generate --parent main --invocationDir={{ CURRENT_DIR }}
+
+[no-cd]
+coverage-go: _tools-monorepo
+    mkdir -p {{COVERAGE_DIR}}
+    rm -rf {{COVERAGE_DIR}}/*
+    env CGO_ENABLED=1 gomonorepo test --invocationDir={{ CURRENT_DIR }} \
+      -f="-race" \
+      -f="-count=1" \
+      -f="-cover" \
+      --args="-test.gocoverdir {{COVERAGE_DIR}}"
+    go tool covdata textfmt -i={{COVERAGE_DIR}} -o={{COVERAGE_DIR}}/compiled_coverage.out
+    go tool cover -html {{COVERAGE_DIR}}/compiled_coverage.out
 
 _tools-linter: (_tools-install "golangci-lint" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.62.2")
 
