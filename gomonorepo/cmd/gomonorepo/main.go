@@ -23,6 +23,7 @@ func main() {
 		gomonorepo.LintModulesCommand,
 		gomonorepo.FormatModulesCommand,
 		gomonorepo.GenerateModulesCommand,
+		gomonorepo.TidyModulesCommand,
 		gomonorepo.ListModulesCommand,
 	}
 	var err error

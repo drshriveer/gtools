@@ -5,8 +5,8 @@ export GOBIN := PKG_ROOT + "/bin"
 CURRENT_DIR := invocation_directory_native()
 
 # Runs `go mod tidy` for all modules in the current directory, then sync go workspaces.
-tidy: (_invokeMod "go mod tidy -C {}")
-    go work sync
+tidy: _tools-monorepo
+    gomonorepo tidy
 
 # Runs `go test --race ` for all modules in the current directory.
 test: _tools-monorepo
@@ -29,6 +29,7 @@ update-interdependencies: \
     (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/gencommon") \
     (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/genum") \
     (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/set") \
+    (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/gomonorepo") \
     && tidy
 
 # updates a single package across all go modules.

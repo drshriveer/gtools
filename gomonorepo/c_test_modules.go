@@ -34,7 +34,7 @@ func (x *testModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) e
 		return err
 	}
 
-	success, err := invokeOnModules(ctx, opts, mods.Slice(), x.testModule)
+	success, err := invokeOnElement(ctx, opts, mods.Slice(), x.testModule)
 	if err != nil {
 		return err
 	}

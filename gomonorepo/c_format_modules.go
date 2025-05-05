@@ -35,7 +35,7 @@ func (x *formatModulesCommand) RunCommand(ctx context.Context, opts *AppOptions)
 		return err
 	}
 
-	success, err := invokeOnModules(ctx, opts, mods.Slice(), x.fmtModule)
+	success, err := invokeOnElement(ctx, opts, mods.Slice(), x.fmtModule)
 	if err != nil {
 		return err
 	}

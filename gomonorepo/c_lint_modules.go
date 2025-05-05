@@ -34,7 +34,7 @@ func (x *lintModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) e
 		return err
 	}
 
-	success, err := invokeOnModules(ctx, opts, mods.Slice(), x.testModule)
+	success, err := invokeOnElement(ctx, opts, mods.Slice(), x.runPerModule)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (x *lintModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) e
 	return nil
 }
 
-func (x *lintModulesCommand) testModule(ctx context.Context, m *Module) (commandResult, error) {
+func (x *lintModulesCommand) runPerModule(ctx context.Context, m *Module) (commandResult, error) {
 	args := make([]string, 2, 5)
 	args[0] = "golangci-lint"
 	args[1] = "run"
