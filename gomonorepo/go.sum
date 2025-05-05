@@ -2,8 +2,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/drshriveer/gtools/gsync v0.0.0-20250505185248-f2099d584001 h1:liabVHlwJr10Ur93EhMxVZWLbdK5W6I6SctcxV2wl3g=
 github.com/drshriveer/gtools/gsync v0.0.0-20250505185248-f2099d584001/go.mod h1:aEdsN1JizD1u9D2A3VoEv/pLEGPSx+2Bw4xOfyexCZY=
-github.com/drshriveer/gtools/set v0.0.0-20250505185248-f2099d584001 h1:2YJQN4bwFlg1SUfVI1bTHh89pa8wKX1Uyq28HMXy2pg=
-github.com/drshriveer/gtools/set v0.0.0-20250505185248-f2099d584001/go.mod h1:BS9kwJJEthktfVc8c9aWMgBqFPVZzxcN76dgS1N3D/E=
+github.com/drshriveer/gtools/set v0.0.0-20250505201453-a19775e22e02 h1:lbpPEJsE8Mkdq26Jc7Xr68CSbNv5Xqz12RUwdsqBuOY=
+github.com/drshriveer/gtools/set v0.0.0-20250505201453-a19775e22e02/go.mod h1:BS9kwJJEthktfVc8c9aWMgBqFPVZzxcN76dgS1N3D/E=
 github.com/jessevdk/go-flags v1.6.1 h1:Cvu5U8UGrLay1rZfv/zP7iLpSHGUZ/Ou68T0iX1bBK4=
 github.com/jessevdk/go-flags v1.6.1/go.mod h1:Mk8T1hIAWpOiJiHa9rJASDK2UGWji0EuPGBnNLMooyc=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
