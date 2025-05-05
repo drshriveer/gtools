@@ -1,10 +1,7 @@
 package gomonorepo
 
 import (
-	"bufio"
 	"context"
-	"fmt"
-	"os/exec"
 
 	"github.com/drshriveer/gtools/set"
 )
@@ -108,29 +105,4 @@ func listAllChangedAndDependenciesWithTree(
 	}
 
 	return changedMods, nil
-}
-
-func listChangedFiles(ctx context.Context, parent string) ([]string, error) {
-	stdout, done := GetBuffer()
-	defer done(stdout)
-	stderr, done := GetBuffer()
-	defer done(stderr)
-	cmd := exec.CommandContext(ctx, "git", "diff", "--name-only", parent)
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
-	err := cmd.Run()
-	if err != nil {
-		return nil, fmt.Errorf("failed to run git diff: %w\n%s", err, stderr.String())
-	}
-
-	result := make([]string, 0, 8)
-	scanner := bufio.NewScanner(stdout)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if line != "" {
-			result = append(result, line)
-		}
-	}
-
-	return result, nil
 }

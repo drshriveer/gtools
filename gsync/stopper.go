@@ -4,44 +4,55 @@ import (
 	"sync"
 )
 
-type Stopper struct {
-	stopChan         chan struct{}
-	stopOnce         sync.Once
-	stopCompleteChan chan struct{}
-	stopCompleteOnce sync.Once
-	cleanups         []func()
+// Shutdown is some generic boilerplate code to handle cleanup/stopping of some
+// process that requires such handling.
+// It has two signals:
+//  1. Shutdown: a signal to indicate that the process should stop.
+//  2. ShutdownComplete: a signal to indicate that all cleanup process has run.
+type Shutdown struct {
+	shutdownChan         chan struct{}
+	shutdownOnce         sync.Once
+	shutdownCompleteChan chan struct{}
+	shutdownCompleteOnce sync.Once
+	cleanups             []func()
 }
 
-func NewStopper() Stopper {
-	return Stopper{
-		stopChan:         make(chan struct{}),
-		stopCompleteChan: make(chan struct{}),
+// NewShutdown creates a new Shutdown instance.
+func NewShutdown() Shutdown {
+	return Shutdown{
+		shutdownChan:         make(chan struct{}),
+		shutdownCompleteChan: make(chan struct{}),
 	}
 }
 
-func (s *Stopper) AddCleanup(fn func()) {
+// AddCleanup adds a cleanup function to be called when the shutdown signal is received.
+func (s *Shutdown) AddCleanup(fn func()) {
 	s.cleanups = append(s.cleanups, fn)
 }
 
-func (s *Stopper) Stop() {
-	s.stopOnce.Do(func() {
+// Shutdown sends the shutdown signal and runs all cleanup functions.
+func (s *Shutdown) Shutdown() {
+	s.shutdownOnce.Do(func() {
 		for _, fn := range s.cleanups {
 			fn()
 		}
-		close(s.stopChan)
+		close(s.shutdownChan)
 	})
 }
 
-func (s *Stopper) StopSig() <-chan struct{} {
-	return s.stopChan
+// ShutdownSignal returns a channel that will be closed when the shutdown signal is received.
+func (s *Shutdown) ShutdownSignal() <-chan struct{} {
+	return s.shutdownChan
 }
 
-func (s *Stopper) StopCompleteSig() <-chan struct{} {
-	return s.stopCompleteChan
+// ShutdownCompleteSignal returns a channel that will be closed when all cleanup functions have been run.
+func (s *Shutdown) ShutdownCompleteSignal() <-chan struct{} {
+	return s.shutdownCompleteChan
 }
 
-func (s *Stopper) SignalStopComplete() {
-	s.stopCompleteOnce.Do(func() {
-		close(s.stopCompleteChan)
+// SignalStopComplete signals that the shutdown process is complete and closes the shutdownCompleteChan.
+func (s *Shutdown) SignalStopComplete() {
+	s.shutdownCompleteOnce.Do(func() {
+		close(s.shutdownCompleteChan)
 	})
 }

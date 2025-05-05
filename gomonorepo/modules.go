@@ -148,9 +148,7 @@ func (r *modDirTreeNode) nodeWithDirName(dirName string) *modDirTreeNode {
 
 // listAllModules lists all Go modules in the given directory and its subdirectories.
 func listAllModules(ctx context.Context, opts *AppOptions) (*ModuleTree, error) {
-	// TODO: Exclude patterns are great and probably still useful, but following .gitignore
-	//       is also a GREAT idea.
-	excludePaths, err := opts.ExcludePathPatterns()
+	excludePaths, excludeDirs, err := opts.ExcludePathPatterns(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -158,43 +156,19 @@ func listAllModules(ctx context.Context, opts *AppOptions) (*ModuleTree, error) 
 	executor, done := gsync.NewSliceExecutor[*Module](ctx)
 	defer done()
 
-	var gitIgnoreStack []Patterns
-	var gitIgnoreStackPaths []string
-
 	err = filepath.WalkDir(opts.GetRoot(), func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		
-		// check if we're still in the gitignore stack...
-		// remove gitignore patterns that are no longer relevant
-		for i := len(gitIgnoreStackPaths) - 1; i >= 0; i-- {
-			if strings.HasPrefix(path, gitIgnoreStackPaths[i]) {
-				break
-			}
-			gitIgnoreStack = gitIgnoreStack[:i]
-			gitIgnoreStackPaths = gitIgnoreStackPaths[:i]
-		}
 
 		if d.IsDir() {
-			if matchesString(excludePaths, gitIgnoreStack, path) {
+			if matchesAny(excludePaths, excludeDirs, path) {
 				return filepath.SkipDir
 			}
 			return nil // recurse
 		}
 
-		switch d.Name() {
-		case ".gitignore":
-			ignorePatterns, err := parseGitignore(path)
-			if err != nil {
-				return err
-			} else if ignorePatterns == nil {
-				return nil
-			}
-
-			gitIgnoreStack = append(gitIgnoreStack, ignorePatterns)
-			gitIgnoreStackPaths = append(gitIgnoreStackPaths, path)
-		case "go.mod":
+		if d.Name() == "go.mod" {
 			data, err := os.ReadFile(path)
 			if err != nil {
 				return fmt.Errorf("failed to read go.mod file at %s: %w", path, err)
@@ -250,5 +224,3 @@ func buildModuleTree(mods []*Module, rootDir string) (*ModuleTree, error) {
 
 	return root, nil
 }
-
-// listAllChangedModules lists all Go modules in the given directory and its subdirectories

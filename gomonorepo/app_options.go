@@ -1,6 +1,7 @@
 package gomonorepo
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -26,7 +27,7 @@ type AppOptions struct {
 }
 
 // ExcludePathPatterns compiles and returns ExcludePaths into regexes.
-func (x *AppOptions) ExcludePathPatterns() (res Patterns, errs error) {
+func (x *AppOptions) ExcludePathPatterns(ctx context.Context) (res Patterns, excludeDirs []string, errs error) {
 	res = make([]*regexp.Regexp, len(x.ExcludePaths))
 	var err error
 	for i, expStr := range x.ExcludePaths {
@@ -35,7 +36,11 @@ func (x *AppOptions) ExcludePathPatterns() (res Patterns, errs error) {
 			errs = errors.Join(errs, fmt.Errorf("could not compile exclude path pattern %q: %w", expStr, err))
 		}
 	}
-	return res, errs
+	dirs, err := getIgnoredDirectories(ctx, x.GetRoot())
+	if err != nil {
+		errs = errors.Join(errs, err)
+	}
+	return res, dirs, errs
 }
 
 // GetRoot returns the root directory of the mono repo.
