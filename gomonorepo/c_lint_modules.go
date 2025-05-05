@@ -58,7 +58,7 @@ func (x *lintModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) e
 }
 
 func (x *lintModulesCommand) runPerModule(ctx context.Context, m *Module) (commandResult, error) {
-	return x.runPerTarget(ctx, m.ModRoot)
+	return x.runPerTarget(ctx, ensureRecursivePath(m.ModRoot))
 }
 
 func (x *lintModulesCommand) runPerTarget(ctx context.Context, dir string) (commandResult, error) {

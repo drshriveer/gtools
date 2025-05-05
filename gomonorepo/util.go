@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/jessevdk/go-flags"
 	"golang.org/x/sync/semaphore"
@@ -111,4 +112,13 @@ func buildCommandName(cmd *exec.Cmd) string {
 	}
 
 	return sb.String()
+}
+
+func ensureRecursivePath(path string) string {
+	if strings.HasSuffix(path, "/...") {
+		return path
+	}
+	path = strings.TrimSuffix(path, "/") // just in case
+	path += "/..."
+	return path
 }
