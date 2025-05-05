@@ -1,5 +1,7 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/drshriveer/gtools/gsync v0.0.0-20250505185248-f2099d584001 h1:liabVHlwJr10Ur93EhMxVZWLbdK5W6I6SctcxV2wl3g=
+github.com/drshriveer/gtools/gsync v0.0.0-20250505185248-f2099d584001/go.mod h1:aEdsN1JizD1u9D2A3VoEv/pLEGPSx+2Bw4xOfyexCZY=
 github.com/drshriveer/gtools/set v0.0.0-20250505185205-42f9d636bc21 h1:scRucQ5m4pqyXgClWN5LiclsVNZkCY31X2N5pj1J0Y4=
 github.com/drshriveer/gtools/set v0.0.0-20250505185205-42f9d636bc21/go.mod h1:BS9kwJJEthktfVc8c9aWMgBqFPVZzxcN76dgS1N3D/E=
 github.com/jessevdk/go-flags v1.6.1 h1:Cvu5U8UGrLay1rZfv/zP7iLpSHGUZ/Ou68T0iX1bBK4=

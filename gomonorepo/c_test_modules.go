@@ -3,7 +3,6 @@ package gomonorepo
 import (
 	"context"
 	"os"
-	"strings"
 )
 
 const testModulesDesc = `Invoke go tests in the mono repo.
@@ -26,16 +25,29 @@ var TestModulesCommand = &testModulesCommand{
 type testModulesCommand struct {
 	EmbeddedCommand
 	ParentCommitOpt
-	Fags string `long:"flags" description:"Flags to pass to through to the test command." default:"-race -count=1 -cover"`
+	Fags []string `long:"flags" short:"f" description:"Flags to pass to through to the test command." default:"-race" default:"-count=1" default:"-cover"`
 }
 
 func (x *testModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) error {
+	focus, ok := opts.GetFocusDir()
+	if ok {
+		cr, err := x.runPerTarget(ctx, focus)
+		if err != nil {
+			return err
+		}
+		cr.Print()
+		if !cr.succeeded {
+			os.Exit(1)
+		}
+		return nil
+	}
+
 	_, mods, err := listAllChangedAndDependencies(ctx, opts, x.ParentCommit)
 	if err != nil {
 		return err
 	}
 
-	success, err := invokeOnModules(ctx, opts, mods.Slice(), x.testModule)
+	success, err := invokeOnElement(ctx, opts, mods.Slice(), x.runPerModule)
 	if err != nil {
 		return err
 	}
@@ -45,13 +57,15 @@ func (x *testModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) e
 	return nil
 }
 
-func (x *testModulesCommand) testModule(ctx context.Context, m *Module) (commandResult, error) {
+func (x *testModulesCommand) runPerModule(ctx context.Context, m *Module) (commandResult, error) {
+	return x.runPerTarget(ctx, m.ModRoot)
+}
+
+func (x *testModulesCommand) runPerTarget(ctx context.Context, target string) (commandResult, error) {
 	args := make([]string, 2, 5)
 	args[0] = "go"
 	args[1] = "test"
-	if x.Fags != "" {
-		args = append(args, strings.Fields(x.Fags)...)
-	}
-	args = append(args, m.ModRoot)
+	args = append(args, x.Fags...)
+	args = append(args, target)
 	return runCommand(ctx, args), nil
 }

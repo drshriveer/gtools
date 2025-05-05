@@ -5,23 +5,23 @@ export GOBIN := PKG_ROOT + "/bin"
 CURRENT_DIR := invocation_directory_native()
 
 # Runs `go mod tidy` for all modules in the current directory, then sync go workspaces.
-tidy: (_invokeMod "go mod tidy -C {}")
-    go work sync
+tidy: _tools-monorepo
+    gomonorepo tidy --invocationDir={{ CURRENT_DIR }}
 
 # Runs `go test --race ` for all modules in the current directory.
 test: _tools-monorepo
-    gomonorepo test --parent main
+    gomonorepo test --parent main --invocationDir={{ CURRENT_DIR }}
 
 # Runs lint and test for all modules in the current directory.
-check: _tools-monorepo lint test
+check: lint test
 
 # Runs lint/format for all modules in the current directory.
 lint: _tools-monorepo _tools-linter
-    gomonorepo lint --parent main
+    gomonorepo lint --parent main --invocationDir={{ CURRENT_DIR }}
 
 # Fixes all auto-fixable format and lint errors for all modules in the current directory.
 fix: _tools-monorepo _tools-linter format-md
-    gomonorepo lint --parent main --flags="--fix"
+    gomonorepo lint --parent main -f="--fix" --invocationDir={{ CURRENT_DIR }}
     # just --fmt --unstable - Disabled due to combining single lines.
 
 # Updates interdependent modules of gtools. TODO: could make this wayyy smarter.
@@ -29,6 +29,7 @@ update-interdependencies: \
     (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/gencommon") \
     (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/genum") \
     (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/set") \
+    (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/gomonorepo") \
     && tidy
 
 # updates a single package across all go modules.
@@ -40,7 +41,8 @@ format-md: (_install-go-pkg "github.com/moorereason/mdfmt")
     @mdfmt -w -l ./**/*.md
 
 # Runs `go generate` on all modules in the current directory.
-generate: _tools-generate (_invokeMod "go generate -C {} ./...")
+generate: _tools-monorepo _tools-generate
+    gomonorepo generate --parent main --invocationDir={{ CURRENT_DIR }}
 
 _tools-linter: (_tools-install "golangci-lint" "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.62.2")
 

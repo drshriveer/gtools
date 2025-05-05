@@ -13,6 +13,16 @@ import (
 	"github.com/drshriveer/gtools/set"
 )
 
+// WorkFile represents a Go work file found in the monorepo.
+type WorkFile struct {
+	// WorkFile is the parsed go.work file.
+	WorkFile *modfile.WorkFile
+	// WorkFilePath is the path to the go.work file, including the go.work file suffix.
+	WorkFilePath string
+	// WorkRoot is the directory containing the go.work file; or the root of the module.
+	WorkRoot string
+}
+
 // Module represents a Go module, its dependencies,
 // and other parsed information from the module.
 // This is likely to grow considerably in the future.
@@ -55,6 +65,8 @@ type ModuleTree struct {
 	AllModules []*Module
 	// AllModulesMap is a map of all modules found in the repository, keyed by the module package name.
 	AllModulesMap map[string]*Module
+	// AllWorkFiles is a list of all work files found in the repository.
+	AllWorkFiles []*WorkFile
 	// rootDir is the root directory of the repository.
 	rootDir string
 
@@ -89,6 +101,13 @@ func (r *ModuleTree) AddModule(mod *Module) error {
 	return nil
 }
 
+// AddWorkFile adds a work file to the module tree.
+func (r *ModuleTree) AddWorkFile(work *WorkFile) {
+	temp := strings.TrimPrefix(work.WorkRoot, r.rootDir+"/")
+	path := strings.Split(temp, string(filepath.Separator))
+	r.directoryTreeRoot.addWorkFile(work, path)
+}
+
 // modDirTreeNode represents modules in the mono repo as they are laid out in the
 // file system. E.g.
 // .
@@ -103,6 +122,8 @@ type modDirTreeNode struct {
 	directoryName string
 	// moduleAtPath is the module present at this path, if any.
 	moduleAtPath *Module
+	// workFileAtPath is the work file present at this path, if any.
+	workFileAtPath *WorkFile
 	// children is a list of modules  nodes in the module tree.
 	children []*modDirTreeNode
 }
@@ -124,6 +145,20 @@ func (r *modDirTreeNode) addModuleWithPath(mod *Module, path []string) {
 		r.children = append(r.children, node)
 	}
 	node.addModuleWithPath(mod, path[1:])
+}
+
+func (r *modDirTreeNode) addWorkFile(work *WorkFile, path []string) {
+	if len(path) == 0 {
+		r.workFileAtPath = work
+		return
+	}
+
+	node := r.nodeWithDirName(path[0])
+	if node == nil {
+		node = &modDirTreeNode{directoryName: path[0]}
+		r.children = append(r.children, node)
+	}
+	node.addWorkFile(work, path[1:])
 }
 
 // findModuleContainingFile finds the module that contains the given file path,
@@ -164,8 +199,11 @@ func listAllModules(ctx context.Context, opts *AppOptions) (*ModuleTree, error) 
 		return nil, err
 	}
 
-	executor, done := gsync.NewSliceExecutor[*Module](ctx)
-	defer done()
+	modExecutor, meDone := gsync.NewSliceExecutor[*Module](ctx)
+	defer meDone()
+
+	workExecutor, weDone := gsync.NewSliceExecutor[*WorkFile](ctx)
+	defer weDone()
 
 	err = filepath.WalkDir(opts.GetRoot(), func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -182,8 +220,9 @@ func listAllModules(ctx context.Context, opts *AppOptions) (*ModuleTree, error) 
 			return nil // recurse
 		}
 
-		if d.Name() == "go.mod" {
-			return executor.AddTask(func(context.Context) (*Module, error) {
+		switch d.Name() {
+		case "go.mod":
+			return modExecutor.AddTask(func(context.Context) (*Module, error) {
 				// Sad no streaming parser for go.mod yet...
 				data, err := os.ReadFile(path)
 				if err != nil {
@@ -199,6 +238,22 @@ func listAllModules(ctx context.Context, opts *AppOptions) (*ModuleTree, error) 
 					ModRoot:     filepath.Dir(path),
 				}, nil
 			})
+		case "go.work":
+			return workExecutor.AddTask(func(context.Context) (*WorkFile, error) {
+				data, err := os.ReadFile(path)
+				if err != nil {
+					return nil, fmt.Errorf("failed to read go.mod file at %s: %w", path, err)
+				}
+				f, err := modfile.ParseWork(path, data, nil)
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse go.work file at %s: %w", path, err)
+				}
+				return &WorkFile{
+					WorkFile:     f,
+					WorkFilePath: path,
+					WorkRoot:     filepath.Dir(path),
+				}, nil
+			})
 		}
 		return nil
 	})
@@ -206,20 +261,32 @@ func listAllModules(ctx context.Context, opts *AppOptions) (*ModuleTree, error) 
 	if err != nil {
 		return nil, fmt.Errorf("error walking the directory tree: %w", err)
 	}
-	mods, err := executor.WaitAndResult()
+
+	mods, err := modExecutor.WaitAndResult()
 	if err != nil {
 		return nil, fmt.Errorf("error executing tasks: %w", err)
 	}
 
-	return buildModuleTree(mods, opts.GetRoot())
+	workFiles, err := workExecutor.WaitAndResult()
+	if err != nil {
+		return nil, fmt.Errorf("error executing tasks: %w", err)
+	}
+
+	return buildModuleTree(mods, workFiles, opts.GetRoot())
 }
 
-func buildModuleTree(mods []*Module, rootDir string) (*ModuleTree, error) {
+func buildModuleTree(mods []*Module, workFiles []*WorkFile, rootDir string) (*ModuleTree, error) {
 	root := &ModuleTree{
 		rootDir:       rootDir,
 		AllModules:    mods,
+		AllWorkFiles:  workFiles,
 		AllModulesMap: make(map[string]*Module, len(mods)),
 	}
+
+	for _, work := range workFiles {
+		root.AddWorkFile(work)
+	}
+
 	var err error
 	for _, mod := range mods {
 		err = root.AddModule(mod)

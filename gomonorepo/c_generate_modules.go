@@ -30,12 +30,25 @@ type genModulesCommand struct {
 // TODO: This command isn't smart yet, it would be friggen wonderful if we could search for
 // `go:generate` directives and undestand if their templates or the underlying references changed.
 func (x *genModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) error {
+	focus, ok := opts.GetFocusDir()
+	if ok {
+		cr, err := x.runPerTarget(ctx, focus)
+		if err != nil {
+			return err
+		}
+		cr.Print()
+		if !cr.succeeded {
+			os.Exit(1)
+		}
+		return nil
+	}
+
 	_, mods, err := listAllChangedAndDependencies(ctx, opts, x.ParentCommit)
 	if err != nil {
 		return err
 	}
 
-	success, err := invokeOnModules(ctx, opts, mods.Slice(), x.testModule)
+	success, err := invokeOnElement(ctx, opts, mods.Slice(), x.runPerModule)
 	if err != nil {
 		return err
 	}
@@ -45,12 +58,16 @@ func (x *genModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) er
 	return nil
 }
 
-func (x *genModulesCommand) testModule(ctx context.Context, m *Module) (commandResult, error) {
+func (x *genModulesCommand) runPerModule(ctx context.Context, m *Module) (commandResult, error) {
+	return x.runPerTarget(ctx, m.ModRoot)
+}
+
+func (x *genModulesCommand) runPerTarget(ctx context.Context, target string) (commandResult, error) {
 	args := []string{
 		"go",
 		"generate",
 		"-C",
-		m.ModRoot,
+		target,
 		"-x",
 		"./...",
 	}

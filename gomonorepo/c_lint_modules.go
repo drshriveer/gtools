@@ -3,7 +3,6 @@ package gomonorepo
 import (
 	"context"
 	"os"
-	"strings"
 )
 
 const lintModulesDesc = `Invoke lint on modules in the mono repo.
@@ -26,16 +25,29 @@ type lintModulesCommand struct {
 	EmbeddedCommand
 	ParentCommitOpt
 
-	Fags string `long:"flags" description:"Flags to pass to through to the lint command."`
+	Fags []string `long:"flags" short:"f" description:"Flags to pass to through to the lint command."`
 }
 
 func (x *lintModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) error {
+	focus, ok := opts.GetFocusDir()
+	if ok {
+		cr, err := x.runPerTarget(ctx, focus)
+		if err != nil {
+			return err
+		}
+		cr.Print()
+		if !cr.succeeded {
+			os.Exit(1)
+		}
+		return nil
+	}
+
 	_, mods, err := listAllChangedModules(ctx, opts, x.ParentCommit)
 	if err != nil {
 		return err
 	}
 
-	success, err := invokeOnModules(ctx, opts, mods.Slice(), x.testModule)
+	success, err := invokeOnElement(ctx, opts, mods.Slice(), x.runPerModule)
 	if err != nil {
 		return err
 	}
@@ -45,13 +57,15 @@ func (x *lintModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) e
 	return nil
 }
 
-func (x *lintModulesCommand) testModule(ctx context.Context, m *Module) (commandResult, error) {
+func (x *lintModulesCommand) runPerModule(ctx context.Context, m *Module) (commandResult, error) {
+	return x.runPerTarget(ctx, m.ModRoot)
+}
+
+func (x *lintModulesCommand) runPerTarget(ctx context.Context, dir string) (commandResult, error) {
 	args := make([]string, 2, 5)
 	args[0] = "golangci-lint"
 	args[1] = "run"
-	if x.Fags != "" {
-		args = append(args, strings.Fields(x.Fags)...)
-	}
-	args = append(args, m.ModRoot)
+	args = append(args, x.Fags...)
+	args = append(args, dir)
 	return runCommand(ctx, args), nil
 }

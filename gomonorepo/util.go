@@ -35,11 +35,11 @@ func (cr *commandResult) Print() {
 	PutBuffer(cr.output)
 }
 
-func invokeOnModules(
+func invokeOnElement[T any](
 	ctx context.Context,
 	opts *AppOptions,
-	mods []*Module,
-	f func(ctx context.Context, m *Module) (commandResult, error),
+	mods []T,
+	f func(ctx context.Context, m T) (commandResult, error),
 ) (success bool, err error) {
 	success = true // start this way
 

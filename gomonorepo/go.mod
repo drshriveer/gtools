@@ -5,15 +5,13 @@ go 1.23.0
 toolchain go1.23.7
 
 require (
-	github.com/drshriveer/gtools/gsync v0.0.0-20250417202014-260178ef6ec0
+	github.com/drshriveer/gtools/gsync v0.0.0-20250505185248-f2099d584001
 	github.com/drshriveer/gtools/set v0.0.0-20250505185205-42f9d636bc21
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/mod v0.24.0
 	golang.org/x/sync v0.14.0
 )
-
-replace github.com/drshriveer/gtools/gsync => ../gsync
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

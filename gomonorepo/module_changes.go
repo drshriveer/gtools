@@ -16,6 +16,9 @@ func listAllChangedModules(
 		return nil, nil, err
 	}
 	mods, err := listAllChangedModulesWithTree(ctx, opts, parentCommit, tree)
+	opts.Infof("Detected changes in %d/%d modules will run the command.\n",
+		len(mods), len(tree.AllModules))
+
 	return tree, mods, err
 }
 
@@ -68,6 +71,7 @@ func listAllChangedAndDependencies(
 		return nil, nil, err
 	}
 	modsToTest, err := listAllChangedAndDependenciesWithTree(ctx, opts, parentCommit, tree)
+
 	return tree, modsToTest, err
 }
 
