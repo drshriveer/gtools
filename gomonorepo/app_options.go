@@ -23,7 +23,7 @@ type AppOptions struct {
 	Verbose      bool           `long:"verbose" short:"v" description:"Enable verbose logging."`
 	Parallelism  int            `long:"parallelism" short:"p" description:"Permitted parallelism for tasks that can be parallelized." default:"4"`
 	Timeout      time.Duration  `long:"timeout" short:"t" description:"Timeout for the command." default:"5m"`
-	ExcludePaths []string       `long:"excludePath" short:"x" description:"Paths to to exclude from searches (these may be regex)." default:"node_modules" default:"vendor"`
+	ExcludePaths []string       `long:"excludePath" short:"x" description:"Paths to to exclude from searches (these may be regex). Note: Anything excluded by git is ignored by default." default:"node_modules" default:"vendor"`
 }
 
 // ExcludePathPatterns compiles and returns ExcludePaths into regexes.
