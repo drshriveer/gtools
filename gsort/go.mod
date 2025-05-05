@@ -5,8 +5,8 @@ go 1.23.0
 toolchain go1.23.7
 
 require (
-	github.com/drshriveer/gtools/gencommon v0.0.0-20250505185248-f2099d584001
-	github.com/drshriveer/gtools/set v0.0.0-20250505185248-f2099d584001
+	github.com/drshriveer/gtools/gencommon v0.0.0-20250505201453-a19775e22e02
+	github.com/drshriveer/gtools/set v0.0.0-20250505201453-a19775e22e02
 	github.com/itzg/go-flagsfiller v1.12.0
 	github.com/stretchr/testify v1.9.0
 )

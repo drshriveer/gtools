@@ -26,7 +26,8 @@ fix: _tools-monorepo _tools-linter format-md
 
 # Updates interdependent modules of gtools. TODO: could make this wayyy smarter.
 update-interdependencies: _tools-monorepo && tidy
-    gomonorepo update-pkgs -pkg github.com/drshriveer/gtools/gencommon \
+    gomonorepo update-pkgs \
+        --pkg github.com/drshriveer/gtools/gencommon \
         --pkg github.com/drshriveer/gtools/genum \
         --pkg github.com/drshriveer/gtools/set \
         --pkg github.com/drshriveer/gtools/gomonorepo
