@@ -91,9 +91,9 @@ func listAllChangedAndDependenciesWithTree(
 	}
 	numChanged := len(changedMods)
 
-	// Add their dependencies.
-	for mod := range changedMods {
-		changedMods.Add(mod.DependencyOf...)
+	// Add their dependencies
+	for _, mod := range changedMods.Slice() {
+		changedMods.Add(mod)
 	}
 
 	opts.Infof("Detected changes in %d/%d modules, after including dependencies %d/%d modules will run the command.\n",

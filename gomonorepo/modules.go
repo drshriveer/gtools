@@ -10,6 +10,7 @@ import (
 	"golang.org/x/mod/modfile"
 
 	"github.com/drshriveer/gtools/gsync"
+	"github.com/drshriveer/gtools/set"
 )
 
 // Module represents a Go module, its dependencies,
@@ -35,6 +36,14 @@ type Module struct {
 	// this does not imply a dependency relationship, but is important for detecting
 	// if a file is contained within a module.
 	NestedModules []*Module
+}
+
+// AddDependants recursively adds all dependants of this module to the given set.
+func (r *Module) AddDependants(s set.Set[*Module]) {
+	for _, dependant := range r.DependencyOf {
+		s.Add(dependant)
+		dependant.AddDependants(s)
+	}
 }
 
 // ModuleTree represents a tree of Go modules starting from the root directory of the
@@ -163,6 +172,9 @@ func listAllModules(ctx context.Context, opts *AppOptions) (*ModuleTree, error) 
 
 		if d.IsDir() {
 			if matchesAny(excludePaths, excludeDirs, path) {
+				if opts.Verbose {
+					opts.Infof("Skipping excluded path: %s", path)
+				}
 				return filepath.SkipDir
 			}
 			return nil // recurse
