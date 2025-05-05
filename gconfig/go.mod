@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.7
 
 require (
-	github.com/drshriveer/gtools/genum v0.0.0-20250505212851-f00a25f973f1
+	github.com/drshriveer/gtools/genum v0.0.0-20250505215934-770e56a07442
 	github.com/drshriveer/gtools/gerror v0.0.0-20240118184715-48af8963ff63
 	github.com/drshriveer/gtools/set v0.0.0-20250505214922-1840047d9273
 	github.com/puzpuzpuz/xsync/v3 v3.5.1
