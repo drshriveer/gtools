@@ -31,14 +31,15 @@ Usage:
   gomonorepo [OPTIONS] <command>
 
 Application Options:
-  -r, --root=        Root directory of the mono repo. (default: .)
-  -v, --verbose      Enable verbose logging.
-  -p, --parallelism= Permitted parallelism for tasks that can be parallelized. (default: 4)
-  -t, --timeout=     Timeout for the command. (default: 5m)
-  -x, --excludePath= Paths to to exclude from searches (these may be regex). Note: Anything excluded by git is ignored by default. (default: node_modules, vendor)
+  -r, --root=          Root directory of the mono repo. (default: .)
+      --invocationDir= If invocationDir is not the root directory, invocation will be limited to the invocationDir and its subdirectories.
+  -v, --verbose        Enable verbose logging.
+  -p, --parallelism=   Permitted parallelism for tasks that can be parallelized. (default: 4)
+  -t, --timeout=       Timeout for the command. (default: 5m)
+  -x, --excludePath=   Paths to to exclude from searches (these may be regex). Note: Anything excluded by git is ignored by default. (default: node_modules, vendor)
 
 Help Options:
-  -h, --help         Show this help message
+  -h, --help           Show this help message
 
 Available commands:
   detect-changes  detect changed modules and their dependencies.
@@ -48,6 +49,7 @@ Available commands:
   list-modules    List all go modules, and their dependencies also defined in the mono repo.
   test            Invoke go tests in the mono repo.
   tidy            Run 'go mod tidy' on all go modules in the monorepo. If a go.work file is found, this will also be tidied.
+
 ```
 
 **Example: Add to your justfile:**
@@ -55,21 +57,23 @@ Available commands:
 -	See the [justfile](../justfile) in the current repo or:
 
 ```justfile
+CURRENT_DIR := invocation_directory_native()
+
 # Runs `go mod tidy` for all modules in the current directory, then sync go workspaces.
 tidy: _tools-monorepo
-    gomonorepo tidy
+    gomonorepo tidy --invocationDir={{ CURRENT_DIR }}
 
 # Runs `go test --race ` for all modules in the current directory.
 test: _tools-monorepo
-    gomonorepo test --parent main
+    gomonorepo test --parent=main --invocationDir={{ CURRENT_DIR }}
 
 # Runs lint/format for all modules in the current directory.
 lint: _tools-monorepo _tools-linter
-    gomonorepo lint --parent main
+    gomonorepo lint --parent=main --invocationDir={{ CURRENT_DIR }}
 
 # Fixes all auto-fixable format and lint errors for all modules in the current directory.
 fix: _tools-monorepo _tools-linter
-    gomonorepo lint --parent main -f="--fix"
+    gomonorepo lint --parent=main -f="--fix" --invocationDir={{ CURRENT_DIR }}
 ```
 
 **Example: Add to CI:**
