@@ -2,17 +2,13 @@ package gsync
 
 import (
 	"context"
+	"errors"
 	"sync/atomic"
 	"time"
-
-	"github.com/drshriveer/gtools/gerror"
 )
 
 // ErrWGTimeout indicates a wait group timeout.
-var ErrWGTimeout gerror.Factory = &gerror.GError{
-	Name:    "ErrWGTimeout",
-	Message: "timed out waiting for SelectableWaitGroup",
-}
+var ErrWGTimeout = errors.New("WaitGroupTimeout: timed out waiting for SelectableWaitGroup")
 
 var closedChan chan struct{}
 
@@ -75,7 +71,7 @@ func (wg *SelectableWaitGroup) Count() int {
 func (wg *SelectableWaitGroup) Wait() <-chan struct{} {
 	// there is a race between updating the counter and updating the channel
 	// .. so to make sure we have a consistent state check that we don't have a > zero count
-	// but a closed channel. Do this repeatedly until the result makes sense.
+	// but a closed channel. Do this repeatedly until the taskResult makes sense.
 	for {
 		count := wg.count.Load()
 		wgChan := wg.wChan.Load()
@@ -103,7 +99,7 @@ func (wg *SelectableWaitGroup) WaitTimeout(timeout time.Duration) error {
 	defer timer.Stop()
 	select {
 	case <-timer.C:
-		return ErrWGTimeout.Base()
+		return ErrWGTimeout
 	case <-wg.Wait():
 		return nil
 	}

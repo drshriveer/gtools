@@ -4,10 +4,7 @@ go 1.23.0
 
 toolchain go1.23.7
 
-require (
-	github.com/drshriveer/gtools/gerror v0.0.0
-	github.com/stretchr/testify v1.9.0
-)
+require github.com/stretchr/testify v1.9.0
 
 replace github.com/drshriveer/gtools/gerror v0.0.0 => ../gerror
 

@@ -9,16 +9,19 @@ tidy: (_invokeMod "go mod tidy -C {}")
     go work sync
 
 # Runs `go test --race ` for all modules in the current directory.
-test: (_invokeMod "go test --race {}/...")
+test: _tools-monorepo
+    gomonorepo test --parent main
 
 # Runs lint and test for all modules in the current directory.
-check: lint test
+check: _tools-monorepo lint test
 
 # Runs lint/format for all modules in the current directory.
-lint: _tools-linter (_invokeMod "golangci-lint run {}/...")
+lint: _tools-monorepo _tools-linter
+    gomonorepo lint --parent main
 
 # Fixes all auto-fixable format and lint errors for all modules in the current directory.
-fix: _tools-linter format-md && (_invokeMod "golangci-lint run --fix {}/...")
+fix: _tools-monorepo _tools-linter format-md
+    gomonorepo lint --parent main --flags="--fix"
     # just --fmt --unstable - Disabled due to combining single lines.
 
 # Updates interdependent modules of gtools. TODO: could make this wayyy smarter.
@@ -49,6 +52,10 @@ _tools-generate: (_install-go-pkg "google.golang.org/protobuf" "cmd/protoc-gen-g
     go build -o bin/gsort gsort/cmd/gsort/main.go
     go build -o bin/gerror gerror/cmd/gerror/main.go
     go build -o bin/gogenproto gogenproto/cmd/gogenproto/main.go
+
+# Installs the latest monorepo tool.
+_tools-monorepo:
+    go build -o bin/gomonorepo gomonorepo/cmd/gomonorepo/main.go
 
 # installs a go package at the version indicated in go.work / go.mod.
 _install-go-pkg package cmdpath="":
