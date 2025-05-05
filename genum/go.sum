@@ -1,11 +1,11 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/drshriveer/gtools/gencommon v0.0.0-20250505201453-a19775e22e02 h1:otorJNW1T2/a5t/Fb6b6xdGX3Ez3xXsidunJ/vB1rNo=
-github.com/drshriveer/gtools/gencommon v0.0.0-20250505201453-a19775e22e02/go.mod h1:nBjMo3EPmhIaR4tMKg10JP/sph/MokianpuZ6TGsIVU=
+github.com/drshriveer/gtools/gencommon v0.0.0-20250505212851-f00a25f973f1 h1:1G36Qi5JKJdoSn4OcGP6GTDf56G9b2lxm+sdZvNWKdg=
+github.com/drshriveer/gtools/gencommon v0.0.0-20250505212851-f00a25f973f1/go.mod h1:lrUGS7COmy7w4EyRwCHpJ3BZ4cDmLaVaxpCqFsXzXn0=
 github.com/drshriveer/gtools/rutils v0.0.0-20240118184715-48af8963ff63 h1:PRV3yLYUlBnH+/HSrdezMpDRNFd+b60Tv7qOpg9IC9s=
 github.com/drshriveer/gtools/rutils v0.0.0-20240118184715-48af8963ff63/go.mod h1:ixRN41tPraNiLhfegjbhtt9zFLW8XXhZxUlmSaGGU3w=
-github.com/drshriveer/gtools/set v0.0.0-20250505201453-a19775e22e02 h1:lbpPEJsE8Mkdq26Jc7Xr68CSbNv5Xqz12RUwdsqBuOY=
-github.com/drshriveer/gtools/set v0.0.0-20250505201453-a19775e22e02/go.mod h1:BS9kwJJEthktfVc8c9aWMgBqFPVZzxcN76dgS1N3D/E=
+github.com/drshriveer/gtools/set v0.0.0-20250505212851-f00a25f973f1 h1:wRVJ4n2TmW4osn0vkaifzTZosmdRjBF+UJZi48ZMjeQ=
+github.com/drshriveer/gtools/set v0.0.0-20250505212851-f00a25f973f1/go.mod h1:BS9kwJJEthktfVc8c9aWMgBqFPVZzxcN76dgS1N3D/E=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=

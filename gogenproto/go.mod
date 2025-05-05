@@ -5,12 +5,12 @@ go 1.23.0
 toolchain go1.23.7
 
 require (
-	github.com/drshriveer/gtools/gencommon v0.0.0-20250505201453-a19775e22e02
+	github.com/drshriveer/gtools/gencommon v0.0.0-20250505212851-f00a25f973f1
 	github.com/itzg/go-flagsfiller v1.12.0
 )
 
 require (
-	github.com/drshriveer/gtools/set v0.0.0-20250505201453-a19775e22e02 // indirect
+	github.com/drshriveer/gtools/set v0.0.0-20250505212851-f00a25f973f1 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/sync v0.14.0 // indirect
