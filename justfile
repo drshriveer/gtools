@@ -25,17 +25,15 @@ fix: _tools-monorepo _tools-linter format-md
     # just --fmt --unstable - Disabled due to combining single lines.
 
 # Updates interdependent modules of gtools. TODO: could make this wayyy smarter.
-update-interdependencies:
-    gomonorepo update-pkgs --parent main \
-        -pkg github.com/drshriveer/gtools/gencommon \
-        -pkg github.com/drshriveer/gtools/genum \
-        -pkg github.com/drshriveer/gtools/set \
-        -pkg github.com/drshriveer/gtools/gomonorepo
+update-interdependencies: _tools-monorepo && tidy
+    gomonorepo update-pkgs -pkg github.com/drshriveer/gtools/gencommon \
+        --pkg github.com/drshriveer/gtools/genum \
+        --pkg github.com/drshriveer/gtools/set \
+        --pkg github.com/drshriveer/gtools/gomonorepo
 
 # updates a single package across all go modules.
-update-pkg pkgName: && tidy
-    gomonorepo update-pkgs --parent main \
-    -pkg {{ pkgName }}
+update-pkg pkgName: _tools-monorepo && tidy
+    gomonorepo update-pkgs --pkg {{ pkgName }}
 
 # Formats markdown.
 format-md: (_install-go-pkg "github.com/moorereason/mdfmt")
@@ -89,13 +87,3 @@ _tools-install tool cmd:
     echo "$(grep -v '{{ tool }}' {{ INSTALLED_TOOLS }})" > {{ INSTALLED_TOOLS }}
     echo "{{ tool }} # {{ cmd }}" >> {{ INSTALLED_TOOLS }}
     sort {{ INSTALLED_TOOLS }} -o {{ INSTALLED_TOOLS }}
-
-# a the placeholder `{}` which is the path to the correct module.
-_invokeMod cmd:
-    #!/usr/bin/env bash
-    set -euo pipefail # makes scripts act like justfiles (https://github.com/casey/just#safer-bash-shebang-recipes)
-    if [ "{{ CURRENT_DIR }}" = "{{ PKG_ROOT }}" ]; then
-      go list -f '{{{{.Dir}}' -m | xargs -L1 -P 8 -t -I {} {{ cmd }}
-    else
-      xargs -L1 -P 8 -t -I {} {{ cmd }} <<< "{{ CURRENT_DIR }}"
-    fi
