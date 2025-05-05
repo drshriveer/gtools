@@ -29,6 +29,19 @@ type lintModulesCommand struct {
 }
 
 func (x *lintModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) error {
+	focus, ok := opts.GetFocusDir()
+	if ok {
+		cr, err := x.runPerTarget(ctx, focus)
+		if err != nil {
+			return err
+		}
+		cr.Print()
+		if !cr.succeeded {
+			os.Exit(1)
+		}
+		return nil
+	}
+
 	_, mods, err := listAllChangedModules(ctx, opts, x.ParentCommit)
 	if err != nil {
 		return err
@@ -45,10 +58,14 @@ func (x *lintModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) e
 }
 
 func (x *lintModulesCommand) runPerModule(ctx context.Context, m *Module) (commandResult, error) {
+	return x.runPerTarget(ctx, m.ModRoot)
+}
+
+func (x *lintModulesCommand) runPerTarget(ctx context.Context, dir string) (commandResult, error) {
 	args := make([]string, 2, 5)
 	args[0] = "golangci-lint"
 	args[1] = "run"
 	args = append(args, x.Fags...)
-	args = append(args, m.ModRoot)
+	args = append(args, dir)
 	return runCommand(ctx, args), nil
 }

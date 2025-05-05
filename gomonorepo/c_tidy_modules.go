@@ -20,6 +20,19 @@ type tidyModCommand struct {
 }
 
 func (x *tidyModCommand) RunCommand(ctx context.Context, opts *AppOptions) error {
+	focus, ok := opts.GetFocusDir()
+	if ok {
+		cr, err := x.runPerModTarget(ctx, focus)
+		if err != nil {
+			return err
+		}
+		cr.Print()
+		if !cr.succeeded {
+			os.Exit(1)
+		}
+		return nil
+	}
+
 	modTree, err := listAllModules(ctx, opts)
 	if err != nil {
 		return fmt.Errorf("failed to list modules: %w", err)
@@ -42,15 +55,19 @@ func (x *tidyModCommand) RunCommand(ctx context.Context, opts *AppOptions) error
 	return nil
 }
 
-func (x *tidyModCommand) runPerMod(ctx context.Context, m *Module) (commandResult, error) {
+func (x *tidyModCommand) runPerModTarget(ctx context.Context, target string) (commandResult, error) {
 	args := []string{
 		"go",
 		"mod",
 		"tidy",
 		"-C",
-		m.ModRoot,
+		target,
 	}
 	return runCommand(ctx, args), nil
+}
+
+func (x *tidyModCommand) runPerMod(ctx context.Context, m *Module) (commandResult, error) {
+	return x.runPerModTarget(ctx, m.ModRoot)
 }
 
 func (x *tidyModCommand) runPerWork(ctx context.Context, m *WorkFile) (commandResult, error) {

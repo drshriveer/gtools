@@ -52,7 +52,25 @@ Available commands:
 
 **Example: Add to your justfile:**
 
--	TODO!! (link to updated just-file)
+-	See the [justfile](../justfile) in the current repo or:
+
+```justfile
+# Runs `go mod tidy` for all modules in the current directory, then sync go workspaces.
+tidy: _tools-monorepo
+    gomonorepo tidy
+
+# Runs `go test --race ` for all modules in the current directory.
+test: _tools-monorepo
+    gomonorepo test --parent main
+
+# Runs lint/format for all modules in the current directory.
+lint: _tools-monorepo _tools-linter
+    gomonorepo lint --parent main
+
+# Fixes all auto-fixable format and lint errors for all modules in the current directory.
+fix: _tools-monorepo _tools-linter
+    gomonorepo lint --parent main -f="--fix"
+```
 
 **Example: Add to CI:**
 

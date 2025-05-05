@@ -13,6 +13,7 @@ import (
 	"github.com/drshriveer/gtools/set"
 )
 
+// WorkFile represents a Go work file found in the monorepo.
 type WorkFile struct {
 	// WorkFile is the parsed go.work file.
 	WorkFile *modfile.WorkFile
@@ -253,9 +254,6 @@ func listAllModules(ctx context.Context, opts *AppOptions) (*ModuleTree, error) 
 					WorkRoot:     filepath.Dir(path),
 				}, nil
 			})
-
-		}
-		if d.Name() == "go.mod" {
 		}
 		return nil
 	})

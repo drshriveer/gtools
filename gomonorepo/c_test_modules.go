@@ -29,12 +29,25 @@ type testModulesCommand struct {
 }
 
 func (x *testModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) error {
+	focus, ok := opts.GetFocusDir()
+	if ok {
+		cr, err := x.runPerTarget(ctx, focus)
+		if err != nil {
+			return err
+		}
+		cr.Print()
+		if !cr.succeeded {
+			os.Exit(1)
+		}
+		return nil
+	}
+
 	_, mods, err := listAllChangedAndDependencies(ctx, opts, x.ParentCommit)
 	if err != nil {
 		return err
 	}
 
-	success, err := invokeOnElement(ctx, opts, mods.Slice(), x.testModule)
+	success, err := invokeOnElement(ctx, opts, mods.Slice(), x.runPerModule)
 	if err != nil {
 		return err
 	}
@@ -44,11 +57,15 @@ func (x *testModulesCommand) RunCommand(ctx context.Context, opts *AppOptions) e
 	return nil
 }
 
-func (x *testModulesCommand) testModule(ctx context.Context, m *Module) (commandResult, error) {
+func (x *testModulesCommand) runPerModule(ctx context.Context, m *Module) (commandResult, error) {
+	return x.runPerTarget(ctx, m.ModRoot)
+}
+
+func (x *testModulesCommand) runPerTarget(ctx context.Context, target string) (commandResult, error) {
 	args := make([]string, 2, 5)
 	args[0] = "go"
 	args[1] = "test"
 	args = append(args, x.Fags...)
-	args = append(args, m.ModRoot)
+	args = append(args, target)
 	return runCommand(ctx, args), nil
 }

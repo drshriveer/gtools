@@ -6,22 +6,22 @@ CURRENT_DIR := invocation_directory_native()
 
 # Runs `go mod tidy` for all modules in the current directory, then sync go workspaces.
 tidy: _tools-monorepo
-    gomonorepo tidy
+    gomonorepo tidy --invocationDir={{ CURRENT_DIR }}
 
 # Runs `go test --race ` for all modules in the current directory.
 test: _tools-monorepo
-    gomonorepo test --parent main
+    gomonorepo test --parent main --invocationDir={{ CURRENT_DIR }}
 
 # Runs lint and test for all modules in the current directory.
-check: _tools-monorepo lint test
+check: lint test
 
 # Runs lint/format for all modules in the current directory.
 lint: _tools-monorepo _tools-linter
-    gomonorepo lint --parent main
+    gomonorepo lint --parent main --invocationDir={{ CURRENT_DIR }}
 
 # Fixes all auto-fixable format and lint errors for all modules in the current directory.
 fix: _tools-monorepo _tools-linter format-md
-    gomonorepo lint --parent main -f="--fix"
+    gomonorepo lint --parent main -f="--fix" --invocationDir={{ CURRENT_DIR }}
     # just --fmt --unstable - Disabled due to combining single lines.
 
 # Updates interdependent modules of gtools. TODO: could make this wayyy smarter.

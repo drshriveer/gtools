@@ -68,6 +68,7 @@ func listAllChangedAndDependencies(
 		return nil, nil, err
 	}
 	modsToTest, err := listAllChangedAndDependenciesWithTree(ctx, opts, parentCommit, tree)
+
 	return tree, modsToTest, err
 }
 
