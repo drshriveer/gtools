@@ -3,6 +3,7 @@ package gomonorepo
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -33,6 +34,12 @@ func (cr *commandResult) Print() {
 	_, _ = fmt.Fprintln(os.Stdout, "→", cr.cmd)
 	_, _ = cr.output.WriteTo(os.Stdout)
 	PutBuffer(cr.output)
+}
+func (cr *commandResult) join(other *commandResult) {
+	cr.output.WriteString("→ " + other.cmd + "\n")
+	_, _ = other.output.WriteTo(cr.output)
+	cr.err = errors.Join(cr.err, other.err)
+	cr.succeeded = cr.succeeded && other.succeeded
 }
 
 func invokeOnElement[T any](

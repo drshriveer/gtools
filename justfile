@@ -25,16 +25,17 @@ fix: _tools-monorepo _tools-linter format-md
     # just --fmt --unstable - Disabled due to combining single lines.
 
 # Updates interdependent modules of gtools. TODO: could make this wayyy smarter.
-update-interdependencies: \
-    (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/gencommon") \
-    (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/genum") \
-    (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/set") \
-    (_invokeMod "go get -C {} -u github.com/drshriveer/gtools/gomonorepo") \
-    && tidy
+update-interdependencies:
+    gomonorepo update-pkgs --parent main \
+        -pkg github.com/drshriveer/gtools/gencommon \
+        -pkg github.com/drshriveer/gtools/genum \
+        -pkg github.com/drshriveer/gtools/set \
+        -pkg github.com/drshriveer/gtools/gomonorepo
 
 # updates a single package across all go modules.
 update-pkg pkgName: && tidy
-    _invokeMod "go get -C {} -u  {{ pkgName }}"
+    gomonorepo update-pkgs --parent main \
+    -pkg {{ pkgName }}
 
 # Formats markdown.
 format-md: (_install-go-pkg "github.com/moorereason/mdfmt")

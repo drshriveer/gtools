@@ -58,6 +58,17 @@ func (r *Module) AddDependants(s set.Set[*Module]) {
 	}
 }
 
+// Requires checks if the module requires the given dependency.
+func (r *Module) Requires(dep string) bool {
+	pkg, _ := strings.CutSuffix(dep, "@")
+	for _, d := range r.ModFile.Require {
+		if d.Mod.Path == pkg && !d.Indirect {
+			return true
+		}
+	}
+	return false
+}
+
 // ModuleTree represents a tree of Go modules starting from the root directory of the
 // repository or mono repo.
 type ModuleTree struct {

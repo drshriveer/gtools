@@ -25,6 +25,7 @@ func main() {
 		gomonorepo.GenerateModulesCommand,
 		gomonorepo.TidyModulesCommand,
 		gomonorepo.ListModulesCommand,
+		gomonorepo.UpdateDependencyCommand,
 	}
 	var err error
 	for _, cmd := range cmds {
