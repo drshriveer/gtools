@@ -47,7 +47,7 @@ Available commands:
   lint            Invoke lint command in the mono repo.
   list-modules    List all go modules, and their dependencies also defined in the mono repo.
   test            Invoke go tests in the mono repo.
-
+  tidy            Run 'go mod tidy' on all go modules in the monorepo. If a go.work file is found, this will also be tidied.
 ```
 
 **Example: Add to your justfile:**
