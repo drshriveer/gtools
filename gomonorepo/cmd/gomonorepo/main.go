@@ -49,6 +49,6 @@ func main() {
 	if fErr, ok := err.(*flags.Error); ok && fErr.Type == flags.ErrHelp {
 		parser.WriteHelp(os.Stdout)
 	} else if err != nil {
-		opts.Errorf("Fatal: %w", err)
+		opts.Errorf("Fatal: %s", err.Error())
 	}
 }
