@@ -24,7 +24,7 @@ func getIgnoredDirectories(
 	cmd.Stderr = stderr
 	err := cmd.Run()
 	if err != nil {
-		return nil, fmt.Errorf("failed to run git diff: %w\n%s", err, stderr.String())
+		return nil, fmt.Errorf("failed to get ignored files: %w\n%s", err, stderr.String())
 	}
 
 	result := make([]string, 0, 8)

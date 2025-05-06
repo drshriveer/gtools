@@ -51,5 +51,6 @@ func main() {
 		parser.WriteHelp(os.Stdout)
 	} else if err != nil {
 		fmt.Fprint(os.Stderr, err.Error())
+		os.Exit(1)
 	}
 }
