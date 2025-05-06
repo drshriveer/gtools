@@ -88,13 +88,15 @@ What remains / ideas of the future, time permitting.
 -	smarter dependency resolution and test/lint planning
 	-	Option to run in dependency order (with parallelism where permitted)
 	-	sub-package dependency graph
-	-	test-package change detection and planning
-	-	skip things like markdown files
-		-	follow embed directives
+	-	Planning should account for test-package (only) changes
+	-	Planning should account for comment (only) changes
+	-	Planning should account for non-go files (markdown, yaml, etc)
+		-	account for 'embed' directives / embedded files must trigger update
+	-	Planning should account for links that go off the dependency graph (e.g. http/grpc/etc)
+		-	maybe define our own directives for this? (e.g. `//go:gomonorepo run-with-changes-to --package=${} --module=${} --scopeTo="./sub-pkg"`\)
 -	parallelize sub-package generate commands
 	-	Run in dependency order, parallelize what can be.
 -	module release & upgrade flow
 	-	semver change classification detection
 	-	tool to update inter dependencies
--	config.yaml support (if/when configurations are complex enough to desire it)
--	skip directories (e.g. node_modules)
+-	config.yaml support (if/when configurations are complex enough to desire it)-
