@@ -65,15 +65,15 @@ tidy: _tools-monorepo
 
 # Runs `go test --race ` for all modules in the current directory.
 test: _tools-monorepo
-    gomonorepo test --parent=main --invocationDir={{ CURRENT_DIR }}
+    gomonorepo test --parent=origin/main --invocationDir={{ CURRENT_DIR }}
 
 # Runs lint/format for all modules in the current directory.
 lint: _tools-monorepo _tools-linter
-    gomonorepo lint --parent=main --invocationDir={{ CURRENT_DIR }}
+    gomonorepo lint --parent=origin/main --invocationDir={{ CURRENT_DIR }}
 
-# Fixes all auto-fixable format and lint errors for all modules in the current directory.
+# Fixes all auto-fixable format and lint errors for all modules in the current directory. 
 fix: _tools-monorepo _tools-linter
-    gomonorepo lint --parent=main -f="--fix" --invocationDir={{ CURRENT_DIR }}
+    gomonorepo lint --parent=origin/main -f="--fix" --invocationDir={{ CURRENT_DIR }}
 ```
 
 **Example: Add to CI:**
