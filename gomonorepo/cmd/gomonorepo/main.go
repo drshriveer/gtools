@@ -50,6 +50,5 @@ func main() {
 		parser.WriteHelp(os.Stdout)
 	} else if err != nil {
 		opts.Errorf("Fatal: %w", err)
-		os.Exit(1)
 	}
 }
