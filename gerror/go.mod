@@ -5,8 +5,8 @@ go 1.23.0
 toolchain go1.23.7
 
 require (
-	github.com/drshriveer/gtools/gencommon v0.0.0-20250505222151-add2dee6d774
-	github.com/drshriveer/gtools/set v0.0.0-20250505222151-add2dee6d774
+	github.com/drshriveer/gtools/gencommon v0.0.0-20250505225543-0a91847ffeb8
+	github.com/drshriveer/gtools/set v0.0.0-20250505225543-0a91847ffeb8
 	github.com/fatih/structtag v1.2.0
 	github.com/itzg/go-flagsfiller v1.12.0
 	github.com/stretchr/testify v1.9.0

@@ -1,9 +1,9 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/drshriveer/gtools/gencommon v0.0.0-20250505222151-add2dee6d774 h1:2wXYDc7Ea69TtXWUSpmUQrAMe43SK+fzc1uGLt7L+cU=
-github.com/drshriveer/gtools/gencommon v0.0.0-20250505222151-add2dee6d774/go.mod h1:M4ktKv+JKSTtmyUDDwzSbsYetQR2FK5He1rTXwssaek=
-github.com/drshriveer/gtools/set v0.0.0-20250505222151-add2dee6d774 h1:hXhk68g3vhuid1yEd5szvI5W0YFHqboRPgAXj4FT0Ms=
-github.com/drshriveer/gtools/set v0.0.0-20250505222151-add2dee6d774/go.mod h1:BS9kwJJEthktfVc8c9aWMgBqFPVZzxcN76dgS1N3D/E=
+github.com/drshriveer/gtools/gencommon v0.0.0-20250505225543-0a91847ffeb8 h1:iR3mZLkR9sjhk0fzI4RhNkQH1MOyuBY4aHN757N+xhw=
+github.com/drshriveer/gtools/gencommon v0.0.0-20250505225543-0a91847ffeb8/go.mod h1:zm7K7AcJi3wYYef+2hEFs/jDiy7uZX2B5sORFF8Q9/g=
+github.com/drshriveer/gtools/set v0.0.0-20250505225543-0a91847ffeb8 h1:dpHRTSIVpP/GLDVtRgqKppT08ol/X5c72XTWWB3m2zY=
+github.com/drshriveer/gtools/set v0.0.0-20250505225543-0a91847ffeb8/go.mod h1:BS9kwJJEthktfVc8c9aWMgBqFPVZzxcN76dgS1N3D/E=
 github.com/fatih/structtag v1.2.0 h1:/OdNE99OxoI/PqaW/SuSK9uxxT3f/tcSZgon/ssNSx4=
 github.com/fatih/structtag v1.2.0/go.mod h1:mBJUNpUnHmRKrKlQQlmCrh5PuhftFbNv8Ys4/aAZl94=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
