@@ -94,13 +94,9 @@ func getCurrentBranch(ctx context.Context) (remote string, branch string, err er
 	cmd.Stderr = stderr
 	err = cmd.Run()
 	if err != nil {
-		return "", "", fmt.Errorf("failed to get upstream: %w\n%s", err, stderr.String())
+		// noop. there is no remote.
+		return "", branch, nil
 	}
-
-	remote = strings.TrimSpace(stdout.String())
-	if strings.HasPrefix(remote, "fatal: no") {
-		remote = ""
-	}
-
+	remote = strings.TrimSuffix(strings.TrimSpace(stdout.String()), "/"+branch)
 	return remote, branch, nil
 }
