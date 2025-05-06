@@ -67,7 +67,12 @@ func listChangedFiles(ctx context.Context, parent string) ([]string, error) {
 }
 
 // getCurrentBranch returns the current branch name.
-func getCurrentBranch(ctx context.Context) (string, error) {
+func getCurrentBranch(ctx context.Context) (remote string, branch string, err error) {
+	// git rev-parse --verify HEAD <-- prints out the current hash
+	// What about unstaged?
+	// git rev-parse --abbrev-ref --symbolic-full-name @{upstream} <-- prints out the upstream branch OR fatals with "fatal: no upstream configured ..."
+	//
+
 	stdout, done := GetBuffer()
 	defer done(stdout)
 	stderr, done := GetBuffer()
@@ -75,9 +80,27 @@ func getCurrentBranch(ctx context.Context) (string, error) {
 	cmd := exec.CommandContext(ctx, "git", "rev-parse", "--abbrev-ref", "HEAD")
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
-		return "", fmt.Errorf("failed to run git diff: %w\n%s", err, stderr.String())
+		return "", "", fmt.Errorf("failed to get branch name: %w\n%s", err, stderr.String())
 	}
-	return strings.TrimSpace(stdout.String()), nil
+	branch = strings.TrimSpace(stdout.String())
+
+	stdout.Reset()
+	stderr.Reset()
+
+	cmd = exec.CommandContext(ctx, "git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}")
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+	err = cmd.Run()
+	if err != nil {
+		return "", "", fmt.Errorf("failed to get upstream: %w\n%s", err, stderr.String())
+	}
+
+	remote = strings.TrimSpace(stdout.String())
+	if strings.HasPrefix(remote, "fatal: no") {
+		remote = ""
+	}
+
+	return remote, branch, nil
 }

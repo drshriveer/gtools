@@ -13,6 +13,10 @@ tidy: _tools-monorepo
 test: _tools-monorepo
     gomonorepo test --parent=origin/main --invocationDir={{ CURRENT_DIR }}
 
+# Runs `go test --race ` for all modules in the current directory.
+test-g: _tools-monorepo
+    gomonorepo test --parent=gs/compare-branch-correctly --invocationDir={{ CURRENT_DIR }}
+
 # Runs lint and test for all modules in the current directory.
 check: lint test
 
