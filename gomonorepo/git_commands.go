@@ -41,7 +41,7 @@ func getIgnoredDirectories(
 	return result, nil
 }
 
-func listChangedFiles(ctx context.Context, parent string, patched bool) ([]string, error) {
+func listChangedFiles(ctx context.Context, opts *AppOptions, parent string, patched bool) ([]string, error) {
 	stdout, done := GetBuffer()
 	defer done(stdout)
 	stderr, done := GetBuffer()
@@ -52,11 +52,12 @@ func listChangedFiles(ctx context.Context, parent string, patched bool) ([]strin
 	err := cmd.Run()
 	if err != nil {
 		if !patched && strings.HasPrefix(stderr.String(), "fatal: ambiguous argument '"+parent+"'") {
+			opts.Infof("Parent %q not found locally, attempting to fetch it from remote.\n", parent)
 			err = tryFetchParentRevision(ctx, parent)
 			if err != nil {
 				return nil, err
 			}
-			return listChangedFiles(ctx, parent, true)
+			return listChangedFiles(ctx, opts, parent, true)
 		}
 		return nil, fmt.Errorf("failed to run git diff: %w\n%s", err, stderr.String())
 	}
@@ -74,27 +75,21 @@ func listChangedFiles(ctx context.Context, parent string, patched bool) ([]strin
 }
 
 func tryFetchParentRevision(ctx context.Context, parent string) error {
+	remote, err := getConfiguredRemoteName(ctx)
+	if err != nil {
+		return err
+	}
+	branch := parent
+	if strings.HasPrefix(parent, remote) {
+		branch = strings.TrimPrefix(parent, remote+"/")
+	}
+
 	stdout, done := GetBuffer()
 	defer done(stdout)
 	stderr, done := GetBuffer()
 	defer done(stderr)
 
-	// git rev-list --count origin/main..$(git branch --show-current)
-	cmd := exec.CommandContext(ctx, "git", "fetch", parent)
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
-	err := cmd.Run()
-	if err == nil {
-		return nil
-	}
-	remote, branch, ok := strings.Cut(parent, "/")
-	if !ok {
-		return fmt.Errorf("failed to fetch parent revision: %w\n%s", err, stderr.String())
-	}
-
-	stdout.Reset()
-	stderr.Reset()
-	cmd = exec.CommandContext(ctx, "git", "fetch", remote, branch)
+	cmd := exec.CommandContext(ctx, "git", "fetch", remote, branch)
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 	err = cmd.Run()
@@ -102,6 +97,30 @@ func tryFetchParentRevision(ctx context.Context, parent string) error {
 		return fmt.Errorf("failed to fetch parent revision: %w\n%s", err, stderr.String())
 	}
 	return nil
+}
+
+// getConfiguredRemoteName returns the first remote name configured in the git repository.
+func getConfiguredRemoteName(ctx context.Context) (string, error) {
+	stdout, done := GetBuffer()
+	defer done(stdout)
+	stderr, done := GetBuffer()
+	defer done(stderr)
+
+	cmd := exec.CommandContext(ctx, "git", "remote")
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+	err := cmd.Run()
+	if err != nil {
+		return "", fmt.Errorf("failed to get remote name: %w\n%s", err, stderr.String())
+	}
+
+	// Get the first remote name
+	remotes := strings.Split(stdout.String(), "\n")
+	if len(remotes) == 0 {
+		return "", fmt.Errorf("no remotes found")
+	}
+
+	return remotes[0], nil
 }
 
 // getCurrentBranch returns the current branch name.
