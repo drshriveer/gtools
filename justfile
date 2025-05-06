@@ -11,18 +11,18 @@ tidy: _tools-monorepo
 
 # Runs `go test --race ` for all modules in the current directory.
 test: _tools-monorepo
-    gomonorepo test --parent main --invocationDir={{ CURRENT_DIR }}
+    gomonorepo test --parent=origin/main --invocationDir={{ CURRENT_DIR }}
 
 # Runs lint and test for all modules in the current directory.
 check: lint test
 
 # Runs lint/format for all modules in the current directory.
 lint: _tools-monorepo _tools-linter
-    gomonorepo lint --parent main --invocationDir={{ CURRENT_DIR }}
+    gomonorepo lint --parent=origin/main --invocationDir={{ CURRENT_DIR }}
 
 # Fixes all auto-fixable format and lint errors for all modules in the current directory.
 fix: _tools-monorepo _tools-linter format-md
-    gomonorepo lint --parent main -f="--fix" --invocationDir={{ CURRENT_DIR }}
+    gomonorepo lint --parent=origin/main -f="--fix" --invocationDir={{ CURRENT_DIR }}
     # just --fmt --unstable - Disabled due to combining single lines.
 
 
@@ -44,7 +44,7 @@ format-md: (_install-go-pkg "github.com/moorereason/mdfmt")
 
 # Runs `go generate` on all modules in the current directory.
 generate: _tools-monorepo _tools-generate
-    gomonorepo generate --parent main --invocationDir={{ CURRENT_DIR }}
+    gomonorepo generate --parent=origin/main --invocationDir={{ CURRENT_DIR }}
 
 [no-cd]
 coverage-go: _tools-monorepo
