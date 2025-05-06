@@ -33,7 +33,7 @@ func listAllChangedModulesWithTree(
 		return set.Make(tree.AllModules...), nil
 	}
 
-	changedFiles, err := listChangedFiles(ctx, parentCommit)
+	changedFiles, err := listChangedFiles(ctx, parentCommit, false)
 	if err != nil {
 		return nil, err
 	}

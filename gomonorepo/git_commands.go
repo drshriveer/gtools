@@ -41,7 +41,7 @@ func getIgnoredDirectories(
 	return result, nil
 }
 
-func listChangedFiles(ctx context.Context, parent string) ([]string, error) {
+func listChangedFiles(ctx context.Context, parent string, patched bool) ([]string, error) {
 	stdout, done := GetBuffer()
 	defer done(stdout)
 	stderr, done := GetBuffer()
@@ -51,11 +51,13 @@ func listChangedFiles(ctx context.Context, parent string) ([]string, error) {
 	cmd.Stderr = stderr
 	err := cmd.Run()
 	if err != nil {
-		logRemotes(ctx)
-		// if !patched && strings.HasPrefix(stderr.String(), "fatal: ambiguous argument '"+parent+"'") {
-		//
-		// 	return nil, nil
-		// }
+		if !patched && strings.HasPrefix(stderr.String(), "fatal: ambiguous argument '"+parent+"'") {
+			err = tryFetchParentRevision(ctx, parent)
+			if err != nil {
+				return nil, err
+			}
+			return listChangedFiles(ctx, parent, true)
+		}
 		return nil, fmt.Errorf("failed to run git diff: %w\n%s", err, stderr.String())
 	}
 
@@ -71,46 +73,20 @@ func listChangedFiles(ctx context.Context, parent string) ([]string, error) {
 	return result, nil
 }
 
-// FIXME: DELETE THIS IF NOT USED
 func tryFetchParentRevision(ctx context.Context, parent string) error {
 	stdout, done := GetBuffer()
 	defer done(stdout)
 	stderr, done := GetBuffer()
 	defer done(stderr)
 
-	_, branch, err := getCurrentBranch(ctx)
-	if err != nil {
-		return err
-	}
 	// git rev-list --count origin/main..$(git branch --show-current)
-	cmd := exec.CommandContext(ctx, "git", "rev-list", "--count", parent+".."+branch)
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
-	err = cmd.Run()
-	if err != nil {
-		return fmt.Errorf("failed to fetch parent revision: %w\n%s", err, stderr.String())
-	}
-	return nil
-}
-
-// FIXME: DELETE THIS IF NOT USED
-func logRemotes(ctx context.Context) error {
-	stdout, done := GetBuffer()
-	defer done(stdout)
-	stderr, done := GetBuffer()
-	defer done(stderr)
-
-	cmd := exec.CommandContext(ctx, "git", "remote", "-v")
+	cmd := exec.CommandContext(ctx, "git", "fetch", parent)
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("failed to fetch remote revision: %w\n%s", err, stderr.String())
+		return fmt.Errorf("failed to fetch parent revision: %w\n%s", err, stderr.String())
 	}
-
-	println("===============")
-	println(stdout.String())
-	println("===============")
 	return nil
 }
 
