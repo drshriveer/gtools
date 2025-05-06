@@ -89,6 +89,8 @@ What remains / ideas of the future, time permitting.
 	-	Option to run in dependency order (with parallelism where permitted)
 	-	sub-package dependency graph
 	-	test-package change detection and planning
+	-	skip things like markdown files
+		-	follow embed directives  
 -	parallelize sub-package generate commands
 	-	Run in dependency order, parallelize what can be.
 -	module release & upgrade flow
