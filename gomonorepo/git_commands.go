@@ -84,6 +84,20 @@ func tryFetchParentRevision(ctx context.Context, parent string) error {
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 	err := cmd.Run()
+	if err == nil {
+		return nil
+	}
+	remote, branch, ok := strings.Cut(parent, "/")
+	if !ok {
+		return fmt.Errorf("failed to fetch parent revision: %w\n%s", err, stderr.String())
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	cmd = exec.CommandContext(ctx, "git", "fetch", remote, branch)
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+	err = cmd.Run()
 	if err != nil {
 		return fmt.Errorf("failed to fetch parent revision: %w\n%s", err, stderr.String())
 	}
