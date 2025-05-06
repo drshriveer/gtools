@@ -68,15 +68,12 @@ func listChangedFiles(ctx context.Context, parent string) ([]string, error) {
 
 // getCurrentBranch returns the current branch name.
 func getCurrentBranch(ctx context.Context) (remote string, branch string, err error) {
-	// git rev-parse --verify HEAD <-- prints out the current hash
-	// What about unstaged?
-	// git rev-parse --abbrev-ref --symbolic-full-name @{upstream} <-- prints out the upstream branch OR fatals with "fatal: no upstream configured ..."
-	//
-
 	stdout, done := GetBuffer()
 	defer done(stdout)
 	stderr, done := GetBuffer()
 	defer done(stderr)
+
+	// Get the current branch / revision name excluding the remote:
 	cmd := exec.CommandContext(ctx, "git", "rev-parse", "--abbrev-ref", "HEAD")
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
@@ -89,6 +86,7 @@ func getCurrentBranch(ctx context.Context) (remote string, branch string, err er
 	stdout.Reset()
 	stderr.Reset()
 
+	// Get the branch name AND its upstream remote (e.g. origin/main):
 	cmd = exec.CommandContext(ctx, "git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}")
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
