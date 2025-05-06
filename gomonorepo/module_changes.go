@@ -33,16 +33,16 @@ func listAllChangedModulesWithTree(
 		return set.Make(tree.AllModules...), nil
 	}
 
-	changedFiles, err := listChangedFiles(ctx, parentCommit)
+	changedFiles, err := listChangedFiles(ctx, opts, parentCommit, false)
 	if err != nil {
 		return nil, err
 	}
 	if len(changedFiles) == 0 {
-		current, err := getCurrentBranch(ctx)
+		remote, current, err := getCurrentBranch(ctx)
 		if err != nil {
 			return nil, err
 		}
-		if current == parentCommit {
+		if current == parentCommit || remote+"/"+current == parentCommit {
 			opts.Infof("Currently on %q with no changes; will run command on all %d moduels.\n",
 				current,
 				len(tree.AllModules))

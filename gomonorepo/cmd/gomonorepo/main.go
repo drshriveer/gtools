@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -50,6 +49,6 @@ func main() {
 	if fErr, ok := err.(*flags.Error); ok && fErr.Type == flags.ErrHelp {
 		parser.WriteHelp(os.Stdout)
 	} else if err != nil {
-		fmt.Fprint(os.Stderr, err.Error())
+		opts.Errorf("Fatal: %s", err.Error())
 	}
 }
