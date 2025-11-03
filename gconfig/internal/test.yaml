@@ -78,3 +78,7 @@ struct:
         D1a: "D1a name"
         D1b: "D1b name"
         default: "default"
+
+regressions:
+  emptyObject:
+  anotherEmptyObject: {}
