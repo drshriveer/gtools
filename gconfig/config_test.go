@@ -387,6 +387,48 @@ func TestGetters(t *testing.T) {
 	}
 }
 
+func TestRegressions_EmptyObjects(t *testing.T) {
+	cfg, err := gconfig.NewBuilder().
+		WithDimension("d1", internal.D1b).
+		WithDimension("d2", internal.D2e).
+		FromFile(testFS, "internal/test.yaml")
+	require.NoError(t, err)
+
+	t.Run("emptyObject as empy map", func(t *testing.T) {
+		result, err := gconfig.Get[map[string]string](cfg, "regressions.emptyObject")
+		assert.NoError(t, err)
+		assert.Empty(t, result)
+	})
+
+	t.Run("emptyObject as empty slice", func(t *testing.T) {
+		result, err := gconfig.Get[[]string](cfg, "regressions.emptyObject")
+		assert.NoError(t, err)
+		assert.Empty(t, result)
+	})
+
+	t.Run("anotherEmptyObject as empty map", func(t *testing.T) {
+		result, err := gconfig.Get[map[string]string](cfg, "regressions.anotherEmptyObject")
+		assert.NoError(t, err)
+		assert.Empty(t, result)
+	})
+
+	type structWithValues struct {
+		Field1 string `yaml:"field1"`
+		Field2 int    `yaml:"field2"`
+	}
+	t.Run("anotherEmptyObject as struct", func(t *testing.T) {
+		result, err := gconfig.Get[structWithValues](cfg, "regressions.anotherEmptyObject")
+		assert.NoError(t, err)
+		assert.Equal(t, structWithValues{}, result)
+	})
+	t.Run("emptyObject as struct", func(t *testing.T) {
+		result, err := gconfig.Get[structWithValues](cfg, "regressions.emptyObject")
+		assert.NoError(t, err)
+		assert.Equal(t, structWithValues{}, result)
+	})
+
+}
+
 func testGetter[T any](expected T, defaultV T) tester {
 	return func(t *testing.T, cfg *gconfig.Config, key string) {
 		t.Run(fmt.Sprintf("Get[%T]", *new(T)), func(t *testing.T) {

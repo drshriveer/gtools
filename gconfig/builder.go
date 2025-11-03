@@ -196,6 +196,9 @@ func reduceAny(in any, dimensions []*dimension, dIndex int) (any, error) {
 }
 
 func reduce(in map[string]any, dimensions []*dimension, dIndex int) (any, error) {
+	if len(in) == 0 {
+		return in, nil // nothing to reduce.
+	}
 	if dIndex+1 > len(dimensions) {
 		return in, nil
 	}
